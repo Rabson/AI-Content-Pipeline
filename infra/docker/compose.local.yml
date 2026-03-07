@@ -1,0 +1,40 @@
+version: '3.9'
+services:
+  api:
+    build:
+      target: dev
+    working_dir: /workspace
+    volumes:
+      - ../../:/workspace
+      - api_node_modules:/workspace/node_modules
+    environment:
+      APP_ENV: local
+      AUTH_ALLOW_HEADER_BYPASS: 'true'
+
+  worker:
+    build:
+      target: dev
+    working_dir: /workspace
+    volumes:
+      - ../../:/workspace
+      - worker_node_modules:/workspace/node_modules
+    environment:
+      APP_ENV: local
+
+  dashboard:
+    build:
+      target: dev
+    working_dir: /workspace
+    volumes:
+      - ../../:/workspace
+      - dashboard_node_modules:/workspace/node_modules
+      - dashboard_next_data:/workspace/apps/dashboard/.next-docker
+    environment:
+      NEXT_PUBLIC_APP_ENV: local
+      NEXT_DIST_DIR: .next-docker
+
+volumes:
+  api_node_modules:
+  worker_node_modules:
+  dashboard_node_modules:
+  dashboard_next_data:

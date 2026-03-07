@@ -1,7 +1,8 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-COMPOSE_FILE := infra/docker/docker-compose.yml
+COMPOSE_BASE_FILE := infra/docker/compose.base.yml
+COMPOSE_LOCAL_FILE := infra/docker/compose.local.yml
 STAGINGLIKE_COMPOSE_FILE := infra/docker/docker-compose.staginglike.yml
 PRISMA_SCHEMA := apps/api/src/prisma/schema.prisma
 ENV_FILE ?= .env
@@ -109,46 +110,46 @@ dev-dashboard: ## Run dashboard in dev mode
 	@set -a; \
 	if [ -f "$(ENV_FILE)" ]; then source "$(ENV_FILE)"; else echo "Missing $(ENV_FILE). Create it from .env.example."; exit 0; fi; \
 	set +a; \
-	PORT=$${DASHBOARD_HOST_PORT:-3000} npm --workspace @aicp/dashboard run dev
+	PORT=$${DASHBOARD_HOST_PORT:-3003} npm --workspace @aicp/dashboard run dev
 
 dev-up: ## Start local infra/services with Docker Compose
 	@if docker info >/dev/null 2>&1; then \
-	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_FILE) --profile local up -d; \
+	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) -f $(COMPOSE_LOCAL_FILE) up -d; \
 	else \
 	  echo "Docker daemon not available; skipping dev-up."; \
 	fi
 
 dev-down: ## Stop local infra/services
 	@if docker info >/dev/null 2>&1; then \
-	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_FILE) --profile local down; \
+	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) -f $(COMPOSE_LOCAL_FILE) down; \
 	else \
 	  echo "Docker daemon not available; skipping dev-down."; \
 	fi
 
 dev-logs: ## Tail Docker Compose logs
 	@if docker info >/dev/null 2>&1; then \
-	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_FILE) --profile local logs -f --tail=200; \
+	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) -f $(COMPOSE_LOCAL_FILE) logs -f --tail=200; \
 	else \
 	  echo "Docker daemon not available; skipping dev-logs."; \
 	fi
 
 dev-ps: ## Show Docker Compose services status
 	@if docker info >/dev/null 2>&1; then \
-	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_FILE) --profile local ps; \
+	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) -f $(COMPOSE_LOCAL_FILE) ps; \
 	else \
 	  echo "Docker daemon not available; skipping dev-ps."; \
 	fi
 
 dev-up-staginglike: ## Start staging-like local stack
 	@if docker info >/dev/null 2>&1; then \
-	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_FILE) -f $(STAGINGLIKE_COMPOSE_FILE) --profile local up -d; \
+	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) -f $(STAGINGLIKE_COMPOSE_FILE) up -d; \
 	else \
 	  echo "Docker daemon not available; skipping dev-up-staginglike."; \
 	fi
 
 dev-down-staginglike: ## Stop staging-like local stack
 	@if docker info >/dev/null 2>&1; then \
-	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_FILE) -f $(STAGINGLIKE_COMPOSE_FILE) --profile local down; \
+	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) -f $(STAGINGLIKE_COMPOSE_FILE) down; \
 	else \
 	  echo "Docker daemon not available; skipping dev-down-staginglike."; \
 	fi
@@ -211,7 +212,7 @@ seed-demo: ## Seed local demo topics into the configured database
 	@set -a; \
 	if [ -f "$(ENV_FILE)" ]; then source "$(ENV_FILE)"; else echo "Missing $(ENV_FILE). Create it from .env.example."; exit 0; fi; \
 	set +a; \
-	node scripts/seed-demo.mjs
+	node apps/api/scripts/seed-demo.mjs
 
 clean: ## Remove build outputs
 	find apps -type d -name dist -prune -exec rm -rf {} +

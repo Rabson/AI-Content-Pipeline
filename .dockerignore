@@ -1,0 +1,12 @@
+node_modules
+.git
+.next
+.next-docker
+coverage
+dist
+apps/*/dist
+apps/dashboard/.next
+apps/dashboard/.next-docker
+*.log
+.DS_Store
+.env

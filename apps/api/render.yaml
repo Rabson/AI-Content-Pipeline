@@ -5,7 +5,7 @@ services:
     rootDir: .
     plan: starter
     buildCommand: npm install && npx prisma generate --schema apps/api/src/prisma/schema.prisma && npm run build:api
-    startCommand: npm --workspace @aicp/api run start
+    startCommand: npm run start:api
     healthCheckPath: /api/ready
     envVars:
       - key: APP_ENV
