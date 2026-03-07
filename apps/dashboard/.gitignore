@@ -1,0 +1,13 @@
+.next/
+.next-docker/
+out/
+tmp/
+.vercel/
+coverage/
+node_modules/
+*.log
+.env
+.env.local
+.env.development
+.env.test
+.env.production

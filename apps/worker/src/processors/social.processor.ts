@@ -1,0 +1,57 @@
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Job } from 'bullmq';
+import { SocialOrchestrator } from '../../../api/src/modules/social/social.orchestrator';
+import { JobExecutionService } from '../support/job-execution.service';
+import { withTelemetrySpan } from '../support/opentelemetry';
+import { WorkerMetricsService } from '../support/worker-metrics.service';
+import { RetryPolicyService } from '../support/retry-policy.service';
+
+const SOCIAL_QUEUE = 'social';
+const SOCIAL_LINKEDIN_GENERATE_JOB = 'social.linkedin.generate';
+
+@Processor(SOCIAL_QUEUE)
+export class WorkerSocialProcessor extends WorkerHost {
+  constructor(
+    private readonly orchestrator: SocialOrchestrator,
+    private readonly jobExecutionService: JobExecutionService,
+    private readonly metrics: WorkerMetricsService,
+    private readonly retryPolicyService: RetryPolicyService,
+  ) {
+    super();
+  }
+
+  async process(job: Job<any, any, string>): Promise<any> {
+    this.metrics.recordStart(job.queueName);
+    const execution = await this.jobExecutionService.start(job);
+
+    try {
+      if (job.name !== SOCIAL_LINKEDIN_GENERATE_JOB) {
+        this.metrics.recordSuccess(job.queueName);
+        await this.jobExecutionService.succeed(execution.id);
+        return null;
+      }
+
+      const result = await withTelemetrySpan(
+        `worker.${job.queueName}.${job.name}`,
+        {
+          'job.id': String(job.id ?? ''),
+          'job.name': job.name,
+          'queue.name': job.queueName,
+          'topic.id': job.data?.topicId,
+        },
+        async () => this.orchestrator.runLinkedIn(job.data.topicId),
+      );
+      this.metrics.recordSuccess(job.queueName);
+      await this.jobExecutionService.succeed(execution.id);
+      return result;
+    } catch (error) {
+      const classification = this.retryPolicyService.classify(error);
+      if (!classification.retryable) {
+        job.discard();
+      }
+      this.metrics.recordFailure(job.queueName, !classification.retryable);
+      await this.jobExecutionService.fail(execution.id, error, classification.reason);
+      throw error;
+    }
+  }
+}

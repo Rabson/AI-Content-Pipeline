@@ -1,0 +1,101 @@
+import { Body, Controller, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import { AppRole } from '../../common/auth/roles.enum';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { CreateReviewCommentDto } from './dto/create-review-comment.dto';
+import { CreateReviewSessionDto } from './dto/create-review-session.dto';
+import { GenerateDraftDto } from './dto/generate-draft.dto';
+import { GetDraftQueryDto } from './dto/get-draft-query.dto';
+import { ListDraftVersionsDto } from './dto/list-draft-versions.dto';
+import { UpdateReviewCommentDto } from './dto/update-review-comment.dto';
+import { DraftService } from './draft.service';
+
+@Roles(AppRole.EDITOR)
+@Controller('v1')
+export class DraftController {
+  constructor(private readonly draftService: DraftService) {}
+
+  @Post('topics/:topicId/drafts/generate')
+  generateDraft(
+    @Param('topicId') topicId: string,
+    @Body() dto: GenerateDraftDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.draftService.enqueueDraftGeneration(topicId, dto, this.actorId(req));
+  }
+
+  @Get('topics/:topicId/drafts')
+  listDrafts(@Param('topicId') topicId: string, @Query() query: ListDraftVersionsDto) {
+    return this.draftService.listDraftVersions(topicId, query);
+  }
+
+  @Get('topics/:topicId/drafts/current')
+  getCurrentDraft(@Param('topicId') topicId: string, @Query() query: GetDraftQueryDto) {
+    return this.draftService.getDraft(topicId, query);
+  }
+
+  @Get('topics/:topicId/drafts/current/markdown')
+  getDraftMarkdown(@Param('topicId') topicId: string, @Query() query: GetDraftQueryDto) {
+    return this.draftService.getDraftMarkdown(topicId, query);
+  }
+
+  @Get('topics/:topicId/draft/sections/:sectionKey')
+  getDraftSection(
+    @Param('topicId') topicId: string,
+    @Param('sectionKey') sectionKey: string,
+    @Query() query: GetDraftQueryDto,
+  ) {
+    return this.draftService.getDraftSection(topicId, sectionKey, query);
+  }
+
+  @Get('topics/:topicId/reviews')
+  listReviewSessions(@Param('topicId') topicId: string) {
+    return this.draftService.listReviewSessions(topicId);
+  }
+
+  @Post('drafts/:draftVersionId/reviews')
+  createReviewSession(
+    @Param('draftVersionId') draftVersionId: string,
+    @Body() dto: CreateReviewSessionDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.draftService.createReviewSession(draftVersionId, dto, this.actorId(req));
+  }
+
+  @Roles(AppRole.REVIEWER)
+  @Post('reviews/:reviewSessionId/comments')
+  createReviewComment(
+    @Param('reviewSessionId') reviewSessionId: string,
+    @Body() dto: CreateReviewCommentDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.draftService.createReviewComment(reviewSessionId, dto, this.actorId(req));
+  }
+
+  @Roles(AppRole.REVIEWER)
+  @Patch('reviews/:reviewSessionId/comments/:commentId')
+  updateReviewComment(
+    @Param('reviewSessionId') reviewSessionId: string,
+    @Param('commentId') commentId: string,
+    @Body() dto: UpdateReviewCommentDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.draftService.updateReviewComment(reviewSessionId, commentId, dto, this.actorId(req));
+  }
+
+  @Roles(AppRole.REVIEWER)
+  @Post('reviews/:reviewSessionId/submit')
+  submitReview(@Param('reviewSessionId') reviewSessionId: string) {
+    return this.draftService.submitReview(reviewSessionId);
+  }
+
+  @Roles(AppRole.REVIEWER)
+  @Post('drafts/:draftVersionId/approve')
+  approveDraft(@Param('draftVersionId') draftVersionId: string, @Req() req: AuthenticatedRequest) {
+    return this.draftService.approveDraft(draftVersionId, this.actorId(req));
+  }
+
+  private actorId(req: AuthenticatedRequest): string {
+    return req.user?.id ?? req.header('x-actor-id')?.trim() ?? 'system';
+  }
+}

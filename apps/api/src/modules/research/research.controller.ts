@@ -1,0 +1,43 @@
+import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { AppRole } from '../../common/auth/roles.enum';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { AddSourceDto } from './dto/add-source.dto';
+import { ResearchQueryDto } from './dto/research-query.dto';
+import { RunResearchDto } from './dto/run-research.dto';
+import { ResearchService } from './research.service';
+
+@Roles(AppRole.EDITOR)
+@Controller('v1/topics/:topicId/research')
+export class ResearchController {
+  constructor(private readonly researchService: ResearchService) {}
+
+  @Post('run')
+  run(
+    @Param('topicId') topicId: string,
+    @Body() dto: RunResearchDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.researchService.enqueue(topicId, dto, this.actorId(req));
+  }
+
+  @Get()
+  latest(@Param('topicId') topicId: string, @Query() query: ResearchQueryDto) {
+    return this.researchService.getLatest(topicId, query);
+  }
+
+  @Get('versions')
+  versions(@Param('topicId') topicId: string) {
+    return this.researchService.listVersions(topicId);
+  }
+
+  @Roles(AppRole.REVIEWER)
+  @Post('sources')
+  addSource(@Param('topicId') topicId: string, @Body() dto: AddSourceDto) {
+    return this.researchService.addManualSource(topicId, dto);
+  }
+
+  private actorId(req: AuthenticatedRequest): string {
+    return req.user?.id ?? req.header('x-actor-id')?.trim() ?? 'system';
+  }
+}

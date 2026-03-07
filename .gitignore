@@ -1,0 +1,11 @@
+.DS_Store
+node_modules/
+dist/
+.next/
+coverage/
+.env
+.env.local
+.env.production
+*.log
+apps/**/dist/
+apps/dashboard/.next/

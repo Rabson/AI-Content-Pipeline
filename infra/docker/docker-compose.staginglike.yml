@@ -1,0 +1,24 @@
+version: '3.9'
+services:
+  api:
+    command: sh -c "npm install && npm run build:api && npm --workspace @aicp/api run start"
+    environment:
+      APP_ENV: staging
+      NODE_ENV: production
+      AUTH_ALLOW_HEADER_BYPASS: 'false'
+      FEATURE_PHASE2_ENABLED: 'true'
+      FEATURE_PHASE3_ENABLED: 'true'
+
+  worker:
+    command: sh -c "npm install && npm run build:worker && npm --workspace @aicp/worker run start"
+    environment:
+      APP_ENV: staging
+      NODE_ENV: production
+
+  dashboard:
+    command: sh -c "npm install && npm run build:dashboard && npm --workspace @aicp/dashboard run start"
+    environment:
+      NEXT_PUBLIC_APP_ENV: staging
+      NEXT_PUBLIC_FEATURE_PHASE2_ENABLED: 'true'
+      NEXT_PUBLIC_FEATURE_PHASE3_ENABLED: 'true'
+      NEXTAUTH_URL: http://localhost:3000

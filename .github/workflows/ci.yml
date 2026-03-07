@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint:workspaces
+      - run: npm run lint:structure
+      - run: npm run typecheck
+      - run: npm run test
+      - name: Prisma Validate
+        run: npx prisma validate --schema apps/api/src/prisma/schema.prisma
+      - name: Prisma Migration Drift Check
+        run: |
+          npx prisma migrate diff \
+            --from-empty \
+            --to-schema-datamodel apps/api/src/prisma/schema.prisma \
+            --script > /tmp/generated-migration.sql
+          diff -u apps/api/src/prisma/migrations/202603070001_init/migration.sql /tmp/generated-migration.sql

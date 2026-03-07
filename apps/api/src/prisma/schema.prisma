@@ -1,0 +1,775 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TopicStatus {
+  DRAFT
+  SUBMITTED
+  SCORED
+  APPROVED
+  REJECTED
+  RESEARCH_QUEUED
+  RESEARCH_IN_PROGRESS
+  RESEARCH_READY
+  FAILED
+  ARCHIVED
+}
+
+enum ContentState {
+  TOPIC_INTAKE
+  APPROVED
+  RESEARCH_IN_PROGRESS
+  RESEARCH_READY
+  OUTLINE_READY
+  DRAFT_IN_PROGRESS
+  DRAFT_READY
+  REVIEW_IN_PROGRESS
+  REVISION_IN_PROGRESS
+  READY_TO_PUBLISH
+  PUBLISH_IN_PROGRESS
+  PUBLISHED
+  DISTRIBUTION_IN_PROGRESS
+  COMPLETED
+  FAILED
+  ARCHIVED
+}
+
+enum WorkflowStage {
+  TOPIC
+  RESEARCH
+  OUTLINE
+  DRAFT
+  REVIEW
+  REVISION
+  SEO
+  SOCIAL
+  PUBLISH
+  ANALYTICS
+  OPS
+}
+
+enum WorkflowRunStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+enum WorkflowEventType {
+  TRANSITION
+  TOPIC_CREATED
+  TOPIC_SCORED
+  TOPIC_APPROVED
+  TOPIC_REJECTED
+  ENQUEUED
+  STARTED
+  COMPLETED
+  FAILED
+  COMMENT_CREATED
+  COMMENT_UPDATED
+  REVIEW_SUBMITTED
+  DRAFT_APPROVED
+  REVISION_REQUESTED
+  SOCIAL_GENERATED
+  SOCIAL_STATUS_CHANGED
+  SEO_GENERATED
+  PUBLISH_REQUESTED
+  PUBLISHED
+  PUBLISH_FAILED
+  REPLAY_REQUESTED
+  RETRY_REQUESTED
+}
+
+enum ArtifactType {
+  RESEARCH
+  OUTLINE
+  DRAFT
+  SEO
+  SOCIAL
+}
+
+enum ArtifactStatus {
+  ACTIVE
+  SUPERSEDED
+  FAILED
+}
+
+enum SourceType {
+  DOCS
+  BLOG
+  PAPER
+  NEWS
+  INTERNAL_NOTE
+  OTHER
+}
+
+enum JobExecutionStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+enum DraftVersionStatus {
+  IN_PROGRESS
+  READY_FOR_REVIEW
+  APPROVED
+  SUPERSEDED
+  FAILED
+}
+
+enum ReviewSessionStatus {
+  OPEN
+  SUBMITTED
+  CLOSED
+}
+
+enum ReviewCommentSeverity {
+  NIT
+  MAJOR
+  BLOCKER
+}
+
+enum ReviewCommentStatus {
+  OPEN
+  ADDRESSED
+  WONT_FIX
+}
+
+enum RevisionRunStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum PublicationChannel {
+  DEVTO
+}
+
+enum PublicationStatus {
+  PENDING
+  PUBLISHED
+  FAILED
+}
+
+enum SocialPlatform {
+  LINKEDIN
+}
+
+enum SocialPostStatus {
+  DRAFT
+  APPROVED
+  POSTED
+  FAILED
+}
+
+enum StorageObjectPurpose {
+  IMAGE
+  EXPORT
+  ATTACHMENT
+  SOCIAL_ASSET
+  PUBLICATION_ASSET
+}
+
+model Topic {
+  id                 String      @id @default(uuid())
+  title              String
+  slug               String      @unique
+  brief              String?
+  audience           String?
+  source             String      @default("MANUAL")
+  status             TopicStatus @default(DRAFT)
+  scoreTotal         Decimal?    @db.Decimal(5, 2)
+  scoreBreakdown     Json?
+  createdBy          String
+  approvedBy         String?
+  rejectedBy         String?
+  approvalNote       String?
+  rejectionReason    String?
+  contentItemId      String?     @unique
+  researchJobId      String?
+  researchEnqueuedAt DateTime?
+  approvedAt         DateTime?
+  rejectedAt         DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  deletedAt          DateTime?
+
+  contentItem        ContentItem?        @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  history            TopicStatusHistory[]
+  tags               TopicTag[]
+  researchArtifacts  ResearchArtifact[]
+  artifactVersions   ArtifactVersion[]
+  llmUsageLogs       LlmUsageLog[]
+  draftVersions      DraftVersion[]
+  reviewSessions     ReviewSession[]
+  revisionRuns       RevisionRun[]
+  outlines           Outline[]
+  publications       Publication[]
+  seoMetadata        SeoMetadata[]
+  socialPosts        SocialPost[]
+  workflowRuns       WorkflowRun[]
+  workflowEvents     WorkflowEvent[]
+  storageObjects     StorageObject[]
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([scoreTotal(sort: Desc)])
+}
+
+model ContentItem {
+  id                           String       @id @default(uuid())
+  currentState                 ContentState @default(TOPIC_INTAKE)
+  currentDraftVersionId        String?
+  latestApprovedDraftVersionId String?
+  lockedForPublish             Boolean      @default(false)
+  publishedAt                  DateTime?
+  createdAt                    DateTime     @default(now())
+  updatedAt                    DateTime     @updatedAt
+
+  topic                        Topic?
+  currentDraftVersion          DraftVersion?        @relation("ContentCurrentDraft", fields: [currentDraftVersionId], references: [id], onDelete: SetNull)
+  latestApprovedDraftVersion   DraftVersion?        @relation("ContentApprovedDraft", fields: [latestApprovedDraftVersionId], references: [id], onDelete: SetNull)
+  publications                 Publication[]
+  seoMetadata                  SeoMetadata[]
+  socialPosts                  SocialPost[]
+  workflowRuns                 WorkflowRun[]
+  workflowEvents               WorkflowEvent[]
+  llmUsageLogs                 LlmUsageLog[]
+  storageObjects               StorageObject[]
+
+  @@index([currentState, updatedAt(sort: Desc)])
+}
+
+model TopicStatusHistory {
+  id         String      @id @default(uuid())
+  topicId    String
+  fromStatus TopicStatus?
+  toStatus   TopicStatus
+  actorId    String
+  reason     String?
+  metadata   Json?
+  createdAt  DateTime    @default(now())
+
+  topic      Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([topicId, createdAt(sort: Desc)])
+}
+
+model WorkflowRun {
+  id            String            @id @default(uuid())
+  contentItemId String
+  topicId       String?
+  stage         WorkflowStage
+  status        WorkflowRunStatus @default(RUNNING)
+  startedBy     String?
+  metadata      Json?
+  startedAt     DateTime          @default(now())
+  endedAt       DateTime?
+
+  contentItem   ContentItem       @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  topic         Topic?            @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  events        WorkflowEvent[]
+
+  @@index([contentItemId, startedAt(sort: Desc)])
+  @@index([stage, status, startedAt(sort: Desc)])
+}
+
+model WorkflowEvent {
+  id            String            @id @default(uuid())
+  contentItemId String
+  topicId       String?
+  workflowRunId String?
+  eventType     WorkflowEventType
+  stage         WorkflowStage
+  fromState     ContentState?
+  toState       ContentState?
+  actorId       String?
+  metadata      Json?
+  createdAt     DateTime          @default(now())
+
+  contentItem   ContentItem       @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  topic         Topic?            @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  workflowRun   WorkflowRun?      @relation(fields: [workflowRunId], references: [id], onDelete: SetNull)
+
+  @@index([contentItemId, createdAt(sort: Desc)])
+  @@index([topicId, createdAt(sort: Desc)])
+  @@index([eventType, stage, createdAt(sort: Desc)])
+}
+
+model TopicTag {
+  topicId String
+  tag     String
+  topic   Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([topicId, tag])
+}
+
+model ArtifactVersion {
+  id            String         @id @default(uuid())
+  topicId       String
+  artifactType  ArtifactType
+  versionNumber Int
+  status        ArtifactStatus @default(ACTIVE)
+  payloadJson   Json
+  model         String?
+  promptHash    String?
+  createdAt     DateTime       @default(now())
+
+  topic         Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  research      ResearchArtifact?
+  outline       Outline?
+  draftVersion  DraftVersion?
+  seoMetadata   SeoMetadata?
+
+  @@unique([topicId, artifactType, versionNumber])
+  @@index([topicId, artifactType, createdAt(sort: Desc)])
+}
+
+model Outline {
+  id                String   @id @default(uuid())
+  topicId           String
+  artifactVersionId String   @unique
+  title             String
+  objective         String
+  createdAt         DateTime @default(now())
+
+  topic             Topic           @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  artifactVersion   ArtifactVersion @relation(fields: [artifactVersionId], references: [id], onDelete: Cascade)
+  sections          OutlineSection[]
+
+  @@index([topicId, createdAt(sort: Desc)])
+}
+
+model OutlineSection {
+  id              String          @id @default(uuid())
+  outlineId       String
+  sectionKey      String
+  parentSectionId String?
+  position        Int
+  heading         String
+  objective       String
+  targetWords     Int             @default(250)
+  createdAt       DateTime        @default(now())
+
+  outline         Outline         @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+  parentSection   OutlineSection? @relation("OutlineSectionHierarchy", fields: [parentSectionId], references: [id], onDelete: SetNull)
+  childSections   OutlineSection[] @relation("OutlineSectionHierarchy")
+
+  @@unique([outlineId, sectionKey])
+  @@index([outlineId, position])
+}
+
+model ResearchArtifact {
+  id                String   @id @default(uuid())
+  topicId           String
+  artifactVersionId String   @unique
+  summary           String
+  keyPointsCount    Int      @default(0)
+  examplesCount     Int      @default(0)
+  confidenceScore   Decimal? @db.Decimal(3, 2)
+  createdAt         DateTime @default(now())
+
+  topic             Topic           @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  artifactVersion   ArtifactVersion @relation(fields: [artifactVersionId], references: [id], onDelete: Cascade)
+  sources           SourceReference[]
+  keyPoints         ResearchKeyPoint[]
+  examples          ResearchExample[]
+
+  @@index([topicId, createdAt(sort: Desc)])
+}
+
+model SourceReference {
+  id                 String           @id @default(uuid())
+  researchArtifactId String
+  url                String
+  domain             String?
+  title              String?
+  sourceType         SourceType       @default(OTHER)
+  publishedAt        DateTime?
+  credibilityScore   Decimal?         @db.Decimal(3, 2)
+  relevanceScore     Decimal?         @db.Decimal(3, 2)
+  excerpt            String?
+  snippets           Json?
+  language           String?
+  notes              String?
+  createdAt          DateTime         @default(now())
+
+  researchArtifact   ResearchArtifact @relation(fields: [researchArtifactId], references: [id], onDelete: Cascade)
+
+  @@index([researchArtifactId, createdAt(sort: Desc)])
+  @@index([domain])
+}
+
+model ResearchKeyPoint {
+  id                 String           @id @default(uuid())
+  researchArtifactId String
+  point              String
+  importance         String
+  sourceRefIds       Json
+  createdAt          DateTime         @default(now())
+
+  researchArtifact   ResearchArtifact @relation(fields: [researchArtifactId], references: [id], onDelete: Cascade)
+
+  @@index([researchArtifactId, createdAt(sort: Desc)])
+}
+
+model ResearchExample {
+  id                 String           @id @default(uuid())
+  researchArtifactId String
+  exampleTitle       String
+  exampleBody        String
+  takeaway           String?
+  sourceRefIds       Json
+  createdAt          DateTime         @default(now())
+
+  researchArtifact   ResearchArtifact @relation(fields: [researchArtifactId], references: [id], onDelete: Cascade)
+
+  @@index([researchArtifactId, createdAt(sort: Desc)])
+}
+
+model JobExecution {
+  id            String             @id @default(uuid())
+  queueName     String
+  jobName       String
+  bullJobId     String?
+  topicId       String?
+  contentItemId String?
+  status        JobExecutionStatus
+  attempt       Int                @default(1)
+  payloadJson   Json?
+  error         String?
+  startedAt     DateTime           @default(now())
+  endedAt       DateTime?
+}
+
+model LlmUsageLog {
+  id               String       @id @default(uuid())
+  topicId          String
+  contentItemId    String?
+  module           String
+  model            String
+  promptTokens     Int
+  completionTokens Int
+  totalTokens      Int
+  costUsd          Decimal?     @db.Decimal(10, 6)
+  createdAt        DateTime     @default(now())
+
+  topic            Topic        @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  contentItem      ContentItem? @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+
+  @@index([topicId, createdAt(sort: Desc)])
+  @@index([contentItemId, createdAt(sort: Desc)])
+}
+
+model DraftVersion {
+  id                         String             @id @default(uuid())
+  topicId                    String
+  artifactVersionId          String?            @unique
+  versionNumber             Int
+  status                    DraftVersionStatus @default(IN_PROGRESS)
+  assembledMarkdown         String?
+  createdBy                 String
+  approvedBy                String?
+  approvedAt                DateTime?
+  createdAt                 DateTime           @default(now())
+  updatedAt                 DateTime           @updatedAt
+
+  topic                     Topic              @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  artifactVersion           ArtifactVersion?   @relation(fields: [artifactVersionId], references: [id], onDelete: SetNull)
+  sections                  DraftSection[]
+  reviewSessions            ReviewSession[]
+  reviewComments            ReviewComment[]
+  revisionsFrom             RevisionRun[]      @relation("RevisionFrom")
+  revisionsTo               RevisionRun[]      @relation("RevisionTo")
+  currentForContentItems    ContentItem[]      @relation("ContentCurrentDraft")
+  approvedForContentItems   ContentItem[]      @relation("ContentApprovedDraft")
+  publications              Publication[]
+
+  @@unique([topicId, versionNumber])
+  @@index([topicId, createdAt(sort: Desc)])
+}
+
+model DraftSection {
+  id             String         @id @default(uuid())
+  draftVersionId String
+  sectionKey     String
+  heading        String
+  position       Int
+  contentMd      String
+  wordCount      Int            @default(0)
+  model          String?
+  promptHash     String?
+  createdAt      DateTime       @default(now())
+
+  draftVersion   DraftVersion   @relation(fields: [draftVersionId], references: [id], onDelete: Cascade)
+  reviewComments ReviewComment[]
+  revisionItems  RevisionItem[]
+  sectionDiffs   SectionDiff[]
+
+  @@unique([draftVersionId, sectionKey])
+  @@index([draftVersionId, position])
+}
+
+model ReviewSession {
+  id             String              @id @default(uuid())
+  topicId        String
+  draftVersionId String
+  status         ReviewSessionStatus @default(OPEN)
+  reviewerId     String
+  submittedAt    DateTime?
+  createdAt      DateTime            @default(now())
+
+  topic          Topic               @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  draftVersion   DraftVersion        @relation(fields: [draftVersionId], references: [id], onDelete: Cascade)
+  comments       ReviewComment[]
+  revisionRuns   RevisionRun[]
+
+  @@index([topicId, createdAt(sort: Desc)])
+  @@index([draftVersionId])
+}
+
+model ReviewComment {
+  id             String               @id @default(uuid())
+  reviewSessionId String
+  draftVersionId String
+  draftSectionId String
+  sectionKey     String
+  commentMd      String
+  severity       ReviewCommentSeverity
+  status         ReviewCommentStatus  @default(OPEN)
+  resolutionNote String?
+  createdBy      String
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  reviewSession  ReviewSession        @relation(fields: [reviewSessionId], references: [id], onDelete: Cascade)
+  draftVersion   DraftVersion         @relation(fields: [draftVersionId], references: [id], onDelete: Cascade)
+  draftSection   DraftSection         @relation(fields: [draftSectionId], references: [id], onDelete: Cascade)
+
+  @@index([reviewSessionId, createdAt(sort: Desc)])
+  @@index([draftVersionId, sectionKey])
+}
+
+model RevisionRun {
+  id                 String            @id @default(uuid())
+  topicId            String
+  reviewSessionId    String
+  fromDraftVersionId String
+  toDraftVersionId   String?
+  status             RevisionRunStatus @default(PENDING)
+  createdBy          String
+  createdAt          DateTime          @default(now())
+  completedAt        DateTime?
+
+  topic              Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  reviewSession      ReviewSession     @relation(fields: [reviewSessionId], references: [id], onDelete: Cascade)
+  fromDraftVersion   DraftVersion      @relation("RevisionFrom", fields: [fromDraftVersionId], references: [id], onDelete: Cascade)
+  toDraftVersion     DraftVersion?     @relation("RevisionTo", fields: [toDraftVersionId], references: [id], onDelete: SetNull)
+  items              RevisionItem[]
+  sectionDiffs       SectionDiff[]
+
+  @@index([topicId, createdAt(sort: Desc)])
+  @@index([reviewSessionId])
+}
+
+model RevisionItem {
+  id               String            @id @default(uuid())
+  revisionRunId    String
+  draftSectionId   String
+  sectionKey       String
+  instructionMd    String
+  sourceCommentIds Json?
+  status           RevisionRunStatus @default(PENDING)
+  error            String?
+  createdAt        DateTime          @default(now())
+
+  revisionRun      RevisionRun       @relation(fields: [revisionRunId], references: [id], onDelete: Cascade)
+  draftSection     DraftSection      @relation(fields: [draftSectionId], references: [id], onDelete: Cascade)
+
+  @@index([revisionRunId, createdAt(sort: Desc)])
+  @@index([draftSectionId])
+}
+
+model SectionDiff {
+  id             String       @id @default(uuid())
+  revisionRunId  String
+  draftSectionId String
+  sectionKey     String
+  beforeMd       String
+  afterMd        String
+  diffUnifiedMd  String
+  createdAt      DateTime     @default(now())
+
+  revisionRun    RevisionRun  @relation(fields: [revisionRunId], references: [id], onDelete: Cascade)
+  draftSection   DraftSection @relation(fields: [draftSectionId], references: [id], onDelete: Cascade)
+
+  @@index([revisionRunId, createdAt(sort: Desc)])
+  @@index([draftSectionId])
+}
+
+model SeoMetadata {
+  id                 String          @id @default(uuid())
+  topicId            String
+  contentItemId      String?
+  artifactVersionId  String?         @unique
+  slug               String
+  metaTitle          String
+  metaDescription    String
+  canonicalUrl       String?
+  tags               String[]        @default([])
+  keywords           String[]        @default([])
+  openGraphTitle     String?
+  openGraphDescription String?
+  model              String?
+  promptHash         String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  topic              Topic           @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  contentItem        ContentItem?    @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  artifactVersion    ArtifactVersion? @relation(fields: [artifactVersionId], references: [id], onDelete: SetNull)
+
+  @@index([topicId, createdAt(sort: Desc)])
+  @@index([contentItemId, createdAt(sort: Desc)])
+}
+
+model SocialPost {
+  id                    String           @id @default(uuid())
+  topicId               String
+  contentItemId         String?
+  platform              SocialPlatform
+  status                SocialPostStatus @default(DRAFT)
+  latestVersionNumber   Int              @default(0)
+  approvedVersionNumber Int?
+  postedVersionNumber   Int?
+  externalId            String?
+  externalUrl           String?
+  error                 String?
+  postedAt              DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  topic                 Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  contentItem           ContentItem?     @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  versions              SocialPostVersion[]
+
+  @@unique([topicId, platform])
+  @@index([contentItemId, createdAt(sort: Desc)])
+}
+
+model SocialPostVersion {
+  id             String        @id @default(uuid())
+  socialPostId   String
+  versionNumber  Int
+  headline       String
+  bodyText       String
+  hashtags       String[]      @default([])
+  cta            String
+  model          String?
+  promptHash     String?
+  createdAt      DateTime      @default(now())
+
+  socialPost     SocialPost    @relation(fields: [socialPostId], references: [id], onDelete: Cascade)
+
+  @@unique([socialPostId, versionNumber])
+  @@index([socialPostId, createdAt(sort: Desc)])
+}
+
+model Publication {
+  id               String             @id @default(uuid())
+  topicId          String
+  contentItemId    String?
+  draftVersionId   String?
+  channel          PublicationChannel
+  status           PublicationStatus  @default(PENDING)
+  lockedForPublish Boolean            @default(false)
+  title            String
+  externalId       String?
+  externalUrl      String?
+  payloadJson      Json?
+  error            String?
+  verificationStatus String?
+  verifiedAt       DateTime?
+  publishedAt      DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  topic            Topic              @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  contentItem      ContentItem?       @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  draftVersion     DraftVersion?      @relation(fields: [draftVersionId], references: [id], onDelete: SetNull)
+  attempts         PublicationAttempt[]
+
+  @@index([topicId, createdAt(sort: Desc)])
+  @@index([contentItemId, createdAt(sort: Desc)])
+  @@index([channel, status])
+}
+
+model PublicationAttempt {
+  id                  String            @id @default(uuid())
+  publicationId       String
+  status              PublicationStatus
+  requestPayloadJson  Json?
+  responsePayloadJson Json?
+  error               String?
+  createdAt           DateTime          @default(now())
+
+  publication         Publication       @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId, createdAt(sort: Desc)])
+}
+
+model AnalyticsDailyUsage {
+  id               String   @id @default(uuid())
+  usageDate        DateTime
+  module           String
+  model            String
+  totalTokens      Int      @default(0)
+  estimatedCostUsd Decimal  @default(0) @db.Decimal(12, 6)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([usageDate, module, model])
+  @@index([usageDate(sort: Desc)])
+}
+
+model AnalyticsDailyOverview {
+  id                    String   @id @default(uuid())
+  usageDate             DateTime @unique
+  throughputCount       Int      @default(0)
+  revisionCount         Int      @default(0)
+  publishCount          Int      @default(0)
+  publishCadenceCount   Int      @default(0)
+  avgLeadTimeHours      Decimal  @default(0) @db.Decimal(12, 4)
+  avgRevisionRate       Decimal  @default(0) @db.Decimal(12, 4)
+  avgApprovalLatencyHours Decimal @default(0) @db.Decimal(12, 4)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([usageDate(sort: Desc)])
+}
+
+model StorageObject {
+  id            String               @id @default(uuid())
+  topicId       String?
+  contentItemId String?
+  provider      String
+  bucket        String
+  objectKey     String
+  publicUrl     String?
+  mimeType      String?
+  sizeBytes     Int?
+  purpose       StorageObjectPurpose
+  createdBy     String?
+  createdAt     DateTime             @default(now())
+
+  topic         Topic?               @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  contentItem   ContentItem?         @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+
+  @@unique([bucket, objectKey])
+  @@index([contentItemId, createdAt(sort: Desc)])
+}

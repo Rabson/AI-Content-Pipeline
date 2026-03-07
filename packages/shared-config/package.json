@@ -1,0 +1,11 @@
+{
+  "name": "@aicp/shared-config",
+  "version": "0.1.0",
+  "private": true,
+  "main": "env/env.schema.ts",
+  "scripts": {
+    "lint": "eslint \"env/**/*.ts\"",
+    "typecheck": "tsc --noEmit env/env.schema.ts",
+    "test": "vitest run --config ../../vitest.config.ts --dir ."
+  }
+}

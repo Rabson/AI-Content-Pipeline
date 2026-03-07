@@ -1,0 +1,22 @@
+name: Sentry Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sentry-release:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Sentry release
+        run: |
+          curl -fsS https://sentry.io/api/0/organizations/${SENTRY_ORG}/releases/ \
+            -H "Authorization: Bearer ${SENTRY_AUTH_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{\"version\":\"${GITHUB_SHA}\",\"projects\":[\"${SENTRY_PROJECT}\"],\"refs\":[{\"repository\":\"${GITHUB_REPOSITORY}\",\"commit\":\"${GITHUB_SHA}\"}],\"environment\":\"production\"}"
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}

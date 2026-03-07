@@ -1,0 +1,112 @@
+name: Deploy API and Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'apps/worker/**'
+      - 'packages/**'
+      - 'infra/**'
+      - 'scripts/**'
+      - 'package*.json'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ai_content_pipeline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d ai_content_pipeline"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_content_pipeline
+      REDIS_URL: redis://localhost:6379
+      APP_ENV: local
+      AUTH_ALLOW_HEADER_BYPASS: 'true'
+      FEATURE_PHASE2_ENABLED: 'true'
+      FEATURE_PHASE3_ENABLED: 'true'
+      STORAGE_PROVIDER: s3
+      STORAGE_BUCKET: smoke-bucket
+      AWS_REGION: us-east-1
+      OPENAI_API_KEY: test-key
+      DEVTO_API_KEY: test-key
+      NEXTAUTH_SECRET: smoke-secret
+      DASHBOARD_ACCESS_CODE: smoke-access
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate --schema apps/api/src/prisma/schema.prisma
+      - name: Apply smoke migrations
+        run: npx prisma migrate deploy --schema apps/api/src/prisma/schema.prisma
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm run test
+      - name: Build API and worker
+        run: |
+          npm run build:api
+          npm run build:worker
+      - name: Start API for smoke test
+        run: |
+          PORT=3001 node apps/api/dist/main.js > /tmp/api.log 2>&1 &
+          echo $! > /tmp/api.pid
+      - name: Wait for API health
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:3001/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/api.log
+          exit 1
+      - name: Start worker for smoke test
+        run: |
+          WORKER_METRICS_PORT=3002 node apps/worker/dist/main.js > /tmp/worker.log 2>&1 &
+          echo $! > /tmp/worker.pid
+      - name: Wait for worker metrics health
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:3002/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/worker.log
+          exit 1
+      - name: Trigger Render Deploy (API)
+        run: curl -fsS -X POST "$RENDER_API_DEPLOY_HOOK"
+        env:
+          RENDER_API_DEPLOY_HOOK: ${{ secrets.RENDER_API_DEPLOY_HOOK }}
+      - name: Trigger Render Deploy (Worker)
+        run: curl -fsS -X POST "$RENDER_WORKER_DEPLOY_HOOK"
+        env:
+          RENDER_WORKER_DEPLOY_HOOK: ${{ secrets.RENDER_WORKER_DEPLOY_HOOK }}

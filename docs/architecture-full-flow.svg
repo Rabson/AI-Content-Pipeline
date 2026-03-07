@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1180" viewBox="0 0 1800 1180" role="img" aria-labelledby="title desc">
+  <title id="title">AI Content Pipeline Full Architecture Flow</title>
+  <desc id="desc">Current code-aligned architecture showing discovery intake, scoring and approval, BullMQ queue dispatch, worker processing, section-based drafting and revision, publication, analytics, storage, health checks, and OpenTelemetry observability.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fff8ef"/>
+      <stop offset="100%" stop-color="#f5f1e9"/>
+    </linearGradient>
+    <style>
+      .title{font:700 36px Georgia,serif;fill:#15212a}
+      .label{font:700 18px ui-sans-serif,system-ui;fill:#15212a}
+      .sub{font:700 15px ui-sans-serif,system-ui;fill:#22313b}
+      .body{font:14px ui-sans-serif,system-ui;fill:#51606d}
+      .small{font:12px ui-monospace,SFMono-Regular,monospace;fill:#51606d}
+      .box{fill:#fffdf8;stroke:#d6c7b6;stroke-width:2}
+      .core{fill:#fff7ef;stroke:#d85f2c;stroke-width:3}
+      .data{fill:#f8fbff;stroke:#88a7c4;stroke-width:2}
+      .human{fill:#fff0d6;stroke:#d29b33;stroke-width:2}
+      .ext{fill:#eef7f3;stroke:#4b8f84;stroke-width:2}
+      .obs{fill:#f5f5ff;stroke:#6c7bb8;stroke-width:2}
+      .line{stroke:#61717f;stroke-width:3;fill:none;marker-end:url(#arrow)}
+      .dash{stroke:#61717f;stroke-width:2;stroke-dasharray:7 7;fill:none;marker-end:url(#arrow)}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#61717f"/>
+    </marker>
+  </defs>
+
+  <rect width="1800" height="1180" fill="url(#bg)"/>
+  <text x="60" y="72" class="title">AI Content Pipeline: Current Full Flow</text>
+
+  <rect x="60" y="120" width="250" height="110" rx="22" class="human"/>
+  <text x="90" y="162" class="label">Human Operator</text>
+  <text x="90" y="192" class="body">Adds manual topics, reviews scores,</text>
+  <text x="90" y="212" class="body">approves/rejects, comments by section.</text>
+
+  <rect x="360" y="100" width="320" height="150" rx="22" class="core"/>
+  <text x="392" y="142" class="label">Next.js Dashboard</text>
+  <text x="392" y="172" class="body">Topics, discovery queue, research, outline,</text>
+  <text x="392" y="192" class="body">draft, review, revisions, publish, analytics.</text>
+  <text x="392" y="224" class="small">apps/dashboard</text>
+
+  <rect x="760" y="90" width="430" height="190" rx="22" class="core"/>
+  <text x="792" y="132" class="label">NestJS API</text>
+  <text x="792" y="162" class="body">Discovery, Topic, Research, Outline, Draft, Revision,</text>
+  <text x="792" y="182" class="body">SEO, Social, Publisher, Analytics, Ops, System.</text>
+  <text x="792" y="212" class="small">apps/api</text>
+  <text x="792" y="236" class="small">/api/health and /api/ready check DB, Redis, queues, telemetry</text>
+
+  <rect x="1290" y="110" width="430" height="150" rx="22" class="data"/>
+  <text x="1322" y="152" class="label">PostgreSQL</text>
+  <text x="1322" y="182" class="body">Topics, workflow events, research artifacts, outlines,</text>
+  <text x="1322" y="202" class="body">draft versions, review comments, revision diffs, jobs, analytics.</text>
+
+  <rect x="60" y="320" width="360" height="170" rx="22" class="box"/>
+  <text x="92" y="362" class="label">Discovery Intake</text>
+  <text x="92" y="392" class="body">1. Manual topic creation via dashboard/API</text>
+  <text x="92" y="414" class="body">2. API-backed import job (`hackernews` provider)</text>
+  <text x="92" y="436" class="body">3. Candidates persisted with discovery source metadata</text>
+  <text x="92" y="466" class="small">`POST /api/v1/discovery/topics/manual`</text>
+  <text x="92" y="486" class="small">`POST /api/v1/discovery/topics/import`</text>
+
+  <rect x="470" y="320" width="360" height="170" rx="22" class="box"/>
+  <text x="502" y="362" class="label">Scoring and Filtering</text>
+  <text x="502" y="392" class="body">Topic scoring heuristics compute total + breakdown.</text>
+  <text x="502" y="414" class="body">Threshold filters can auto-reject weak discovery candidates.</text>
+  <text x="502" y="436" class="body">Human review decides approve / reject for research handoff.</text>
+  <text x="502" y="466" class="small">status: DRAFT -> SUBMITTED -> SCORED -> APPROVED/REJECTED</text>
+
+  <rect x="890" y="320" width="300" height="170" rx="22" class="data"/>
+  <text x="922" y="362" class="label">Redis + BullMQ</text>
+  <text x="922" y="392" class="body">`content.pipeline`</text>
+  <text x="922" y="414" class="body">`social`</text>
+  <text x="922" y="436" class="body">`publishing`</text>
+  <text x="922" y="458" class="body">`analytics`</text>
+
+  <rect x="1270" y="320" width="450" height="210" rx="22" class="core"/>
+  <text x="1302" y="362" class="label">NestJS Worker</text>
+  <text x="1302" y="392" class="body">`content.pipeline` dispatcher routes:</text>
+  <text x="1302" y="414" class="body">discovery.import, research.run, outline.generate,</text>
+  <text x="1302" y="434" class="body">draft.generate.*, revision.apply.*, seo.generate</text>
+  <text x="1302" y="464" class="body">Dedicated queues: social.linkedin.generate,</text>
+  <text x="1302" y="484" class="body">publish.devto, analytics.rollup.daily</text>
+  <text x="1302" y="514" class="small">apps/worker</text>
+
+  <rect x="60" y="580" width="360" height="220" rx="22" class="box"/>
+  <text x="92" y="622" class="label">Research and Outline</text>
+  <text x="92" y="652" class="body">Approved topics enqueue `research.run`.</text>
+  <text x="92" y="674" class="body">Worker gathers sources, calls OpenAI, stores</text>
+  <text x="92" y="694" class="body">structured research JSON, then runs outline generation.</text>
+  <text x="92" y="724" class="small">OpenAI returns JSON, not blog prose</text>
+  <text x="92" y="744" class="small">research -> outline handoff stays in `content.pipeline`</text>
+
+  <rect x="470" y="580" width="360" height="220" rx="22" class="box"/>
+  <text x="502" y="622" class="label">Draft Generation</text>
+  <text x="502" y="652" class="body">Drafts are generated section-by-section from outline + research.</text>
+  <text x="502" y="674" class="body">Each draft version is immutable and stored in Postgres.</text>
+  <text x="502" y="696" class="body">Final output format is markdown.</text>
+  <text x="502" y="726" class="small">jobs: `draft.generate.start|section|finalize`</text>
+
+  <rect x="890" y="580" width="360" height="220" rx="22" class="human"/>
+  <text x="922" y="622" class="label">Review and Revision Loop</text>
+  <text x="922" y="652" class="body">Review comments are bound to draft version + section key.</text>
+  <text x="922" y="674" class="body">Revision runs regenerate only selected sections.</text>
+  <text x="922" y="696" class="body">Diffs are stored per section before next approval.</text>
+  <text x="922" y="726" class="small">jobs: `revision.apply.start|section|finalize`</text>
+
+  <rect x="1310" y="580" width="410" height="220" rx="22" class="box"/>
+  <text x="1342" y="622" class="label">Post-Approval Outputs</text>
+  <text x="1342" y="652" class="body">SEO metadata generation</text>
+  <text x="1342" y="674" class="body">LinkedIn draft generation</text>
+  <text x="1342" y="696" class="body">Dev.to publication workflow</text>
+  <text x="1342" y="718" class="body">Daily analytics rollups and throughput metrics</text>
+  <text x="1342" y="748" class="small">queues: `social`, `publishing`, `analytics`</text>
+
+  <rect x="60" y="860" width="520" height="220" rx="22" class="obs"/>
+  <text x="92" y="902" class="label">Observability and Ops</text>
+  <text x="92" y="932" class="body">Structured JSON logs include trace context on API requests.</text>
+  <text x="92" y="954" class="body">OpenTelemetry bootstrap in API and worker supports OTLP HTTP export.</text>
+  <text x="92" y="976" class="body">API `/api/health` and `/api/ready` expose dependency status.</text>
+  <text x="92" y="998" class="body">Worker `/health`, `/ready`, `/metrics` expose runtime state.</text>
+  <text x="92" y="1020" class="body">Ops endpoints expose queue metrics and failed job replay.</text>
+
+  <rect x="640" y="860" width="440" height="220" rx="22" class="ext"/>
+  <text x="672" y="902" class="label">External Systems</text>
+  <text x="672" y="932" class="body">OpenAI API for research, outline, draft, revision, SEO, social.</text>
+  <text x="672" y="954" class="body">Hacker News Algolia API for discovery import.</text>
+  <text x="672" y="976" class="body">Dev.to API for publication.</text>
+  <text x="672" y="998" class="body">S3 / Cloudflare R2 compatible storage for uploads and assets.</text>
+  <text x="672" y="1020" class="body">Sentry + OTLP collector consume runtime error and trace data.</text>
+
+  <rect x="1140" y="860" width="580" height="220" rx="22" class="data"/>
+  <text x="1172" y="902" class="label">Deployment Units</text>
+  <text x="1172" y="932" class="body">Dashboard on Vercel</text>
+  <text x="1172" y="954" class="body">API on Render web service</text>
+  <text x="1172" y="976" class="body">Worker on Render background worker</text>
+  <text x="1172" y="998" class="body">Postgres + Redis managed separately</text>
+  <text x="1172" y="1020" class="body">Local Docker Compose mirrors dashboard, API, worker, Postgres, Redis, MinIO</text>
+
+  <path d="M310 175 L360 175" class="line"/>
+  <path d="M680 175 L760 175" class="line"/>
+  <path d="M1190 180 L1290 180" class="line"/>
+
+  <path d="M240 230 L240 320" class="line"/>
+  <path d="M420 405 L470 405" class="line"/>
+  <path d="M830 405 L890 405" class="line"/>
+  <path d="M1190 405 L1270 405" class="line"/>
+
+  <path d="M240 490 L240 580" class="line"/>
+  <path d="M830 690 L890 690" class="line"/>
+  <path d="M1250 690 L1310 690" class="line"/>
+  <path d="M420 690 L470 690" class="line"/>
+
+  <path d="M1220 490 C1220 560, 1170 600, 1090 640" class="dash"/>
+  <path d="M1450 530 C1510 560, 1540 590, 1540 580" class="dash"/>
+  <path d="M980 280 L980 320" class="line"/>
+  <path d="M1450 260 L1450 320" class="line"/>
+  <path d="M1450 530 L1450 860" class="dash"/>
+  <path d="M980 800 L980 860" class="line"/>
+  <path d="M1560 800 L1560 860" class="line"/>
+  <path d="M240 800 L240 860" class="line"/>
+  <path d="M830 910 C760 910, 730 940, 640 940" class="dash"/>
+  <path d="M1080 940 L1140 940" class="line"/>
+</svg>
