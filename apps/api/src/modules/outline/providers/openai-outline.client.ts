@@ -1,11 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { env } from '../../../config/env';
 import { OUTLINE_SYSTEM_PROMPT } from '../prompts/outline-system.prompt';
 import { OUTLINE_OUTPUT_SCHEMA } from '../prompts/outline-json-schema';
 import { buildOutlinePrompt, OutlinePromptInput } from '../prompts/outline.prompt';
 
 @Injectable()
 export class OpenAiOutlineClient {
-  private readonly model = process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini';
+  private readonly model = env.openAiModelDraft;
 
   async generateOutline(input: OutlinePromptInput): Promise<{
     output: {
@@ -15,7 +16,7 @@ export class OpenAiOutlineClient {
     };
     usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
   }> {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = env.openAiApiKey;
     if (!apiKey) {
       throw new InternalServerErrorException('OPENAI_API_KEY is not configured');
     }

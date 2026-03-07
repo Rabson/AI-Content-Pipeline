@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { env } from '../../../config/env';
 
 @Injectable()
 export class WorkerRuntimeClient {
   async runtimeStatus() {
-    const baseUrl = process.env.WORKER_HEALTH_BASE_URL?.replace(/\/$/, '') ?? '';
+    const baseUrl = env.workerHealthBaseUrl?.replace(/\/$/, '') ?? '';
     if (!baseUrl) {
       return {
         configured: false,

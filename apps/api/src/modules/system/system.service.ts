@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { env } from '../../config/env';
 import { getTelemetryStatus } from '../../common/observability/opentelemetry';
 import { RedisHealthClient } from './clients/redis-health.client';
 import { DatabaseHealthRepository } from './repositories/database-health.repository';
@@ -16,8 +17,8 @@ export class SystemService {
     return {
       status: 'ok',
       service: 'api',
-      appEnv: process.env.APP_ENV ?? 'local',
-      nodeEnv: process.env.NODE_ENV ?? 'development',
+      appEnv: env.appEnv,
+      nodeEnv: env.nodeEnv,
       uptimeSeconds: Math.round(process.uptime()),
       telemetry: getTelemetryStatus(),
       timestamp: new Date().toISOString(),
@@ -35,7 +36,7 @@ export class SystemService {
     return {
       ready,
       service: 'api',
-      appEnv: process.env.APP_ENV ?? 'local',
+      appEnv: env.appEnv,
       telemetry: getTelemetryStatus(),
       dependencies: { database, redis, queues },
       timestamp: new Date().toISOString(),

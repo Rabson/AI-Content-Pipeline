@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ContentState, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
+import { env } from '../../config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { DraftRepository } from './draft.repository';
 import { DraftValidatorService } from './providers/draft-validator.service';
@@ -59,16 +60,16 @@ export class DraftOrchestrator {
       heading: payload.heading,
       position: payload.position,
       contentMd: generated.markdown,
-      model: process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini',
+      model: env.openAiModelDraft,
       promptHash,
     });
 
     if (generated.usage) {
       await this.repository.createUsageLog({
-        topic: { connect: { id: payload.topicId } },
-        module: 'draft.section',
-        model: process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini',
-        promptTokens: generated.usage.prompt_tokens,
+          topic: { connect: { id: payload.topicId } },
+          module: 'draft.section',
+          model: env.openAiModelDraft,
+          promptTokens: generated.usage.prompt_tokens,
         completionTokens: generated.usage.completion_tokens,
         totalTokens: generated.usage.total_tokens,
       });

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID, createHash } from 'crypto';
 import { ContentState, TopicStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
+import { env } from '../../config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { ResearchRepository } from './research.repository';
 import { SourceGathererService } from './providers/source-gatherer.service';
@@ -35,7 +36,7 @@ export class ResearchOrchestrator {
       const aiResult = await this.generateStructuredNotes(promptInput);
       const artifact = await this.repository.persistResearchResult({
         topicId,
-        model: process.env.OPENAI_MODEL_RESEARCH ?? 'gpt-4.1-mini',
+        model: env.openAiModelResearch,
         promptHash: this.hashPrompt(promptInput),
         payload: aiResult.output,
         output: aiResult.output,

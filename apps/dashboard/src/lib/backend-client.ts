@@ -2,16 +2,11 @@ import 'server-only';
 
 import { getDashboardAuthHeaders } from './auth';
 import { parseErrorInfo } from './error-display';
-
-const API_BASE =
-  process.env.INTERNAL_API_BASE_URL ??
-  process.env.API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  'http://localhost:3001/api';
+import { env } from '../config/env';
 
 export async function backendMutation<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = await getDashboardAuthHeaders();
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${env.apiBase}${path}`, {
     ...init,
     headers: {
       ...headers,

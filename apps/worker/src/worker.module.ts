@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaService } from '../../api/src/prisma/prisma.service';
+import { env } from './config/env';
 
 import { WorkflowRepository } from '../../api/src/modules/workflow/workflow.repository';
 import { WorkflowService } from '../../api/src/modules/workflow/workflow.service';
@@ -77,9 +78,9 @@ import { ANALYTICS_QUEUE } from '../../api/src/modules/analytics/constants/analy
   imports: [
     BullModule.forRoot({
       connection: {
-        url: process.env.REDIS_URL,
+        url: env.redisUrl,
       },
-      prefix: process.env.QUEUE_PREFIX ?? 'ai-content',
+      prefix: env.queuePrefix,
     }),
     BullModule.registerQueue(
       { name: CONTENT_PIPELINE_QUEUE },

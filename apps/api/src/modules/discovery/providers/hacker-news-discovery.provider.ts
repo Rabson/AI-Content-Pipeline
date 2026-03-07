@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { env } from '../../../config/env';
 import {
   DiscoveryCandidate,
   DiscoveryImportParams,
@@ -40,9 +41,7 @@ export class HackerNewsDiscoveryProvider implements DiscoveryProvider {
   }
 
   private buildSearchUrl(params: DiscoveryImportParams) {
-    const url = new URL(
-      process.env.DISCOVERY_HN_API_BASE_URL ?? 'https://hn.algolia.com/api/v1/search_by_date',
-    );
+    const url = new URL(env.discoveryHnApiBaseUrl);
     url.searchParams.set('tags', 'story');
     url.searchParams.set('hitsPerPage', String(Math.min(Math.max(params.limit, 1), 20)));
     url.searchParams.set('query', params.query?.trim() || 'ai automation');

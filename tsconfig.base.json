@@ -14,8 +14,7 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@aicp/shared-types": ["packages/shared-types/src/index.ts"],
-      "@aicp/shared-config/*": ["packages/shared-config/*"]
+      "@aicp/shared-types": ["packages/shared-types/src/index.ts"]
     }
   }
 }

@@ -1,12 +1,13 @@
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { env } from '../config/env';
 
 function resolveRole(email: string) {
-  const adminEmails = (process.env.AUTH_ADMIN_EMAILS ?? '')
+  const adminEmails = (env.authAdminEmails ?? '')
     .split(',')
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
-  const reviewerEmails = (process.env.AUTH_REVIEWER_EMAILS ?? '')
+  const reviewerEmails = (env.authReviewerEmails ?? '')
     .split(',')
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
@@ -22,7 +23,7 @@ function resolveRole(email: string) {
 }
 
 function isAllowedDomain(email: string) {
-  const allowedDomains = (process.env.AUTH_ALLOWED_EMAIL_DOMAINS ?? '')
+  const allowedDomains = (env.authAllowedEmailDomains ?? '')
     .split(',')
     .map((entry) => entry.trim().toLowerCase())
     .filter(Boolean);
@@ -51,7 +52,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         const email = credentials?.email?.trim().toLowerCase();
         const accessCode = credentials?.accessCode?.trim();
-        const requiredAccessCode = process.env.DASHBOARD_ACCESS_CODE?.trim();
+        const requiredAccessCode = env.dashboardAccessCode?.trim();
 
         if (!email || !accessCode) {
           return null;

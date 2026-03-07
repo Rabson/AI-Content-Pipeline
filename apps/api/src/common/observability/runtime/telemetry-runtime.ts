@@ -3,6 +3,7 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { NodeSDK } from '@opentelemetry/sdk-node';
+import { env } from '../../../config/env';
 import { buildStatus, parseDiagLogLevel, parseHeaders, type TelemetryStatus } from './telemetry-config';
 
 export function createTelemetryRuntime(defaultServiceName: string) {
@@ -19,8 +20,8 @@ export function createTelemetryRuntime(defaultServiceName: string) {
     }
     diag.setLogger(new DiagConsoleLogger(), parseDiagLogLevel(telemetryStatus.logLevel));
     sdk = new NodeSDK({
-      resource: resourceFromAttributes({ 'service.name': serviceName, 'service.namespace': telemetryStatus.serviceNamespace, 'deployment.environment': process.env.APP_ENV ?? 'local' }),
-      traceExporter: new OTLPTraceExporter({ url: telemetryStatus.endpoint, headers: parseHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS) }),
+      resource: resourceFromAttributes({ 'service.name': serviceName, 'service.namespace': telemetryStatus.serviceNamespace, 'deployment.environment': env.appEnv }),
+      traceExporter: new OTLPTraceExporter({ url: telemetryStatus.endpoint, headers: parseHeaders(env.otelHeaders) }),
       instrumentations: [getNodeAutoInstrumentations()],
     });
     try {

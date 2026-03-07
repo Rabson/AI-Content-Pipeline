@@ -14,6 +14,7 @@ import { DiscoveryModule } from './modules/discovery/discovery.module';
 import { PublisherModule } from './modules/publisher/publisher.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { CommonModule } from './common/common.module';
+import { env } from './config/env';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 
 @Module({
@@ -21,9 +22,9 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
     CommonModule,
     BullModule.forRoot({
       connection: {
-        url: process.env.REDIS_URL,
+        url: env.redisUrl,
       },
-      prefix: process.env.QUEUE_PREFIX ?? 'ai-content',
+      prefix: env.queuePrefix,
     }),
     WorkflowModule,
     TopicModule,

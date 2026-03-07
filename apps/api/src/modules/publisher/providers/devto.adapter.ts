@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PublicationChannel } from '@prisma/client';
+import { env } from '../../../config/env';
 import { PublishRequest, PublishResponse, PublisherAdapter } from './publisher-adapter.interface';
 
 @Injectable()
@@ -7,7 +8,7 @@ export class DevtoAdapter implements PublisherAdapter {
   readonly channel = PublicationChannel.DEVTO;
 
   async publish(input: PublishRequest): Promise<PublishResponse> {
-    const apiKey = process.env.DEVTO_API_KEY;
+    const apiKey = env.devtoApiKey;
     if (!apiKey) {
       throw new InternalServerErrorException('DEVTO_API_KEY is not configured');
     }

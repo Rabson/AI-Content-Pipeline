@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { env } from '../../../config/env';
 
 export interface DevtoPublishInput {
   title: string;
@@ -10,7 +11,7 @@ export interface DevtoPublishInput {
 @Injectable()
 export class DevtoClient {
   async publish(input: DevtoPublishInput): Promise<{ externalId: string; url: string; raw: unknown }> {
-    const apiKey = process.env.DEVTO_API_KEY;
+    const apiKey = env.devtoApiKey;
     if (!apiKey) {
       throw new InternalServerErrorException('DEVTO_API_KEY is not configured');
     }

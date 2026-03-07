@@ -1,17 +1,18 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { env } from '../../../config/env';
 import { RESEARCH_SYSTEM_PROMPT } from '../prompts/research-system.prompt';
 import { buildResearchSynthesisPrompt, ResearchPromptInput } from '../prompts/research-synthesis.prompt';
 import { RESEARCH_OUTPUT_SCHEMA } from '../prompts/research-json-schema';
 
 @Injectable()
 export class OpenAiResearchClient {
-  private readonly model = process.env.OPENAI_MODEL_RESEARCH ?? 'gpt-4.1-mini';
+  private readonly model = env.openAiModelResearch;
 
   async synthesizeStructuredNotes(input: ResearchPromptInput): Promise<{
     output: any;
     usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
   }> {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = env.openAiApiKey;
     if (!apiKey) {
       throw new InternalServerErrorException('OPENAI_API_KEY is not configured');
     }

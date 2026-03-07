@@ -2,12 +2,7 @@ import 'server-only';
 
 import type { TopicSummary } from '@aicp/shared-types';
 import { getDashboardAuthHeaders } from '../auth';
-
-export const API_BASE =
-  process.env.INTERNAL_API_BASE_URL ??
-  process.env.API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  'http://localhost:3001/api';
+import { env } from '../../config/env';
 
 function toNullableNumber(value: unknown) {
   if (value === null || value === undefined || value === '') {
@@ -24,8 +19,8 @@ export function normalizeTopic<T extends Partial<TopicSummary>>(topic: T): T {
     scoreTotal: toNullableNumber(topic.scoreTotal),
     tags: Array.isArray(topic.tags)
       ? topic.tags
-          .filter((tag): tag is { tag: string } => Boolean(tag?.tag))
-          .map((tag) => ({ tag: tag.tag }))
+        .filter((tag): tag is { tag: string } => Boolean(tag?.tag))
+        .map((tag) => ({ tag: tag.tag }))
       : [],
   };
 }
@@ -35,7 +30,7 @@ export async function safeFetch<T>(path: string, init?: RequestInit, fallback?: 
 
   try {
     const headers = await getDashboardAuthHeaders();
-    const response = await fetch(`${API_BASE}${path}`, {
+    const response = await fetch(`${env.apiBase}${path}`, {
       ...init,
       headers: {
         ...headers,

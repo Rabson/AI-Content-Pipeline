@@ -1,22 +1,12 @@
 import { SignInForm } from '../../components/auth/signin-form';
+import { env } from '../../config/env';
 
 export default function SignInPage() {
-  const isLocal = (process.env.NEXT_PUBLIC_APP_ENV ?? 'local') === 'local';
-  const adminEmail =
-    (process.env.AUTH_ADMIN_EMAILS ?? 'operator@example.com').split(',')[0]?.trim() ||
-    'operator@example.com';
-  const reviewerEmail =
-    (process.env.AUTH_REVIEWER_EMAILS ?? 'reviewer@example.com').split(',')[0]?.trim() ||
-    'reviewer@example.com';
-  const allowedDomain =
-    (process.env.AUTH_ALLOWED_EMAIL_DOMAINS ?? 'example.com').split(',')[0]?.trim() ||
-    'example.com';
-  const editorEmail = `editor@${allowedDomain.replace(/^@/, '')}`;
-  const accessCode = process.env.DASHBOARD_ACCESS_CODE?.trim();
+  const editorEmail = `editor@${env.defaultAllowedDomain.replace(/^@/, '')}`;
   const seededIdentities = [
-    `ADMIN    ${adminEmail} / ${accessCode ?? 'set access code'}`,
-    `REVIEWER ${reviewerEmail} / ${accessCode ?? 'set access code'}`,
-    `EDITOR   ${editorEmail} / ${accessCode ?? 'set access code'}`,
+    `ADMIN    ${env.defaultAdminEmail} / ${env.dashboardAccessCode ?? 'set access code'}`,
+    `REVIEWER ${env.defaultReviewerEmail} / ${env.dashboardAccessCode ?? 'set access code'}`,
+    `EDITOR   ${editorEmail} / ${env.dashboardAccessCode ?? 'set access code'}`,
   ].join('\n');
 
   return (
@@ -29,7 +19,7 @@ export default function SignInPage() {
             <p className="lede">Use an allowed email and the dashboard access code to open the internal operations dashboard.</p>
           </div>
           <SignInForm />
-          {isLocal ? (
+          {env.isLocal ? (
             <div className="stack">
               <p className="eyebrow">Seeded local identities</p>
               <pre className="code-block auth-seed-block">{seededIdentities}</pre>

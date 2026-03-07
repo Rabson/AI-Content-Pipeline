@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { StorageObjectPurpose, WorkflowEventType, WorkflowStage } from '@prisma/client';
+import { env } from '../../config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { CreateUploadUrlDto } from './dto/create-upload-url.dto';
 import { StorageRepository } from './storage.repository';
@@ -22,7 +23,7 @@ export class StorageService {
     const object = await this.repository.createStorageObject({
       topicId,
       contentItemId: topic.contentItemId ?? undefined,
-      provider: process.env.STORAGE_PROVIDER ?? 's3',
+      provider: env.storageProvider,
       bucket,
       objectKey,
       publicUrl,

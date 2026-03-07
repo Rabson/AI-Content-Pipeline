@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": ".",
+    "declaration": true
+  },
+  "include": ["env/**/*.ts"],
+  "exclude": ["env/**/*.d.ts", "env/**/*.js"]
+}

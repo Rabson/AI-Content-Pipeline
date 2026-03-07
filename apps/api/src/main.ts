@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { env } from './config/env';
 import { AppLogger } from './common/logger/app-logger.service';
 import { shutdownOpenTelemetry, startOpenTelemetry } from './common/observability/opentelemetry';
 
@@ -23,7 +24,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = Number(process.env.PORT ?? 3001);
+  const port = env.port;
   await app.listen(port, '0.0.0.0');
 
   const shutdown = async () => {

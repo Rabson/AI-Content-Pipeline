@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AppRole } from '../auth/roles.enum';
+import { env } from '../../config/env';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
 
@@ -24,8 +25,7 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const canBypass =
-      process.env.APP_ENV === 'local' && process.env.AUTH_ALLOW_HEADER_BYPASS === 'true';
+    const canBypass = env.appEnv === 'local' && env.authAllowHeaderBypass;
 
     const actorId = request.header('x-actor-id')?.trim();
     const actorRole = request.header('x-actor-role')?.trim();

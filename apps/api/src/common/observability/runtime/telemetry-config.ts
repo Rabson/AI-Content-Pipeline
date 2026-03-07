@@ -1,4 +1,5 @@
 import { DiagLogLevel } from '@opentelemetry/api';
+import { env } from '../../../config/env';
 
 export type TelemetryStatus = {
   enabled: boolean;
@@ -34,16 +35,16 @@ export function parseHeaders(value?: string): Record<string, string> {
 }
 
 export function buildStatus(serviceName: string): TelemetryStatus {
-  const enabled = (process.env.OTEL_ENABLED ?? 'false').toLowerCase() === 'true';
-  const endpoint = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? null;
+  const enabled = env.otelEnabled;
+  const endpoint = env.otelTracesEndpoint ?? env.otelExporterEndpoint ?? null;
   return {
     enabled,
     started: false,
     serviceName,
-    serviceNamespace: process.env.OTEL_SERVICE_NAMESPACE ?? 'ai-content-pipeline',
+    serviceNamespace: env.otelServiceNamespace,
     exporter: enabled && endpoint ? 'otlp-http' : 'disabled',
     endpoint,
-    logLevel: (process.env.OTEL_LOG_LEVEL ?? 'error').toLowerCase(),
+    logLevel: env.otelLogLevel.toLowerCase(),
     lastError: null,
   };
 }

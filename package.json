@@ -7,22 +7,27 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:api": "npm --workspace @aicp/api run start:dev",
-    "dev:worker": "npm --workspace @aicp/worker run start:dev",
-    "dev:dashboard": "npm --workspace @aicp/dashboard run dev",
-    "build:api": "npm --workspace @aicp/api run build",
-    "build:worker": "npm --workspace @aicp/worker run build",
-    "build:dashboard": "npm --workspace @aicp/dashboard run build",
+    "build:shared-config": "npm --workspace @aicp/shared-config run build",
+    "dev:api": "npm run build:shared-config && node scripts/run-with-root-env.mjs npm --workspace @aicp/api run start:dev",
+    "dev:worker": "npm run build:shared-config && node scripts/run-with-root-env.mjs npm --workspace @aicp/worker run start:dev",
+    "dev:dashboard": "npm run build:shared-config && node scripts/run-with-root-env.mjs npm --workspace @aicp/dashboard run dev",
+    "start:api": "npm run build:shared-config && node scripts/run-with-root-env.mjs npm --workspace @aicp/api run start",
+    "start:worker": "npm run build:shared-config && node scripts/run-with-root-env.mjs npm --workspace @aicp/worker run start",
+    "start:dashboard": "npm run build:shared-config && NODE_ENV=production node scripts/run-with-root-env.mjs npm --workspace @aicp/dashboard run start",
+    "build:api": "npm run build:shared-config && npm --workspace @aicp/api run build",
+    "build:worker": "npm run build:shared-config && npm --workspace @aicp/worker run build",
+    "build:dashboard": "npm run build:shared-config && NODE_ENV=production node scripts/run-with-root-env.mjs npm --workspace @aicp/dashboard run build",
     "lint:workspaces": "npm run lint --workspaces",
     "lint:structure": "node scripts/check-code-shape.mjs",
     "lint": "npm run lint:workspaces && npm run lint:structure",
-    "typecheck": "npm run typecheck --workspaces",
+    "typecheck:workspaces": "npm run typecheck --workspaces",
+    "typecheck": "npm run build:shared-config && npm run typecheck:workspaces",
     "test": "npm run test --workspaces"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.2.0",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/parser": "^8.48.1",
     "eslint": "^8.57.1",
     "vitest": "^2.1.8"
   }

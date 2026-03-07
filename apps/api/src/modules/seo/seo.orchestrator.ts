@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
+import { env } from '../../config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { SeoRepository } from './seo.repository';
 import { SeoGeneratorService } from './providers/seo-generator.service';
@@ -32,7 +33,7 @@ export class SeoOrchestrator {
     const seo = await this.repository.persistGeneratedSeo({
       topicId,
       payload: generated.output,
-      model: process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini',
+      model: env.openAiModelDraft,
       promptHash,
       usage: generated.usage,
     });

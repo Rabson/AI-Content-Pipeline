@@ -2,24 +2,25 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { env } from '../../../config/env';
 
 @Injectable()
 export class StorageSigningService {
   private readonly client = new S3Client({
-    region: process.env.AWS_REGION ?? 'auto',
+    region: env.awsRegion,
     credentials:
-      process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+      env.awsAccessKeyId && env.awsSecretAccessKey
         ? {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            accessKeyId: env.awsAccessKeyId,
+            secretAccessKey: env.awsSecretAccessKey,
           }
         : undefined,
-    endpoint: process.env.STORAGE_ENDPOINT || undefined,
-    forcePathStyle: process.env.STORAGE_FORCE_PATH_STYLE === 'true',
+    endpoint: env.storageEndpoint || undefined,
+    forcePathStyle: env.storageForcePathStyle,
   });
 
   getBucketOrThrow() {
-    const bucket = process.env.STORAGE_BUCKET;
+    const bucket = env.storageBucket;
     if (!bucket) {
       throw new Error('STORAGE_BUCKET is not configured');
     }
@@ -43,7 +44,7 @@ export class StorageSigningService {
   }
 
   buildPublicUrl(objectKey: string) {
-    const publicBase = process.env.STORAGE_PUBLIC_BASE_URL?.replace(/\/$/, '');
+    const publicBase = env.storagePublicBaseUrl?.replace(/\/$/, '');
     return publicBase ? `${publicBase}/${objectKey}` : undefined;
   }
 }

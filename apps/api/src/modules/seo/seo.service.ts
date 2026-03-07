@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import { isPhaseEnabled } from '../../common/config/feature-flags';
+import { isPhaseEnabled } from '../../config/feature-flags';
 import { GenerateSeoDto } from './dto/generate-seo.dto';
 import { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB } from './constants/seo.constants';
 import { SeoRepository } from './seo.repository';

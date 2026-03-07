@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
+import { env } from '../../config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { SocialGeneratorService } from './providers/social-generator.service';
 import { SocialRepository } from './social.repository';
@@ -32,7 +33,7 @@ export class SocialOrchestrator {
     const post = await this.repository.persistGeneratedLinkedInDraft({
       topicId,
       payload: generated.output,
-      model: process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini',
+      model: env.openAiModelDraft,
       promptHash,
       usage: generated.usage,
     });

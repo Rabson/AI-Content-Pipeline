@@ -2,7 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { ContentState, SocialPostStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
-import { isPhaseEnabled } from '../../common/config/feature-flags';
+import { isPhaseEnabled } from '../../config/feature-flags';
 import { WorkflowService } from '../workflow/workflow.service';
 import { GenerateLinkedInDto } from './dto/generate-linkedin.dto';
 import { UpdateSocialPostStatusDto } from './dto/update-social-post-status.dto';

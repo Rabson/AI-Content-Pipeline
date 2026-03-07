@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import { isPhaseEnabled } from '../../common/config/feature-flags';
+import { isPhaseEnabled } from '../../config/feature-flags';
 import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB } from './constants/analytics.constants';
 import { AnalyticsRepository } from './analytics.repository';
 import { AnalyticsQueryDto } from './dto/analytics-query.dto';

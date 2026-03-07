@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ContentState, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { Queue } from 'bullmq';
+import { env } from '../../../config/env';
 import { WorkflowService } from '../../workflow/workflow.service';
 import { CONTENT_PIPELINE_QUEUE } from '../constants/draft.constants';
 import { GenerateDraftDto } from '../dto/generate-draft.dto';
@@ -28,7 +29,7 @@ export class DraftGenerationService {
     if (!outline || !outline.sections.length) throw new NotFoundException('No outline found. Generate outline before draft generation.');
 
     const payload = buildDraftPayload(topicId, topic, outline.sections, dto);
-    const draftVersion = await this.repository.createDraftShell({ topicId, actorId, payload: payload as unknown as Record<string, unknown>, model: process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini', promptHash: hashDraftPayload(payload as unknown as Record<string, unknown>) });
+    const draftVersion = await this.repository.createDraftShell({ topicId, actorId, payload: payload as unknown as Record<string, unknown>, model: env.openAiModelDraft, promptHash: hashDraftPayload(payload as unknown as Record<string, unknown>) });
     await this.syncWorkflowState(topicId, draftVersion.id, draftVersion.versionNumber, actorId);
     await enqueueDraftJobs(this.contentPipelineQueue, topicId, draftVersion.id, draftVersion.versionNumber, payload);
     return { enqueued: true, draftVersionId: draftVersion.id, versionNumber: draftVersion.versionNumber };

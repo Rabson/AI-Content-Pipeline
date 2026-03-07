@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { WorkerModule } from './worker.module';
+import { env } from './config/env';
 import { closeHealthServer, registerHealthServer } from './support/health/health-server';
 import { shutdownOpenTelemetry, startOpenTelemetry } from './support/opentelemetry';
 import { WorkerHealthService } from './support/worker-health.service';
@@ -22,7 +23,7 @@ async function bootstrap() {
   const app = await NestFactory.createApplicationContext(WorkerModule);
   const healthService = app.get(WorkerHealthService);
   const metricsService = app.get(WorkerMetricsService);
-  const metricsPort = Number(process.env.WORKER_METRICS_PORT ?? 0);
+  const metricsPort = env.workerMetricsPort;
   let healthServer = registerHealthServer(metricsPort, healthService, metricsService);
 
   const shutdown = async () => {

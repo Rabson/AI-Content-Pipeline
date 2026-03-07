@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ContentState, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
+import { env } from '../../config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { DiffService } from './providers/diff.service';
 import { OpenAiRevisionClient } from './providers/openai-revision.client';
@@ -40,7 +41,7 @@ export class RevisionOrchestrator {
         await this.repository.createUsageLog({
           topic: { connect: { id: payload.topicId } },
           module: 'revision.section',
-          model: process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini',
+          model: env.openAiModelDraft,
           promptTokens: revised.usage.prompt_tokens,
           completionTokens: revised.usage.completion_tokens,
           totalTokens: revised.usage.total_tokens,
@@ -105,7 +106,7 @@ export class RevisionOrchestrator {
       toDraftVersionId: payload.toDraftVersionId,
       sectionKey: payload.sectionKey,
       revisedMarkdown,
-      model: process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini',
+      model: env.openAiModelDraft,
       promptHash,
     });
 

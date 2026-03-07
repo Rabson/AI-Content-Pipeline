@@ -2,7 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { ContentState, PublicationChannel, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { Queue } from 'bullmq';
-import { isPhaseEnabled } from '../../common/config/feature-flags';
+import { isPhaseEnabled } from '../../config/feature-flags';
 import { WorkflowService } from '../workflow/workflow.service';
 import { PUBLISHING_QUEUE, DEVTO_PUBLISH_JOB } from './constants/publisher.constants';
 import { PublishDevtoDto } from './dto/publish-devto.dto';

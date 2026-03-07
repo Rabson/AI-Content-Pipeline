@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { env } from '../config/env';
 import { getTelemetryStatus } from './opentelemetry';
 import { DatabaseHealthRepository } from './health/database-health.repository';
 import { RedisHealthClient } from './health/redis-health.client';
@@ -12,14 +13,14 @@ export class WorkerHealthService {
     private readonly redisHealthClient: RedisHealthClient,
     private readonly queueHealthService: QueueHealthService,
     private readonly metrics: WorkerMetricsService,
-  ) {}
+  ) { }
 
   async health() {
     return {
       status: 'ok',
       service: 'worker',
-      appEnv: process.env.APP_ENV ?? 'local',
-      nodeEnv: process.env.NODE_ENV ?? 'development',
+      appEnv: env.appEnv,
+      nodeEnv: env.nodeEnv,
       uptimeSeconds: Math.round(process.uptime()),
       telemetry: getTelemetryStatus(),
       metrics: this.metrics.snapshot(),
@@ -38,7 +39,7 @@ export class WorkerHealthService {
     return {
       ready,
       service: 'worker',
-      appEnv: process.env.APP_ENV ?? 'local',
+      appEnv: env.appEnv,
       telemetry: getTelemetryStatus(),
       dependencies: { database, redis, queues },
       timestamp: new Date().toISOString(),

@@ -1,16 +1,17 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { env } from '../../../config/env';
 import { REVISION_SECTION_SYSTEM_PROMPT } from '../prompts/revision-system.prompt';
 import { buildRevisionPrompt, RevisionPromptInput } from '../prompts/revision-section.prompt';
 
 @Injectable()
 export class OpenAiRevisionClient {
-  private readonly model = process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini';
+  private readonly model = env.openAiModelDraft;
 
   async reviseSection(input: RevisionPromptInput): Promise<{
     markdown: string;
     usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
   }> {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = env.openAiApiKey;
     if (!apiKey) {
       throw new InternalServerErrorException('OPENAI_API_KEY is not configured');
     }

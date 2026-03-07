@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ContentState, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
+import { env } from '../../config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { OutlineRepository } from './outline.repository';
 import { OpenAiOutlineClient } from './providers/openai-outline.client';
@@ -38,7 +39,7 @@ export class OutlineOrchestrator {
 
     const outline = await this.repository.persistGeneratedOutline({
       topicId,
-      model: process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini',
+      model: env.openAiModelDraft,
       promptHash,
       payload: result.output,
       outline: result.output,

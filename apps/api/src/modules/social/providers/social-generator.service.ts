@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { env } from '../../../config/env';
 
 export interface SocialGenerationInput {
   topicTitle: string;
@@ -16,20 +17,20 @@ export interface LinkedInDraftOutput {
 
 @Injectable()
 export class SocialGeneratorService {
-  private readonly model = process.env.OPENAI_MODEL_DRAFT ?? 'gpt-4.1-mini';
+  private readonly model = env.openAiModelDraft;
 
   async generateLinkedIn(input: SocialGenerationInput): Promise<{
     output: LinkedInDraftOutput;
     usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
   }> {
-    if (!process.env.OPENAI_API_KEY) {
+    if (!env.openAiApiKey) {
       return { output: this.fallback(input) };
     }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${env.openAiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(this.buildRequest(input)),

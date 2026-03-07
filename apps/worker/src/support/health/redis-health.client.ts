@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
+import { env } from '../../config/env';
 
 @Injectable()
 export class RedisHealthClient {
   async check() {
-    const url = process.env.REDIS_URL;
+    const url = env.redisUrl;
     if (!url) {
       return { ok: false, error: 'REDIS_URL not configured' };
     }
