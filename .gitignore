@@ -9,3 +9,4 @@ coverage/
 *.log
 apps/**/dist/
 apps/dashboard/.next/
+misc/
