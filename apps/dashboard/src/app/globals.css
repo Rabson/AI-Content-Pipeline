@@ -161,12 +161,28 @@ a {
   padding: 32px;
 }
 
+.error-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
 .auth-card {
   width: min(100%, 520px);
   padding: 32px;
   border-radius: 28px;
   border: 1px solid var(--line);
   background: rgba(255, 251, 244, 0.96);
+  box-shadow: 0 28px 70px rgba(21, 33, 42, 0.1);
+}
+
+.error-card {
+  width: min(100%, 640px);
+  padding: 32px;
+  border-radius: 28px;
+  border: 1px solid rgba(154, 49, 49, 0.15);
+  background: rgba(255, 251, 244, 0.97);
   box-shadow: 0 28px 70px rgba(21, 33, 42, 0.1);
 }
 
@@ -302,6 +318,13 @@ a {
 .button:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 24px rgba(198, 90, 47, 0.22);
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.75;
+  transform: none;
+  box-shadow: none;
 }
 
 .button-secondary {
@@ -465,6 +488,10 @@ a.list-item:hover,
   background: var(--danger-soft);
   color: var(--danger);
   font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.error-message {
+  white-space: pre-wrap;
 }
 
 .ops-card-grid {
