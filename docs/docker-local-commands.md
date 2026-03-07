@@ -16,6 +16,21 @@ docker compose version
 
 This repo uses root [`.env`](../.env) as the runtime config source.
 
+## Compose Files
+- Base stack: [`compose.base.yml`](../infra/docker/compose.base.yml)
+- Local override: [`compose.local.yml`](../infra/docker/compose.local.yml)
+- Staging-like override: [`docker-compose.staginglike.yml`](../infra/docker/docker-compose.staginglike.yml)
+
+Service image specs live beside each app:
+- [apps/api/Dockerfile](../apps/api/Dockerfile)
+- [apps/worker/Dockerfile](../apps/worker/Dockerfile)
+- [apps/dashboard/Dockerfile](../apps/dashboard/Dockerfile)
+
+Docker build-context filtering is service-local too:
+- [apps/api/Dockerfile.dockerignore](../apps/api/Dockerfile.dockerignore)
+- [apps/worker/Dockerfile.dockerignore](../apps/worker/Dockerfile.dockerignore)
+- [apps/dashboard/Dockerfile.dockerignore](../apps/dashboard/Dockerfile.dockerignore)
+
 ## Start Full Stack
 Starts:
 - `postgres`
@@ -27,34 +42,34 @@ Starts:
 - `dashboard`
 
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local up -d
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d
 ```
 
 ## Start Services Step by Step
 
 ### 1. Infrastructure
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d postgres redis minio
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d postgres redis minio
 ```
 
 ### 2. Run migrations
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up migrate
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up migrate
 ```
 
 ### 3. Start API
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d api
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d api
 ```
 
 ### 4. Start worker
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d worker
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d worker
 ```
 
 ### 5. Start dashboard
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d dashboard
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d dashboard
 ```
 
 ## Health Checks
@@ -81,59 +96,59 @@ curl -I http://localhost:3003/signin
 Use these if host `curl localhost:...` is blocked by your environment even though Docker is running.
 
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T api \
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml exec -T api \
   node -e "fetch('http://localhost:3001/api/health').then(async r=>{console.log(r.status);console.log(await r.text())})"
 
-docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T worker \
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml exec -T worker \
   node -e "fetch('http://localhost:3002/ready').then(async r=>{console.log(r.status);console.log(await r.text())})"
 
-docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T dashboard \
-  node -e "fetch('http://localhost:3000/ops').then(async r=>{console.log(r.status);console.log((await r.text()).slice(0,200))})"
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml exec -T dashboard \
+  node -e "fetch('http://localhost:3003/signin').then(async r=>{console.log(r.status);console.log((await r.text()).slice(0,200))})"
 ```
 
 ## Service Status and Logs
 
 ### Show container status
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml ps
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml ps
 ```
 
 ### Tail all main app logs
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml logs -f api worker dashboard
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml logs -f api worker dashboard
 ```
 
 ### Tail one service
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml logs -f api
-docker compose --env-file .env -f infra/docker/docker-compose.yml logs -f worker
-docker compose --env-file .env -f infra/docker/docker-compose.yml logs -f dashboard
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml logs -f api
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml logs -f worker
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml logs -f dashboard
 ```
 
 ## Restart Services
 
 ### Restart one service
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml restart api
-docker compose --env-file .env -f infra/docker/docker-compose.yml restart worker
-docker compose --env-file .env -f infra/docker/docker-compose.yml restart dashboard
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml restart api
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml restart worker
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml restart dashboard
 ```
 
 ### Recreate app services
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local up -d --force-recreate api worker dashboard
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d --force-recreate api worker dashboard
 ```
 
 ## Stop Stack
 
 ### Stop services and keep volumes
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local down
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml down
 ```
 
 ### Stop services and remove volumes
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local down -v
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml down -v
 ```
 
 ## Current Local Ports
@@ -154,6 +169,7 @@ From the current [`.env`](../.env):
   - `reviewer@example.com` / `local-access` (`REVIEWER`)
   - `editor@example.com` / `local-access` (`EDITOR`)
 - `Ops` is visible only to `ADMIN`
+- Protected routes redirect to sign-in until authenticated
 
 ## Service Connection Map
 - `dashboard` -> `api`
@@ -210,5 +226,5 @@ make clean
 - If the dashboard service is already running, recreate it after a clean:
 
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --force-recreate dashboard
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d --force-recreate dashboard
 ```

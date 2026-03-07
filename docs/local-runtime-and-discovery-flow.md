@@ -1,8 +1,12 @@
 # Local Runtime and Discovery Flow
 
 ## What Was Verified
-- Root runtime config now reads `.env`; `.env.example` is template-only.
-- Root lint now includes the structural code-shape check from `scripts/check-code-shape.mjs`.
+- Runtime reads [`.env`](../.env); [`.env.example`](../.env.example) is template-only.
+- Root `npm run dev:*`, `start:*`, and `build:*` scripts build `@aicp/shared-config` first.
+- Service-local env modules are:
+  - API: [`env.ts`](../apps/api/src/config/env.ts)
+  - Worker: [`env.ts`](../apps/worker/src/config/env.ts)
+  - Dashboard: [`env.ts`](../apps/dashboard/src/config/env.ts)
 - Docker local stack is currently running successfully with the default local ports:
   - Postgres on `5432`
   - Redis on `6380`
@@ -19,10 +23,11 @@
   - Worker `GET /health` -> `200`
   - Worker `GET /ready` -> `200`
   - Worker `GET /metrics` -> `200`
-  - Dashboard `GET /`, `/topics`, `/analytics`, `/ops` -> `200`
+  - Dashboard `GET /signin` -> `200`
+- Protected dashboard routes redirect to sign-in until authenticated.
 - Dashboard shared layout now remains usable on narrow/mobile widths:
   - auth screen uses a single centered card
-  - navbar and topic nav wrap/scroll instead of clipping
+  - navbar and topic nav wrap or scroll instead of clipping
   - action rows stack on smaller screens
 - Discovery flow now supports:
   - manual discovery intake -> auto scoring/filtering
@@ -48,7 +53,7 @@
   - Results can be auto-filtered out if they score below the threshold.
 - Non-Docker startup still requires a running PostgreSQL and Redis instance.
 - In restricted environments, host `curl localhost:...` can fail even while the containers are healthy.
-  - Use the container-level verification commands in `docs/docker-local-commands.md` if that happens.
+  - Use the container-level verification commands in [docker-local-commands.md](./docker-local-commands.md) if that happens.
 
 ## With Docker
 
@@ -60,7 +65,7 @@ export DASHBOARD_HOST_PORT=3003
 
 ### 2. Start the full stack
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local up -d
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d
 ```
 
 ### 3. Health checks
@@ -74,19 +79,19 @@ curl -I -fsS http://localhost:3003/signin | head -n 1
 
 ### 4. Container-level fallback checks
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T api \
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml exec -T api \
   node -e "fetch('http://localhost:3001/api/health').then(async r=>{console.log(r.status);console.log(await r.text())})"
 
-docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T worker \
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml exec -T worker \
   node -e "fetch('http://localhost:3002/ready').then(async r=>{console.log(r.status);console.log(await r.text())})"
 
-docker compose --env-file .env -f infra/docker/docker-compose.yml exec -T dashboard \
-  node -e \"fetch('http://localhost:3000/ops').then(async r=>{console.log(r.status);console.log((await r.text()).slice(0,200))})\"
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml exec -T dashboard \
+  node -e "fetch('http://localhost:3003/signin').then(async r=>{console.log(r.status);console.log((await r.text()).slice(0,200))})"
 ```
 
 ### 5. Stop the stack
 ```bash
-docker compose --env-file .env -f infra/docker/docker-compose.yml --profile local down
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml down
 ```
 
 ## Service Connection Map

@@ -1,0 +1,129 @@
+# Run Guide
+
+This file is the runtime runbook only.
+It documents how to start, verify, and stop the system locally.
+
+## Runtime Modes
+- Docker for full local stack
+- Host `npm` processes with Dockerized infra
+
+## Prerequisites
+- Node.js and npm installed
+- Docker and Docker Compose installed
+- root [`.env`](.env) configured
+
+## Local Ports
+- Postgres: `5432`
+- Redis: `6380`
+- MinIO API: `9000`
+- MinIO Console: `9001`
+- API: `3001`
+- Worker health/metrics: `3002`
+- Dashboard: `3003`
+
+## Option 1: Full Docker Runtime
+
+### Start
+```bash
+cd <repo-root>
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d
+```
+
+### Verify
+```bash
+curl -fsS http://localhost:3001/api/health
+curl -fsS http://localhost:3001/api/ready
+curl -fsS http://localhost:3002/health
+curl -fsS http://localhost:3002/ready
+curl -I http://localhost:3003/signin
+```
+
+### Logs
+```bash
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml logs -f api worker dashboard
+```
+
+### Stop
+```bash
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml down
+```
+
+## Option 2: Docker Infra + Host Services
+
+### Start infra only
+```bash
+cd <repo-root>
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d postgres redis minio
+```
+
+### Run migrations
+```bash
+docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up migrate
+```
+
+### Start host dev services
+Run each in a separate terminal.
+
+#### API
+```bash
+cd <repo-root>
+npm run dev:api
+```
+
+#### Worker
+```bash
+cd <repo-root>
+npm run dev:worker
+```
+
+#### Dashboard
+```bash
+cd <repo-root>
+npm run dev:dashboard
+```
+
+### Start host production-style services
+Build first, then run each in a separate terminal.
+
+```bash
+cd <repo-root>
+npm run build:api
+npm run build:worker
+npm run build:dashboard
+```
+
+#### API
+```bash
+npm run start:api
+```
+
+#### Worker
+```bash
+npm run start:worker
+```
+
+#### Dashboard
+```bash
+npm run start:dashboard
+```
+
+## Useful Commands
+```bash
+make dev-up
+make dev-down
+make dev-ps
+make dev-logs
+make prisma-migrate-deploy
+make clean
+```
+
+## Local Access
+- Dashboard sign-in: `http://localhost:3003/signin`
+- `ADMIN`: `operator@example.com` / `local-access`
+- `REVIEWER`: `reviewer@example.com` / `local-access`
+- `EDITOR`: `editor@example.com` / `local-access`
+
+## Notes
+- Root `npm start` is not defined; use `start:api`, `start:worker`, and `start:dashboard`.
+- Root scripts build `@aicp/shared-config` and inject the repo-level `.env` automatically.
+- For Docker-only command detail, see [docker-local-commands.md](./docs/docker-local-commands.md).
