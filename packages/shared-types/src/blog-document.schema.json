@@ -1,0 +1,269 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Blog Document Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "BlogStatus": {
+      "type": "string",
+      "enum": ["draft", "in_review", "approved", "published", "archived"]
+    },
+    "SectionStatus": {
+      "type": "string",
+      "enum": ["draft", "needs_revision", "approved"]
+    },
+    "TextFormat": {
+      "type": "string",
+      "enum": ["markdown", "plain"]
+    },
+    "ListStyle": {
+      "type": "string",
+      "enum": ["ordered", "unordered"]
+    },
+    "CalloutVariant": {
+      "type": "string",
+      "enum": ["info", "warning", "success", "error"]
+    },
+    "Author": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "avatarUrl": { "type": ["string", "null"], "format": "uri" }
+      },
+      "required": ["id", "name", "avatarUrl"]
+    },
+    "CoverImage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "alt": { "type": "string" },
+        "caption": { "type": ["string", "null"] }
+      },
+      "required": ["url", "alt"]
+    },
+    "Seo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "metaTitle": { "type": "string" },
+        "metaDescription": { "type": "string" },
+        "canonicalUrl": { "type": "string", "format": "uri" },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["metaTitle", "metaDescription"]
+    },
+    "DevtoTransform": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "canonicalUrl": { "type": "string", "format": "uri" }
+      },
+      "required": ["tags"]
+    },
+    "LinkedInTransform": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "excerpt": { "type": "string" }
+      },
+      "required": ["excerpt"]
+    },
+    "PlatformTransforms": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "devto": { "$ref": "#/definitions/DevtoTransform" },
+        "linkedin": { "$ref": "#/definitions/LinkedInTransform" }
+      }
+    },
+    "TextBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "text" },
+        "format": { "$ref": "#/definitions/TextFormat" },
+        "content": { "type": "string" }
+      },
+      "required": ["id", "type", "format", "content"]
+    },
+    "CodeBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "code" },
+        "language": { "type": "string" },
+        "filename": { "type": "string" },
+        "content": { "type": "string" }
+      },
+      "required": ["id", "type", "language", "content"]
+    },
+    "ImageBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "image" },
+        "url": { "type": "string", "format": "uri" },
+        "alt": { "type": "string" },
+        "caption": { "type": ["string", "null"] }
+      },
+      "required": ["id", "type", "url", "alt"]
+    },
+    "ListBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "list" },
+        "style": { "$ref": "#/definitions/ListStyle" },
+        "items": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      },
+      "required": ["id", "type", "style", "items"]
+    },
+    "QuoteBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "quote" },
+        "content": { "type": "string" },
+        "attribution": { "type": ["string", "null"] }
+      },
+      "required": ["id", "type", "content", "attribution"]
+    },
+    "TableBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "table" },
+        "columns": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "rows": {
+          "type": "array",
+          "items": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+        },
+        "caption": { "type": ["string", "null"] }
+      },
+      "required": ["id", "type", "columns", "rows"]
+    },
+    "CalloutBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "callout" },
+        "variant": { "$ref": "#/definitions/CalloutVariant" },
+        "title": { "type": ["string", "null"] },
+        "content": { "type": "string" }
+      },
+      "required": ["id", "type", "variant", "content"]
+    },
+    "DividerBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "divider" }
+      },
+      "required": ["id", "type"]
+    },
+    "EmbedBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "const": "embed" },
+        "url": { "type": "string", "format": "uri" },
+        "provider": { "type": ["string", "null"] },
+        "title": { "type": ["string", "null"] }
+      },
+      "required": ["id", "type", "url"]
+    },
+    "ContentBlock": {
+      "oneOf": [
+        { "$ref": "#/definitions/TextBlock" },
+        { "$ref": "#/definitions/CodeBlock" },
+        { "$ref": "#/definitions/ImageBlock" },
+        { "$ref": "#/definitions/ListBlock" },
+        { "$ref": "#/definitions/QuoteBlock" },
+        { "$ref": "#/definitions/TableBlock" },
+        { "$ref": "#/definitions/CalloutBlock" },
+        { "$ref": "#/definitions/DividerBlock" },
+        { "$ref": "#/definitions/EmbedBlock" }
+      ]
+    },
+    "Section": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "order": { "type": "integer", "minimum": 1 },
+        "status": { "$ref": "#/definitions/SectionStatus" },
+        "blocks": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ContentBlock" },
+          "minItems": 1
+        }
+      },
+      "required": ["id", "title", "order", "status", "blocks"]
+    }
+  },
+  "properties": {
+    "id": { "type": "string" },
+    "type": { "const": "blog" },
+    "title": { "type": "string" },
+    "subtitle": { "type": "string" },
+    "summary": { "type": "string" },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "status": { "$ref": "#/definitions/BlogStatus" },
+    "version": { "type": "integer", "minimum": 1 },
+    "author": { "$ref": "#/definitions/Author" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "category": { "type": "string" },
+    "readingTimeMinutes": { "type": "integer", "minimum": 1 },
+    "coverImage": { "$ref": "#/definitions/CoverImage" },
+    "seo": { "$ref": "#/definitions/Seo" },
+    "sections": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Section" },
+      "minItems": 1
+    },
+    "platformTransforms": { "$ref": "#/definitions/PlatformTransforms" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": [
+    "id",
+    "type",
+    "title",
+    "summary",
+    "slug",
+    "status",
+    "version",
+    "sections",
+    "createdAt",
+    "updatedAt"
+  ]
+}
