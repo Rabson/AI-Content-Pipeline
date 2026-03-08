@@ -12,6 +12,7 @@ Next.js internal dashboard for admins, editors, reviewers, and assigned users.
 ## Runtime and Config
 - Service-local env module: [env.ts](./src/config/env.ts)
 - Root `npm run dev:dashboard`, `start:dashboard`, and `build:dashboard` build `@aicp/shared-config` first, then inject the repo-level [`.env`](../../.env)
+- Tests run through the shared Vitest 4 config at `../../vitest.config.mts`.
 - Docker image spec: [Dockerfile](./Dockerfile)
 - Docker build ignore: [Dockerfile.dockerignore](./Dockerfile.dockerignore)
 - Vercel config: [vercel.json](./vercel.json)

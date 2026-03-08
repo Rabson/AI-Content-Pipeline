@@ -14,6 +14,7 @@ NestJS HTTP API for the AI content pipeline.
 - Service-local env module: [env.ts](./src/config/env.ts)
 - Service-local feature flags: [feature-flags.ts](./src/config/feature-flags.ts)
 - Root `npm run dev:api`, `start:api`, and `build:api` build `@aicp/shared-config` first, then inject the repo-level [`.env`](../../.env)
+- Tests run through the shared Vitest 4 config at `../../vitest.config.mts`.
 - Docker image spec: [Dockerfile](./Dockerfile)
 - Docker build ignore: [Dockerfile.dockerignore](./Dockerfile.dockerignore)
 - Render manifests:

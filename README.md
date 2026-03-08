@@ -76,6 +76,7 @@ Dashboard sign-in:
 ## Repo Conventions
 - Root `.env` is the local runtime source.
 - Root `npm run dev:*`, `start:*`, and `build:*` scripts build `@aicp/shared-config` first.
+- Root and workspace tests run on Vitest 4 with shared config in `vitest.config.mts`.
 - `apps/api/scripts/seed-demo.mjs` seeds the local user accounts and demo publish-ready topic.
 - Service-local env access is centralized in:
   - `apps/api/src/config/env.ts`
@@ -84,6 +85,10 @@ Dashboard sign-in:
 - API and worker share `USER_TOKEN_ENCRYPTION_KEY` so publisher credentials can be encrypted in API and decrypted in worker jobs.
 - Docker image specs live beside each service.
 - Compose files live under `infra/docker`.
+
+## Validation Status
+- `npm audit` is currently clean: `0` vulnerabilities.
+- `npm run lint`, `npm run typecheck`, and `npm run test` pass on the current branch.
 
 ## Where To Find Details
 - Detailed commands: [RUN.md](./RUN.md)
