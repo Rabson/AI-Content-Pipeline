@@ -8,3 +8,7 @@ export function getCurrentUser() {
 export function getMyPublisherCredentials() {
   return safeFetch<UserPublisherCredentialView[]>('/v1/users/me/publisher-credentials', undefined, []);
 }
+
+export function getUsers() {
+  return safeFetch<UserSummary[]>('/v1/users', undefined, []);
+}

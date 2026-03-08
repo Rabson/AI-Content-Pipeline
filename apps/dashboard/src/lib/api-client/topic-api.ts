@@ -2,10 +2,12 @@ import type {
   DraftVersionView,
   LinkedInDraftView,
   OutlineSectionView,
+  PublicationOptionsView,
   PublicationView,
   ResearchArtifactView,
   ReviewCommentView,
   SeoMetadataView,
+  StorageObjectView,
   TopicDetail,
   TopicSummary,
 } from '@aicp/shared-types';
@@ -62,4 +64,16 @@ export function getLinkedInDraft(topicId: string): Promise<LinkedInDraftView | n
 
 export function getPublications(topicId: string) {
   return safeFetch<PublicationView[]>(`/v1/topics/${topicId}/publications`, undefined, []);
+}
+
+export function getPublicationOptions(topicId: string) {
+  return safeFetch<PublicationOptionsView | null>(
+    `/v1/topics/${topicId}/publications/options`,
+    undefined,
+    null,
+  );
+}
+
+export function getTopicAssets(topicId: string) {
+  return safeFetch<StorageObjectView[]>(`/v1/topics/${topicId}/assets`, undefined, []);
 }

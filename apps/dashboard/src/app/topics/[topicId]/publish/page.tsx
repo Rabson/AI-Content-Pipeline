@@ -1,11 +1,24 @@
-import type { LinkedInDraftView, PublicationView, SeoMetadataView, TopicDetail } from '@aicp/shared-types';
-import { getLinkedInDraft, getPublications, getSeo, getTopic } from '../../../../lib/api-client';
+import type { LinkedInDraftView, PublicationOptionsView, PublicationView, SeoMetadataView, StorageObjectView, TopicDetail, UserSummary } from '@aicp/shared-types';
+import {
+  getLinkedInDraft,
+  getPublicationOptions,
+  getPublications,
+  getSeo,
+  getTopic,
+  getTopicAssets,
+} from '../../../../lib/api-client';
+import { getUsers } from '../../../../lib/api-client/user-api';
 import { getDashboardUser } from '../../../../lib/auth';
 import { isPhaseEnabled } from '../../../../lib/feature-flags';
-import { formatDate } from '../../../../lib/formatting';
 import { TopicPageHeader } from '../../../../components/shared/topic-page-header';
 import { PublishActions } from './publish-actions';
-import { updateSocialStatusAction } from '../actions';
+import {
+  BannerPanel,
+  DistributionPanel,
+  OwnerAssignmentPanel,
+  PublicationHistoryPanel,
+  PublishReadinessPanel,
+} from './publish-panels';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,109 +27,45 @@ type PublishPageData = {
   seo: SeoMetadataView | null;
   social: LinkedInDraftView | null;
   publications: PublicationView[];
+  publicationOptions: PublicationOptionsView | null;
+  assets: StorageObjectView[];
+  users: UserSummary[];
 };
 
-async function loadPublishPageData(topicId: string, phase2Enabled: boolean): Promise<PublishPageData> {
-  const [topic, seo, social, publications] = phase2Enabled
-    ? await Promise.all([getTopic(topicId), getSeo(topicId), getLinkedInDraft(topicId), getPublications(topicId)])
-    : await Promise.all([getTopic(topicId), Promise.resolve(null), Promise.resolve(null), Promise.resolve([])]);
+async function loadPublishPageData(topicId: string, isAdmin: boolean): Promise<PublishPageData> {
+  const [topic, seo, social, publications, publicationOptions, assets, users] = await Promise.all([
+    getTopic(topicId),
+    getSeo(topicId),
+    getLinkedInDraft(topicId),
+    getPublications(topicId),
+    getPublicationOptions(topicId),
+    getTopicAssets(topicId),
+    isAdmin ? getUsers() : Promise.resolve([]),
+  ]);
 
-  return { topic, seo, social, publications };
+  return { topic, seo, social, publications, publicationOptions, assets, users };
 }
 
-function DisabledPhaseState() {
-  return (
-    <section className="panel">
-      <p className="empty-state">Phase 2 distribution features are disabled in this environment.</p>
-    </section>
-  );
-}
-
-function SeoChecklistPanel({ seo }: { seo: SeoMetadataView | null }) {
-  return (
-    <div className="stack">
-      <h3>SEO checklist</h3>
-      {seo ? (
-        <div className="stack">
-          <p className="topic-meta">Title: {seo.metaTitle}</p>
-          <p className="topic-meta">Description: {seo.metaDescription}</p>
-          <p className="topic-meta">Slug: {seo.slug}</p>
-          <p className="topic-meta">Tags: {seo.tags.join(', ')}</p>
-        </div>
-      ) : (
-        <p className="empty-state">SEO artifact missing.</p>
-      )}
-    </div>
-  );
-}
-
-function LinkedInDraftPanel({ topicId, social }: { topicId: string; social: LinkedInDraftView | null }) {
-  return (
-    <div className="stack">
-      <h4>LinkedIn draft</h4>
-      <p>{social?.post ?? 'No social draft available.'}</p>
-      {social ? (
-        <div className="detail-actions">
-          <form action={updateSocialStatusAction.bind(null, topicId, social.id)}>
-            <input type="hidden" name="status" value="APPROVED" />
-            <button className="button button-secondary" type="submit">
-              Approve LinkedIn draft
-            </button>
-          </form>
-          <form action={updateSocialStatusAction.bind(null, topicId, social.id)} className="create-form">
-            <input type="hidden" name="status" value="POSTED" />
-            <input name="externalUrl" placeholder="Posted URL" defaultValue={social.externalUrl ?? ''} />
-            <button className="button" type="submit">
-              Mark as posted
-            </button>
-          </form>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function DistributionPanel({ topicId, seo, social }: { topicId: string; seo: SeoMetadataView | null; social: LinkedInDraftView | null }) {
-  return (
-    <div className="panel stack">
-      <SeoChecklistPanel seo={seo} />
-      <LinkedInDraftPanel topicId={topicId} social={social} />
-    </div>
-  );
-}
-
-function PublicationHistoryPanel({ publications }: { publications: PublicationView[] }) {
-  return (
-    <div className="panel">
-      <h3>Publish history</h3>
-      <div className="list">
-        {publications.map((publication) => (
-          <div className="list-item" key={publication.id}>
-            <div>
-              <strong>{publication.title} · {publication.channel}</strong>
-              <p>{publication.externalUrl ?? publication.error ?? 'Pending external URL.'}</p>
-              <p className="topic-meta">Created {formatDate(publication.createdAt)}</p>
-              <p className="topic-meta">Publisher: {publication.publisherUser?.email ?? 'system default'}</p>
-              <p className="topic-meta">Verification: {publication.verificationStatus ?? 'pending'}</p>
-            </div>
-            <span className="pill">{publication.status}</span>
-          </div>
-        ))}
-        {!publications.length ? <p className="empty-state">No publication attempts yet.</p> : null}
-      </div>
-    </div>
-  );
-}
-
-export default async function TopicPublishPage({
-  params,
-}: {
-  params: Promise<{ topicId: string }>;
-}) {
+export default async function TopicPublishPage({ params }: { params: Promise<{ topicId: string }> }) {
   const { topicId } = await params;
   const phase2Enabled = isPhaseEnabled(2);
   const user = await getDashboardUser();
-  const { topic, seo, social, publications } = await loadPublishPageData(topicId, phase2Enabled);
+
+  if (!phase2Enabled) {
+    return (
+      <main className="page stack">
+        <TopicPageHeader eyebrow="Publish" title="Topic" topicId={topicId} />
+        <section className="panel">
+          <p className="empty-state">Phase 2 distribution features are disabled in this environment.</p>
+        </section>
+      </main>
+    );
+  }
+
+  const { topic, seo, social, publications, publicationOptions, assets, users } = await loadPublishPageData(
+    topicId,
+    user.role === 'ADMIN',
+  );
 
   return (
     <main className="page stack">
@@ -124,16 +73,19 @@ export default async function TopicPublishPage({
         eyebrow="Publish"
         title={topic?.title ?? 'Topic'}
         topicId={topicId}
-        actions={phase2Enabled ? <PublishActions topicId={topicId} role={user.role} /> : undefined}
+        actions={<PublishActions topicId={topicId} role={user.role} />}
       />
-      {!phase2Enabled ? (
-        <DisabledPhaseState />
-      ) : (
-        <section className="grid-two">
-          <DistributionPanel topicId={topicId} seo={seo} social={social} />
-          <PublicationHistoryPanel publications={publications} />
-        </section>
-      )}
+      <section className="grid-two">
+        <DistributionPanel topicId={topicId} seo={seo} social={social} />
+        <PublishReadinessPanel topicId={topicId} options={publicationOptions} />
+      </section>
+      <section className="grid-two">
+        <BannerPanel topicId={topicId} topic={topic} assets={assets} />
+        <PublicationHistoryPanel topicId={topicId} publications={publications} />
+      </section>
+      {publicationOptions?.canReassignOwner ? (
+        <OwnerAssignmentPanel topicId={topicId} owner={publicationOptions.owner} users={users} />
+      ) : null}
     </main>
   );
 }

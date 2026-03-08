@@ -102,6 +102,93 @@ export async function requestPublicationAction(topicId: string, channel: string)
   refreshTopicPaths(topicId);
 }
 
+export async function retryPublicationAction(topicId: string, publicationId: string) {
+  await backendMutation(`/v1/topics/${topicId}/publications/${publicationId}/retry`, {
+    method: 'POST',
+  });
+  refreshTopicPaths(topicId);
+}
+
+export async function assignTopicOwnerAction(topicId: string, formData: FormData) {
+  await backendMutation(`/v1/topics/${topicId}/owner`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      ownerUserId: String(formData.get('ownerUserId') ?? ''),
+    }),
+  });
+  refreshTopicPaths(topicId);
+}
+
+export async function setTopicBannerImageAction(topicId: string, formData: FormData) {
+  await backendMutation(`/v1/topics/${topicId}/banner-image`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      storageObjectId: String(formData.get('storageObjectId') ?? ''),
+      alt: String(formData.get('alt') ?? ''),
+      caption: String(formData.get('caption') ?? ''),
+    }),
+  });
+  refreshTopicPaths(topicId);
+}
+
+export async function clearTopicBannerImageAction(topicId: string) {
+  await backendMutation(`/v1/topics/${topicId}/banner-image`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      storageObjectId: '',
+      alt: '',
+      caption: '',
+    }),
+  });
+  refreshTopicPaths(topicId);
+}
+
+export async function uploadTopicBannerImageAction(topicId: string, formData: FormData) {
+  const banner = formData.get('banner');
+  if (!(banner instanceof File) || banner.size === 0) {
+    throw new Error('Select a banner image file');
+  }
+
+  const alt = String(formData.get('alt') ?? '');
+  const caption = String(formData.get('caption') ?? '');
+  const presign = await backendMutation<{
+    storageObjectId: string;
+    uploadUrl: string;
+  }>(`/v1/topics/${topicId}/assets/presign-upload`, {
+    method: 'POST',
+    body: JSON.stringify({
+      filename: banner.name,
+      mimeType: banner.type || 'application/octet-stream',
+      sizeBytes: banner.size,
+      purpose: 'IMAGE',
+    }),
+  });
+
+  const uploadResponse = await fetch(presign.uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': banner.type || 'application/octet-stream',
+    },
+    body: Buffer.from(await banner.arrayBuffer()),
+    cache: 'no-store',
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Banner upload failed: ${uploadResponse.status}`);
+  }
+
+  await backendMutation(`/v1/topics/${topicId}/banner-image`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      storageObjectId: presign.storageObjectId,
+      alt,
+      caption,
+    }),
+  });
+
+  refreshTopicPaths(topicId);
+}
+
 export async function updateSocialStatusAction(topicId: string, socialPostId: string, formData: FormData) {
   await backendMutation(`/v1/social-posts/${socialPostId}/status`, {
     method: 'PATCH',

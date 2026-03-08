@@ -18,9 +18,11 @@ export {
   getDraftSection,
   getLinkedInDraft,
   getOutline,
+  getPublicationOptions,
   getPublications,
   getResearch,
   getSeo,
+  getTopicAssets,
   getTopic,
   getTopics,
 } from './api-client/topic-api';
@@ -39,3 +41,9 @@ export {
   getOpsRuntimeStatus,
   getQueueMetrics,
 } from './api-client/ops-api';
+
+export {
+  getCurrentUser,
+  getMyPublisherCredentials,
+  getUsers,
+} from './api-client/user-api';

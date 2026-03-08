@@ -10,7 +10,12 @@ function refresh() {
 export async function upsertPublisherCredentialAction(channel: string, formData: FormData) {
   await backendMutation(`/v1/users/me/publisher-credentials/${channel}`, {
     method: 'PUT',
-    body: JSON.stringify({ token: String(formData.get('token') ?? '') }),
+    body: JSON.stringify({
+      token: String(formData.get('token') ?? ''),
+      mediumAuthorId: String(formData.get('mediumAuthorId') ?? ''),
+      mediumPublicationId: String(formData.get('mediumPublicationId') ?? ''),
+      linkedinAuthorUrn: String(formData.get('linkedinAuthorUrn') ?? ''),
+    }),
   });
   refresh();
 }
