@@ -6,7 +6,7 @@ COPY apps/worker/package.json apps/worker/package.json
 COPY apps/dashboard/package.json apps/dashboard/package.json
 COPY packages/shared-config/package.json packages/shared-config/package.json
 COPY packages/shared-types/package.json packages/shared-types/package.json
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 FROM deps AS dev
 WORKDIR /workspace

@@ -8,7 +8,7 @@ PRISMA_SCHEMA := apps/api/src/prisma/schema.prisma
 ENV_FILE ?= .env
 
 .PHONY: help install prisma-generate prisma-migrate-dev prisma-migrate-deploy prisma-studio \
-	dev-api dev-worker dev-dashboard dev-up dev-down dev-logs dev-ps \
+	dev-api dev-worker dev-dashboard dev-up dev-up-base dev-down dev-logs dev-ps \
 	typecheck lint test check build-api build-worker build-dashboard build-all \
 	health-api health-worker clean doctor seed-demo dev-up-staginglike dev-down-staginglike
 
@@ -114,9 +114,20 @@ dev-dashboard: ## Run dashboard in dev mode
 
 dev-up: ## Start local infra/services with Docker Compose
 	@if docker info >/dev/null 2>&1; then \
-	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) -f $(COMPOSE_LOCAL_FILE) up -d; \
+	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) -f $(COMPOSE_LOCAL_FILE) up -d || \
+	  (echo ""; \
+	   echo "Local dev Docker startup failed. Common cause: Docker disk ENOSPC during app bootstrap."; \
+	   echo "Try: make dev-up-base"; \
+	   exit 1); \
 	else \
 	  echo "Docker daemon not available; skipping dev-up."; \
+	fi
+
+dev-up-base: ## Start built-image Docker stack without local dev bootstrap
+	@if docker info >/dev/null 2>&1; then \
+	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) up -d; \
+	else \
+	  echo "Docker daemon not available; skipping dev-up-base."; \
 	fi
 
 dev-down: ## Stop local infra/services
@@ -216,5 +227,5 @@ seed-demo: ## Seed local demo topics into the configured database
 
 clean: ## Remove build outputs
 	find apps -type d -name dist -prune -exec rm -rf {} +
-	find apps/dashboard -maxdepth 1 -type d \( -name .next -o -name .next-docker \) -prune -exec rm -rf {} +
+	find apps/dashboard -maxdepth 1 -type d -name .next -prune -exec rm -rf {} +
 	rm -rf apps/dashboard/tmp

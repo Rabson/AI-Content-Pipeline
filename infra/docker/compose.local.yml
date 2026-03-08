@@ -54,10 +54,9 @@ services:
     volumes:
       - ../../:/workspace
       - dashboard_node_modules:/workspace/node_modules
-      - dashboard_next_data:/workspace/apps/dashboard/.next-docker
+      - dashboard_next_data:/workspace/apps/dashboard/.next
     environment:
       NEXT_PUBLIC_APP_ENV: local
-      NEXT_DIST_DIR: .next-docker
 
 volumes:
   api_node_modules:
