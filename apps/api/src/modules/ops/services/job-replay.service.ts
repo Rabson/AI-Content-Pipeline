@@ -15,7 +15,12 @@ export class JobReplayService {
   ) {}
 
   async replayExecution(executionId: string, actorId: string) {
-    this.securityEventService.replayRequested({ executionId, actorId });
+    await this.securityEventService.replayRequested({
+      actorUserId: actorId,
+      resourceType: 'job-execution',
+      resourceId: executionId,
+      executionId,
+    });
     const execution = await this.jobExecutionRepository.findExecutionById(executionId);
     if (!execution) {
       throw new NotFoundException('Job execution not found');

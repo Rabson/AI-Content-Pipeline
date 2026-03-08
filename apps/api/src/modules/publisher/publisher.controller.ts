@@ -25,14 +25,14 @@ export class PublisherController {
   }
 
   @Post()
-  publish(@Param('topicId') topicId: string, @Body() dto: RequestPublicationDto, @Req() req: AuthenticatedRequest) {
-    this.rateLimitService.enforce(`publish:${req.ip}:${req.user?.id ?? 'anonymous'}:${topicId}`, 3, 60_000);
+  async publish(@Param('topicId') topicId: string, @Body() dto: RequestPublicationDto, @Req() req: AuthenticatedRequest) {
+    await this.rateLimitService.enforce(`publish:${req.ip}:${req.user?.id ?? 'anonymous'}:${topicId}`, 3, 60_000);
     return this.publisherService.enqueuePublication(topicId, dto, req.user!);
   }
 
   @Post(':publicationId/retry')
-  retry(@Param('topicId') topicId: string, @Param('publicationId') publicationId: string, @Req() req: AuthenticatedRequest) {
-    this.rateLimitService.enforce(`publish-retry:${req.ip}:${req.user?.id ?? 'anonymous'}:${publicationId}`, 3, 60_000);
+  async retry(@Param('topicId') topicId: string, @Param('publicationId') publicationId: string, @Req() req: AuthenticatedRequest) {
+    await this.rateLimitService.enforce(`publish-retry:${req.ip}:${req.user?.id ?? 'anonymous'}:${publicationId}`, 3, 60_000);
     return this.publisherService.retryPublication(topicId, publicationId, req.user!);
   }
 }

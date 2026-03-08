@@ -1,4 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { SecurityEventType } from '@prisma/client';
+import { SecurityEventService } from '../../common/security/security-event.service';
+import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
+import { PublisherService } from '../publisher/publisher.service';
 import { SystemService } from '../system/system.service';
 import { WorkerRuntimeClient } from './clients/worker-runtime.client';
 import { JobExecutionRepository } from './repositories/job-execution.repository';
@@ -9,10 +13,12 @@ import { QueueMetricsService } from './services/queue-metrics.service';
 export class OpsService {
   constructor(
     private readonly systemService: SystemService,
+    private readonly securityEventService: SecurityEventService,
     private readonly workerRuntimeClient: WorkerRuntimeClient,
     private readonly jobExecutionRepository: JobExecutionRepository,
     private readonly jobReplayService: JobReplayService,
     private readonly queueMetricsService: QueueMetricsService,
+    private readonly publisherService: PublisherService,
   ) {}
 
   async runtimeStatus() {
@@ -42,5 +48,17 @@ export class OpsService {
 
   replayExecution(executionId: string, actorId: string) {
     return this.jobReplayService.replayExecution(executionId, actorId);
+  }
+
+  listSecurityEvents(limit = 50, eventType?: SecurityEventType) {
+    return this.securityEventService.listRecent(limit, eventType);
+  }
+
+  listFailedPublications(limit = 20) {
+    return this.publisherService.listFailedPublications(limit);
+  }
+
+  retryFailedPublication(publicationId: string, actor: AuthenticatedUser) {
+    return this.publisherService.retryPublicationById(publicationId, actor);
   }
 }

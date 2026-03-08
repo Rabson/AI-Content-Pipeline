@@ -1,6 +1,7 @@
 import { getDashboardUser } from '../../lib/auth';
-import { getFailedJobs, getOpsRuntimeStatus, getQueueMetrics } from '../../lib/api-client';
+import { getFailedJobs, getFailedPublications, getOpsRuntimeStatus, getQueueMetrics, getSecurityEvents } from '../../lib/api-client';
 import { FailedJobsPanel, QueueMetricsPanel } from './components/queue-panels';
+import { FailedPublicationsPanel, SecurityEventsPanel } from './components/publication-security-panels';
 import { RuntimeCard, WorkerCard } from './components/runtime-panels';
 
 export const dynamic = 'force-dynamic';
@@ -18,10 +19,12 @@ export default async function OpsPage() {
     );
   }
 
-  const [runtime, queueMetrics, failedJobs] = await Promise.all([
+  const [runtime, queueMetrics, failedJobs, failedPublications, securityEvents] = await Promise.all([
     getOpsRuntimeStatus(),
     getQueueMetrics(),
     getFailedJobs(),
+    getFailedPublications(),
+    getSecurityEvents(),
   ]);
 
   return (
@@ -45,6 +48,11 @@ export default async function OpsPage() {
           executionsLast24Hours={queueMetrics?.executionsLast24Hours ?? {}}
         />
         <FailedJobsPanel jobs={failedJobs} />
+      </section>
+
+      <section className="grid-two">
+        <FailedPublicationsPanel publications={failedPublications} />
+        <SecurityEventsPanel events={securityEvents} />
       </section>
     </main>
   );

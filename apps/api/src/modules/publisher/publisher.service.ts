@@ -54,10 +54,27 @@ export class PublisherService {
   }
 
   async enqueuePublication(topicId: string, dto: RequestPublicationDto, actor: AuthenticatedUser) {
-    this.securityEventService.publishRequested({ topicId, actorId: actor.id, channel: dto.channel });
     if (!isPhaseEnabled(2)) throw new ServiceUnavailableException('Phase 2 features are disabled');
     const topic = await this.getTopicOrThrow(topicId);
     await this.ownershipService.assertPublishAccess(actor, topic.ownerUserId ?? null);
+    await this.securityEventService.publishRequested({
+      actorUserId: actor.id,
+      subjectUserId: topic.ownerUserId ?? actor.id,
+      resourceType: 'topic',
+      resourceId: topicId,
+      topicId,
+      channel: dto.channel,
+    });
+    if (actor.role === AppRole.ADMIN && topic.ownerUserId && actor.id !== topic.ownerUserId) {
+      await this.securityEventService.adminPublishOnBehalf({
+        actorUserId: actor.id,
+        subjectUserId: topic.ownerUserId,
+        resourceType: 'topic',
+        resourceId: topicId,
+        topicId,
+        channel: dto.channel,
+      });
+    }
     const draft = await this.getPublishableDraft(topicId, dto.draftVersionNumber);
     const channelOption = await this.buildChannelOption(dto.channel, topic.ownerUserId ?? actor.id);
     this.assertChannelReady(dto.channel, channelOption);
@@ -109,6 +126,15 @@ export class PublisherService {
     });
 
     return { requeued: true, publicationId, topicId, jobId };
+  }
+
+  async retryPublicationById(publicationId: string, actor: AuthenticatedUser) {
+    const publication = await this.repository.getPublicationOrThrow(publicationId);
+    return this.retryPublication(publication.topicId, publicationId, actor);
+  }
+
+  listFailedPublications(limit = 20) {
+    return this.repository.listFailedPublications(limit);
   }
 
   private async getTopicOrThrow(topicId: string) {

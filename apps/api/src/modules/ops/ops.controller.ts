@@ -1,4 +1,5 @@
 import { Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { SecurityEventType } from '@prisma/client';
 import { AppRole } from '../../common/auth/roles.enum';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
@@ -28,14 +29,33 @@ export class OpsController {
     return this.opsService.listFailedExecutions(limit ? Number(limit) : 50);
   }
 
+  @Get('security-events')
+  securityEvents(@Query('limit') limit?: string, @Query('eventType') eventType?: SecurityEventType) {
+    return this.opsService.listSecurityEvents(limit ? Number(limit) : 50, eventType);
+  }
+
+  @Get('publication-failures')
+  publicationFailures(@Query('limit') limit?: string) {
+    return this.opsService.listFailedPublications(limit ? Number(limit) : 20);
+  }
+
   @Post('failed-jobs/:executionId/replay')
-  replayFailedJob(
+  async replayFailedJob(
     @Param('executionId') executionId: string,
     @Req() req: AuthenticatedRequest,
   ) {
-    this.rateLimitService.enforce(this.limitKey(req, executionId), 3, 60_000);
+    await this.rateLimitService.enforce(this.limitKey(req, executionId), 3, 60_000);
     const actorId = req.user?.id ?? req.header('x-actor-id')?.trim() ?? 'system';
     return this.opsService.replayExecution(executionId, actorId);
+  }
+
+  @Post('publication-failures/:publicationId/retry')
+  async retryPublication(
+    @Param('publicationId') publicationId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    await this.rateLimitService.enforce(this.limitKey(req, publicationId), 3, 60_000);
+    return this.opsService.retryFailedPublication(publicationId, req.user!);
   }
 
   private limitKey(req: AuthenticatedRequest, executionId: string) {

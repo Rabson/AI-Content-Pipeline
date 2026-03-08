@@ -51,6 +51,21 @@ export class PublisherRepository {
     });
   }
 
+  listFailedPublications(limit: number) {
+    return this.prisma.publication.findMany({
+      where: { status: PublicationStatus.FAILED },
+      orderBy: { updatedAt: 'desc' },
+      take: limit,
+      include: {
+        attempts: { orderBy: { createdAt: 'desc' } },
+        draftVersion: true,
+        topic: { include: { owner: { select: { id: true, email: true, name: true, role: true } } } },
+        publisherUser: { select: { id: true, email: true, name: true, role: true } },
+        requestedByUser: { select: { id: true, email: true, name: true, role: true } },
+      },
+    });
+  }
+
   findPendingPublication(topicId: string, channel: PublicationChannel, publisherUserId?: string) {
     return this.prisma.publication.findFirst({
       where: {

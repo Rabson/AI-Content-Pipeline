@@ -32,5 +32,6 @@ import { PublisherRegistryService } from './providers/publisher-registry.service
     PublisherRegistryService,
     PublicationVerifierService,
   ],
+  exports: [PublisherService, PublisherRepository],
 })
 export class PublisherModule {}

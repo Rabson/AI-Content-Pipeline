@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PublisherModule } from '../publisher/publisher.module';
 import { SystemModule } from '../system/system.module';
 import { OpsController } from './ops.controller';
 import { WorkerRuntimeClient } from './clients/worker-runtime.client';
@@ -13,6 +14,7 @@ import { QueueRegistryService } from './services/queue-registry.service';
 @Module({
   imports: [
     SystemModule,
+    PublisherModule,
     BullModule.registerQueue(
       { name: 'content.pipeline' },
       { name: 'publishing' },

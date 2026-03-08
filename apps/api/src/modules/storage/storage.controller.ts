@@ -20,12 +20,12 @@ export class StorageController {
   }
 
   @Post('presign-upload')
-  createUploadUrl(
+  async createUploadUrl(
     @Param('topicId') topicId: string,
     @Body() dto: CreateUploadUrlDto,
     @Req() req: AuthenticatedRequest,
   ) {
-    this.rateLimitService.enforce(this.limitKey(req, topicId), 10, 60_000);
+    await this.rateLimitService.enforce(this.limitKey(req, topicId), 10, 60_000);
     return this.storageService.createUploadUrl(topicId, dto, req.user!);
   }
 

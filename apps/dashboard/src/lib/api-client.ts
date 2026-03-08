@@ -1,9 +1,11 @@
 export type {
   FailedJobView,
+  FailedPublicationView,
   OpsHealthPayload,
   OpsReadinessPayload,
   OpsRuntimeStatusView,
   QueueMetricsView,
+  SecurityEventView,
   WorkerRuntimeView,
 } from './api-client/ops-api';
 
@@ -38,8 +40,10 @@ export {
 
 export {
   getFailedJobs,
+  getFailedPublications,
   getOpsRuntimeStatus,
   getQueueMetrics,
+  getSecurityEvents,
 } from './api-client/ops-api';
 
 export {
