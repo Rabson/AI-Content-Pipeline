@@ -76,7 +76,7 @@ Container build ownership:
 
 ## Shared runtime shape
 - Root [`.env`](../.env) is the local runtime source
-- Root scripts build `@aicp/shared-config` first, then inject `.env`
+- Root scripts build `@aicp/shared-config` and `@aicp/shared-types` first, then inject `.env`
 - Service-local env modules:
   - `apps/api/src/config/env.ts`
   - `apps/worker/src/config/env.ts`

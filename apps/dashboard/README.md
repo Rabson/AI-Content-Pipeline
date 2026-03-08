@@ -8,11 +8,12 @@ Next.js internal dashboard for admins, editors, reviewers, and assigned users.
 - account page for per-user publisher credentials
 - backend error presentation and route-level error boundaries
 - mobile-friendly operator UI
+- persisted light/dark theme with a shared chrome toggle
 - publish readiness, banner image management, owner assignment, and publication retry views
 
 ## Runtime and Config
 - Service-local env module: [env.ts](./src/config/env.ts)
-- Root `npm run dev:dashboard`, `start:dashboard`, and `build:dashboard` build `@aicp/shared-config` first, then inject the repo-level [`.env`](../../.env)
+- Root `npm run dev:dashboard`, `start:dashboard`, and `build:dashboard` build `@aicp/shared-config` and `@aicp/shared-types` first, then inject the repo-level [`.env`](../../.env)
 - Tests run through the shared Vitest 4 config at `../../vitest.config.mts`.
 - Docker image spec: [Dockerfile](./Dockerfile)
 - Docker build ignore: [Dockerfile.dockerignore](./Dockerfile.dockerignore)
@@ -45,3 +46,6 @@ npm run build:dashboard
 - Publishing workflow:
   - `/account` stores per-user `DEVTO`, `MEDIUM`, and `LINKEDIN` credentials
   - `/topics/[topicId]/publish` shows channel readiness, owner assignment, banner image controls, and publication history
+- Theme:
+  - the shared header toggle switches light/dark mode
+  - the preference is persisted in `localStorage`

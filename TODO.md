@@ -37,43 +37,7 @@ Audit basis:
 
 ## Publishing and User Workflow
 
-- Implement banner image workflow for articles.
-  - Scope:
-    - banner image upload/generation flow
-    - storage and metadata persistence
-    - draft/publish linkage to the selected banner
-    - dashboard UI for preview, replace, and validation
-  - Relevant areas:
-    - `apps/api/src/modules/storage`
-    - `apps/api/src/modules/publisher`
-    - `apps/dashboard/src/app/topics/[topicId]/publish`
-    - `packages/shared-types`
-
-- Implement Medium publishing adapter.
-  - Current state: `apps/api/src/modules/publisher/providers/medium.adapter.ts` returns `ServiceUnavailableException`.
-
-- Implement LinkedIn publishing adapter.
-  - Current state: `apps/api/src/modules/publisher/providers/linkedin.adapter.ts` returns `ServiceUnavailableException`.
-
-- Remove DEVTO-only publish restriction once other adapters exist.
-  - Current state: `apps/api/src/modules/publisher/publisher.service.ts` hard-blocks all channels except `DEVTO`.
-
-- Add dashboard UI for channel availability and missing credential guidance.
-  - Current state: users can save credentials, but publish UX should clearly show:
-    - supported channels
-    - unsupported channels
-    - missing credential state
-    - publish ownership rules
-
-- Add admin workflow for topic owner reassignment.
-  - Current state: approved content is assigned to a `USER`, but there is no admin UI/API workflow to reassign ownership cleanly after approval.
-
-- Add publish retry/requeue controls for failed publications.
-  - Current state: failures are recorded, but operator recovery is limited.
-  - Relevant files:
-    - `apps/api/src/modules/publisher/publisher.orchestrator.ts`
-    - `apps/api/src/modules/publisher/publisher.repository.ts`
-    - `apps/dashboard/src/app/topics/[topicId]/publish/page.tsx`
+No open backlog items in this section after the current publish/ownership/banner implementation pass.
 
 ## Architecture and Code Structure
 
@@ -81,37 +45,9 @@ Audit basis:
   - Current state: `apps/worker/src/worker.module.ts` imports many providers directly from `apps/api/src/...`
   - Target: move worker-safe domain services, queue contracts, and provider interfaces into shared packages or worker-owned modules.
 
-- Move queue names and job payload contracts into shared packages.
-  - Current state: worker and API still share queue constants through API module paths.
-  - Target: `packages/shared-types` or `packages/shared-config` should own these contracts.
-
-- Replace generic `throw new Error(...)` paths in core orchestrators with typed exceptions or result objects.
-  - High-value files:
-    - `apps/api/src/modules/research/research.orchestrator.ts`
-    - `apps/api/src/modules/draft/draft.orchestrator.ts`
-    - `apps/api/src/modules/revision/revision.orchestrator.ts`
-    - `apps/api/src/modules/publisher/publisher.orchestrator.ts`
-    - `apps/api/src/modules/workflow/workflow-*.ts`
-
-- Resolve the remaining Next.js ESLint plugin warning during `next build`.
-  - Current state: builds pass, but Next still reports plugin detection mismatch.
-
-- Review generated/runtime artifact strategy for dashboard route types.
-  - Current state: `apps/dashboard/next-env.d.ts` changes when build output path changes.
-  - Target: stable local/Docker behavior without noisy generated diffs.
-
 ## UI and UX
 
-- Implement dashboard dark mode.
-  - Scope:
-    - theme token system for light/dark palettes
-    - user theme preference persistence
-    - accessible contrast review across dashboard screens
-    - theme toggle in shared dashboard chrome
-  - Relevant areas:
-    - `apps/dashboard/src/app/globals.css`
-    - `apps/dashboard/src/components/shared`
-    - `apps/dashboard/src/app`
+No open backlog items in this section after the dashboard theme and responsive polish pass.
 
 ## Testing
 
@@ -158,12 +94,6 @@ Audit basis:
   - Current state: `infra/terraform/README.md` is still starter-level only.
 
 ## Documentation
-
-- Add explicit publisher support matrix to docs.
-  - Clarify:
-    - `DEVTO` implemented
-    - `MEDIUM` stored credentials only, publishing not implemented
-    - `LINKEDIN` stored credentials only, publishing not implemented
 
 - Add owner-assignment and publish-permission flow to docs.
   - Explain:

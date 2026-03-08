@@ -2,7 +2,7 @@
 
 ## What Was Verified
 - Runtime reads [`.env`](../.env); [`.env.example`](../.env.example) is template-only.
-- Root `npm run dev:*`, `start:*`, and `build:*` scripts build `@aicp/shared-config` first.
+- Root `npm run dev:*`, `start:*`, and `build:*` scripts build `@aicp/shared-config` and `@aicp/shared-types` first.
 - Service-local env modules are:
   - API: [`env.ts`](../apps/api/src/config/env.ts)
   - Worker: [`env.ts`](../apps/worker/src/config/env.ts)
@@ -29,6 +29,7 @@
   - auth screen uses a single centered card
   - navbar and topic nav wrap or scroll instead of clipping
   - action rows stack on smaller screens
+- Dashboard theme now supports light/dark mode with a persisted toggle in shared chrome.
 - Discovery flow now supports:
   - manual discovery intake -> auto scoring/filtering
   - API-backed discovery import (`hackernews`) -> auto scoring/filtering

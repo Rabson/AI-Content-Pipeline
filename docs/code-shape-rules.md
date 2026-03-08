@@ -7,6 +7,7 @@ The repo enforces a structural lint check with `npm run lint:structure`.
 - Controllers must not mix HTTP transport with Prisma, queue wiring, or direct external IO.
 - Repositories must not perform queue operations or external HTTP/S3 calls.
 - Service-like files must not combine direct `PrismaService` access with queue wiring or direct external IO.
+- Shared contract packages should stay split into focused files rather than aggregating large type surfaces into one file.
 
 ## Exceptions
 - Reviewed exceptions live in `config/code-shape-exceptions.json`.
@@ -18,3 +19,6 @@ The repo enforces a structural lint check with `npm run lint:structure`.
 npm run lint:structure
 npm run lint
 ```
+
+## Notes
+- Generated outputs such as `dist/`, Prisma client output, and Next `.next/` artifacts are not treated as source files for the shape check.

@@ -139,6 +139,7 @@ npm run start:dashboard
 ## Useful Commands
 ```bash
 make dev-up
+make dev-up-base
 make dev-down
 make dev-ps
 make dev-logs
@@ -162,10 +163,11 @@ npm run test
 
 ## Notes
 - Root `npm start` is not defined; use `start:api`, `start:worker`, and `start:dashboard`.
-- Root scripts build `@aicp/shared-config` and inject the repo-level `.env` automatically.
-- `npm install` and `npm ci` run `postinstall`, which regenerates the Prisma client automatically.
+- Root scripts build `@aicp/shared-config` and `@aicp/shared-types`, then inject the repo-level `.env` automatically.
+- `npm install` and `npm ci` run `postinstall`, which builds the shared packages and regenerates the Prisma client automatically.
 - Workspace tests use Vitest 4 and the shared ESM config file `vitest.config.mts`.
 - API and worker must share the same `USER_TOKEN_ENCRYPTION_KEY`, because publisher tokens are encrypted in API and decrypted in worker during publish jobs.
+- Dashboard theme preference is stored in browser local storage under `aicp-dashboard-theme`.
 - Publisher channel API env also needs:
   - `MEDIUM_API_BASE_URL`
   - `LINKEDIN_API_BASE_URL`

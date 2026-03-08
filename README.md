@@ -9,7 +9,7 @@ This repo contains the full modular-monolith implementation for the content pipe
 - `apps/api`: NestJS HTTP API
 - `apps/worker`: BullMQ worker runtime
 - `apps/dashboard`: Next.js internal dashboard
-- `packages/shared-types`: shared contracts and blog document types
+- `packages/shared-types`: built shared API/view/job contracts and blog document types
 - `packages/shared-config`: shared TS env readers, ESLint presets, and TS base config
 
 This file is the entry point. It stays high-level.
@@ -80,8 +80,12 @@ Dashboard sign-in:
 
 ## Repo Conventions
 - Root `.env` is the local runtime source.
-- Root `npm run dev:*`, `start:*`, and `build:*` scripts build `@aicp/shared-config` first.
-- Root install runs `postinstall`, which regenerates the Prisma client from `apps/api/src/prisma/schema.prisma`.
+- Root `npm run dev:*`, `start:*`, `build:*`, `typecheck`, and `test` build both shared workspace packages first:
+  - `@aicp/shared-config`
+  - `@aicp/shared-types`
+- Root install runs `postinstall`, which:
+  - builds the shared workspace packages
+  - regenerates the Prisma client from `apps/api/src/prisma/schema.prisma`
 - Root and workspace tests run on Vitest 4 with shared config in `vitest.config.mts`.
 - `apps/api/scripts/seed-demo.mjs` seeds the local user accounts and demo publish-ready topic.
 - Service-local env access is centralized in:
@@ -98,6 +102,10 @@ Dashboard sign-in:
   - channel readiness and credential checks
   - banner image upload/select/remove
   - publication history and retry
+- Dashboard UI includes:
+  - light/dark theme toggle in shared chrome
+  - persisted theme preference in local storage
+  - a single `.next` route-type/output strategy for both local and Docker runtime
 - Docker image specs live beside each service.
 - Compose files live under `infra/docker`.
 
