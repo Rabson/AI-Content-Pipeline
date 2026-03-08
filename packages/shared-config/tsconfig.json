@@ -2,9 +2,9 @@
   "extends": "./tsconfig/base.json",
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": ".",
+    "outDir": "dist",
     "declaration": true
   },
-  "include": ["env/**/*.ts", "auth/**/*.ts"],
-  "exclude": ["env/**/*.d.ts", "env/**/*.js", "auth/**/*.d.ts", "auth/**/*.js"]
+  "include": ["env/**/*.ts", "auth/**/*.ts", "observability/**/*.ts"],
+  "exclude": ["dist", "env/**/*.d.ts", "env/**/*.js", "auth/**/*.d.ts", "auth/**/*.js"]
 }

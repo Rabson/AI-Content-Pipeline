@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PublicationChannel } from '@prisma/client';
+import type { PublishRequest, PublishResponse, PublisherAdapter, PublisherCredentialInput } from '@aicp/shared-types';
 import { fetchWithTimeout, throwUpstreamHttpError } from '../../../common/http/external-fetch.util';
 import { env } from '../../../config/env';
 import {
@@ -7,7 +8,6 @@ import {
   sanitizeMediumTags,
   withMediumBannerPreface,
 } from './helpers/medium-adapter.helper';
-import { PublishRequest, PublishResponse, PublisherAdapter, PublisherCredentialInput } from './publisher-adapter.interface';
 
 @Injectable()
 export class MediumAdapter implements PublisherAdapter {

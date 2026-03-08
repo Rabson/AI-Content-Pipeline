@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PublicationChannel } from '@prisma/client';
+import type { PublisherAdapter } from '@aicp/shared-types';
 import { DevtoAdapter } from './devto.adapter';
 import { LinkedInAdapter } from './linkedin.adapter';
 import { MediumAdapter } from './medium.adapter';
-import { PublisherAdapter } from './publisher-adapter.interface';
 
 @Injectable()
 export class PublisherRegistryService {

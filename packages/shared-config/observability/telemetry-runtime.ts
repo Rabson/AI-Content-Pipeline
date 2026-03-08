@@ -3,27 +3,35 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { env } from '../../../config/env';
-import { buildStatus, parseDiagLogLevel, parseHeaders, type TelemetryStatus } from './telemetry-config';
+import { buildStatus, parseDiagLogLevel, parseHeaders, type TelemetryEnvironment, type TelemetryStatus } from './telemetry-config';
 
-export function createTelemetryRuntime(defaultServiceName: string) {
+export function createTelemetryRuntime(defaultServiceName: string, config: TelemetryEnvironment) {
   let sdk: NodeSDK | null = null;
-  let telemetryStatus: TelemetryStatus = buildStatus(defaultServiceName);
+  let telemetryStatus: TelemetryStatus = buildStatus(config, defaultServiceName);
 
   async function startOpenTelemetry(serviceName: string) {
     if (sdk) return getTelemetryStatus();
-    telemetryStatus = buildStatus(serviceName);
+    telemetryStatus = buildStatus(config, serviceName);
     if (!telemetryStatus.enabled) return getTelemetryStatus();
     if (!telemetryStatus.endpoint) {
       telemetryStatus.lastError = 'OTLP endpoint not configured';
       return getTelemetryStatus();
     }
+
     diag.setLogger(new DiagConsoleLogger(), parseDiagLogLevel(telemetryStatus.logLevel));
     sdk = new NodeSDK({
-      resource: resourceFromAttributes({ 'service.name': serviceName, 'service.namespace': telemetryStatus.serviceNamespace, 'deployment.environment': env.appEnv }),
-      traceExporter: new OTLPTraceExporter({ url: telemetryStatus.endpoint, headers: parseHeaders(env.otelHeaders) }),
+      resource: resourceFromAttributes({
+        'service.name': serviceName,
+        'service.namespace': telemetryStatus.serviceNamespace,
+        'deployment.environment': config.appEnv,
+      }),
+      traceExporter: new OTLPTraceExporter({
+        url: telemetryStatus.endpoint,
+        headers: parseHeaders(config.otelHeaders),
+      }),
       instrumentations: [getNodeAutoInstrumentations()],
     });
+
     try {
       await sdk.start();
       telemetryStatus.started = true;
@@ -33,6 +41,7 @@ export function createTelemetryRuntime(defaultServiceName: string) {
       telemetryStatus.lastError = error instanceof Error ? error.message : 'Failed to start OpenTelemetry';
       sdk = null;
     }
+
     return getTelemetryStatus();
   }
 
@@ -43,13 +52,24 @@ export function createTelemetryRuntime(defaultServiceName: string) {
     telemetryStatus.started = false;
   }
 
-  function getTelemetryStatus() { return { ...telemetryStatus }; }
-  function getTraceContext() {
-    const spanContext = trace.getSpan(context.active())?.spanContext();
-    return { traceId: spanContext?.traceId ?? null, spanId: spanContext?.spanId ?? null, traceFlags: spanContext?.traceFlags ?? null };
+  function getTelemetryStatus() {
+    return { ...telemetryStatus };
   }
 
-  async function withTelemetrySpan<T>(name: string, attributes: Record<string, string | number | boolean | undefined>, handler: () => Promise<T>) {
+  function getTraceContext() {
+    const spanContext = trace.getSpan(context.active())?.spanContext();
+    return {
+      traceId: spanContext?.traceId ?? null,
+      spanId: spanContext?.spanId ?? null,
+      traceFlags: spanContext?.traceFlags ?? null,
+    };
+  }
+
+  async function withTelemetrySpan<T>(
+    name: string,
+    attributes: Record<string, string | number | boolean | undefined>,
+    handler: () => Promise<T>,
+  ) {
     const tracer = trace.getTracer(telemetryStatus.serviceName);
     return tracer.startActiveSpan(name, async (span) => {
       Object.entries(attributes).forEach(([key, value]) => value !== undefined && span.setAttribute(key, value));
@@ -59,7 +79,10 @@ export function createTelemetryRuntime(defaultServiceName: string) {
         return result;
       } catch (error) {
         span.recordException(error instanceof Error ? error : new Error(String(error)));
-        span.setStatus({ code: SpanStatusCode.ERROR, message: error instanceof Error ? error.message : 'Telemetry span failed' });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : 'Telemetry span failed',
+        });
         throw error;
       } finally {
         span.end();

@@ -4,3 +4,4 @@ export * from './blog-document-export';
 export * from './job-constants';
 export * from './job-payloads';
 export * from './jobs';
+export * from './publisher';

@@ -1,6 +1,7 @@
-import { createTelemetryRuntime } from '../../../api/src/common/observability/runtime/telemetry-runtime';
+import { createTelemetryRuntime } from '@aicp/shared-config/observability/telemetry-runtime';
+import { env } from '../config/env';
 
-const runtime = createTelemetryRuntime('worker');
+const runtime = createTelemetryRuntime('worker', env);
 
 export const startOpenTelemetry = runtime.startOpenTelemetry;
 export const shutdownOpenTelemetry = runtime.shutdownOpenTelemetry;
