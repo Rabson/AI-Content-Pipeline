@@ -1,13 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB, type AnalyticsRollupDailyJobPayload } from '@aicp/shared-types';
 import { AnalyticsOrchestrator } from '../../../api/src/modules/analytics/analytics.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
-
-const ANALYTICS_QUEUE = 'analytics';
-const ANALYTICS_ROLLUP_DAILY_JOB = 'analytics.rollup.daily';
 
 @Processor(ANALYTICS_QUEUE)
 export class WorkerAnalyticsProcessor extends WorkerHost {
@@ -20,7 +18,7 @@ export class WorkerAnalyticsProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(job: Job<AnalyticsRollupDailyJobPayload, any, string>): Promise<any> {
     this.metrics.recordStart(job.queueName);
     const execution = await this.jobExecutionService.start(job);
 

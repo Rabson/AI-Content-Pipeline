@@ -1,6 +1,11 @@
 import { NotFoundException } from '@nestjs/common';
 import { ContentState, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { Queue } from 'bullmq';
+import type {
+  RevisionApplyFinalizeJobPayload,
+  RevisionApplySectionJobPayload,
+  RevisionApplyStartJobPayload,
+} from '@aicp/shared-types';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { RevisionRepository } from './revision.repository';
 import { REVISION_APPLY_FINALIZE_JOB, REVISION_APPLY_SECTION_JOB, REVISION_APPLY_START_JOB } from './constants/revision.constants';
@@ -10,7 +15,7 @@ import { WorkflowService } from '../workflow/workflow.service';
 export async function enqueueRevisionRun(
   repository: RevisionRepository,
   workflowService: WorkflowService,
-  queue: Queue,
+  queue: Queue<RevisionApplyStartJobPayload | RevisionApplySectionJobPayload | RevisionApplyFinalizeJobPayload>,
   reviewSessionId: string,
   dto: RunRevisionDto,
   actorId: string,
@@ -28,7 +33,7 @@ export async function enqueueRevisionRun(
 }
 
 async function enqueueRevisionJobs(
-  queue: Queue,
+  queue: Queue<RevisionApplyStartJobPayload | RevisionApplySectionJobPayload | RevisionApplyFinalizeJobPayload>,
   reviewSession: NonNullable<Awaited<ReturnType<RevisionRepository['findReviewSession']>>>,
   revisionRunId: string,
   toDraftVersionId: string,
@@ -40,7 +45,7 @@ async function enqueueRevisionJobs(
 }
 
 function enqueueRevisionSection(
-  queue: Queue,
+  queue: Queue<RevisionApplyStartJobPayload | RevisionApplySectionJobPayload | RevisionApplyFinalizeJobPayload>,
   reviewSession: NonNullable<Awaited<ReturnType<RevisionRepository['findReviewSession']>>>,
   revisionRunId: string,
   toDraftVersionId: string,

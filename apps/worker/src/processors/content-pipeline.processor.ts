@@ -1,5 +1,18 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import {
+  CONTENT_PIPELINE_QUEUE,
+  DISCOVERY_IMPORT_JOB,
+  DRAFT_GENERATE_FINALIZE_JOB,
+  DRAFT_GENERATE_SECTION_JOB,
+  DRAFT_GENERATE_START_JOB,
+  OUTLINE_GENERATE_JOB,
+  RESEARCH_RUN_JOB,
+  REVISION_APPLY_FINALIZE_JOB,
+  REVISION_APPLY_SECTION_JOB,
+  REVISION_APPLY_START_JOB,
+  SEO_GENERATE_JOB,
+} from '@aicp/shared-types';
 import { ResearchOrchestrator } from '../../../api/src/modules/research/research.orchestrator';
 import { OutlineOrchestrator } from '../../../api/src/modules/outline/outline.orchestrator';
 import { OutlineRepository } from '../../../api/src/modules/outline/outline.repository';
@@ -9,22 +22,10 @@ import { RevisionOrchestrator } from '../../../api/src/modules/revision/revision
 import { RevisionRepository } from '../../../api/src/modules/revision/revision.repository';
 import { SeoOrchestrator } from '../../../api/src/modules/seo/seo.orchestrator';
 import { DiscoveryService } from '../../../api/src/modules/discovery/discovery.service';
-import { CONTENT_PIPELINE_QUEUE } from '../../../api/src/modules/topic/constants/topic-queue.constants';
-import { DISCOVERY_IMPORT_JOB } from '../../../api/src/modules/discovery/constants/discovery.constants';
 import { JobExecutionService } from '../support/job-execution.service';
 import { getTraceContext, withTelemetrySpan } from '../support/opentelemetry';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
-
-const RESEARCH_RUN_JOB = 'research.run';
-const OUTLINE_GENERATE_JOB = 'outline.generate';
-const DRAFT_GENERATE_START_JOB = 'draft.generate.start';
-const DRAFT_GENERATE_SECTION_JOB = 'draft.generate.section';
-const DRAFT_GENERATE_FINALIZE_JOB = 'draft.generate.finalize';
-const REVISION_APPLY_START_JOB = 'revision.apply.start';
-const REVISION_APPLY_SECTION_JOB = 'revision.apply.section';
-const REVISION_APPLY_FINALIZE_JOB = 'revision.apply.finalize';
-const SEO_GENERATE_JOB = 'seo.generate';
 
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerContentPipelineProcessor extends WorkerHost {

@@ -1,15 +1,19 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import {
+  CONTENT_PIPELINE_QUEUE,
+  REVISION_APPLY_FINALIZE_JOB,
+  REVISION_APPLY_SECTION_JOB,
+  REVISION_APPLY_START_JOB,
+  type RevisionApplyFinalizeJobPayload,
+  type RevisionApplySectionJobPayload,
+  type RevisionApplyStartJobPayload,
+} from '@aicp/shared-types';
 import { RevisionOrchestrator } from '../../../api/src/modules/revision/revision.orchestrator';
 import { RevisionRepository } from '../../../api/src/modules/revision/revision.repository';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
-
-const CONTENT_PIPELINE_QUEUE = 'content.pipeline';
-const REVISION_APPLY_START_JOB = 'revision.apply.start';
-const REVISION_APPLY_SECTION_JOB = 'revision.apply.section';
-const REVISION_APPLY_FINALIZE_JOB = 'revision.apply.finalize';
 
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerRevisionProcessor extends WorkerHost {
@@ -23,7 +27,9 @@ export class WorkerRevisionProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(
+    job: Job<RevisionApplyStartJobPayload | RevisionApplySectionJobPayload | RevisionApplyFinalizeJobPayload, any, string>,
+  ): Promise<any> {
     this.metrics.recordStart(job.queueName);
     const execution = await this.jobExecutionService.start(job);
 
@@ -35,7 +41,7 @@ export class WorkerRevisionProcessor extends WorkerHost {
       }
 
       if (job.name === REVISION_APPLY_SECTION_JOB) {
-        const result = await this.orchestrator.processRevisionSection(job.data);
+        const result = await this.orchestrator.processRevisionSection(job.data as RevisionApplySectionJobPayload);
         this.metrics.recordSuccess(job.queueName);
         await this.jobExecutionService.succeed(execution.id);
         return result;

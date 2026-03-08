@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ContentState, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
 import { env } from '../../config/env';
@@ -128,7 +128,7 @@ export class RevisionOrchestrator {
     const updatedSection = updatedDraft?.sections.find((section) => section.sectionKey === sectionKey);
 
     if (!updatedSection) {
-      throw new Error('Updated section not found after revision');
+      throw new InternalServerErrorException('Updated section not found after revision');
     }
 
     return updatedSection;

@@ -1,10 +1,15 @@
 import { Queue } from 'bullmq';
+import type {
+  DraftGenerateFinalizeJobPayload,
+  DraftGenerateSectionJobPayload,
+  DraftGenerateStartJobPayload,
+} from '@aicp/shared-types';
 import { buildQueueJobId } from '../../../common/queue/job-id.util';
 import { DRAFT_GENERATE_FINALIZE_JOB, DRAFT_GENERATE_SECTION_JOB, DRAFT_GENERATE_START_JOB } from '../constants/draft.constants';
 import { DraftPayload, DraftSectionPlanItem } from './draft-generation.types';
 
 export async function enqueueDraftJobs(
-  queue: Queue,
+  queue: Queue<DraftGenerateStartJobPayload | DraftGenerateSectionJobPayload | DraftGenerateFinalizeJobPayload>,
   topicId: string,
   draftVersionId: string,
   versionNumber: number,
@@ -18,7 +23,7 @@ export async function enqueueDraftJobs(
 }
 
 function enqueueSectionJob(
-  queue: Queue,
+  queue: Queue<DraftGenerateStartJobPayload | DraftGenerateSectionJobPayload | DraftGenerateFinalizeJobPayload>,
   topicId: string,
   draftVersionId: string,
   versionNumber: number,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID, createHash } from 'crypto';
 import { ContentState, TopicStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { env } from '../../config/env';
@@ -56,11 +56,11 @@ export class ResearchOrchestrator {
   private async getEligibleTopic(topicId: string) {
     const topic = await this.repository.findTopicById(topicId);
     if (!topic) {
-      throw new Error('Topic not found');
+      throw new NotFoundException('Topic not found');
     }
 
     if (topic.status !== TopicStatus.APPROVED && topic.status !== TopicStatus.RESEARCH_QUEUED) {
-      throw new Error(`Topic ${topicId} is not in a research-eligible state`);
+      throw new BadRequestException(`Topic ${topicId} is not in a research-eligible state`);
     }
 
     return topic;

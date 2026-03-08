@@ -1,5 +1,11 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import {
+  ANALYTICS_QUEUE,
+  CONTENT_PIPELINE_QUEUE,
+  PUBLISHING_QUEUE,
+  SOCIAL_QUEUE,
+} from '@aicp/shared-types';
 import { PrismaService } from '../../api/src/prisma/prisma.service';
 import { env } from './config/env';
 
@@ -71,10 +77,6 @@ import { DiscoveryImportService } from '../../api/src/modules/discovery/services
 import { DiscoveryIngestService } from '../../api/src/modules/discovery/services/discovery-ingest.service';
 import { DiscoverySuggestionService } from '../../api/src/modules/discovery/services/discovery-suggestion.service';
 import { WorkerContentPipelineProcessor } from './processors/content-pipeline.processor';
-import { CONTENT_PIPELINE_QUEUE } from '../../api/src/modules/topic/constants/topic-queue.constants';
-import { SOCIAL_QUEUE } from '../../api/src/modules/social/constants/social.constants';
-import { PUBLISHING_QUEUE } from '../../api/src/modules/publisher/constants/publisher.constants';
-import { ANALYTICS_QUEUE } from '../../api/src/modules/analytics/constants/analytics.constants';
 import { UserPublisherCredentialRepository } from '../../api/src/modules/user/repositories/user-publisher-credential.repository';
 import { TokenCryptoService } from '../../api/src/modules/user/services/token-crypto.service';
 import { UserPublisherTokenResolverService } from '../../api/src/modules/user/services/user-publisher-token-resolver.service';

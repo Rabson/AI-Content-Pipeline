@@ -1,2 +1,1 @@
-export const CONTENT_PIPELINE_QUEUE = 'content.pipeline';
-export const RESEARCH_RUN_JOB = 'research.run';
+export { CONTENT_PIPELINE_QUEUE, RESEARCH_RUN_JOB } from '@aicp/shared-types';

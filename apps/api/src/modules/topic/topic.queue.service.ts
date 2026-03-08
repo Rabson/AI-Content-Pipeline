@@ -1,24 +1,15 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import type { ResearchRunJobPayload } from '@aicp/shared-types';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { CONTENT_PIPELINE_QUEUE, RESEARCH_RUN_JOB } from './constants/topic-queue.constants';
-
-export interface ResearchRunJobPayload {
-  topicId: string;
-  contentItemId?: string;
-  title: string;
-  brief?: string | null;
-  audience?: string | null;
-  enqueuedBy: string;
-  traceId: string;
-}
 
 @Injectable()
 export class TopicQueueService {
   constructor(
     @InjectQueue(CONTENT_PIPELINE_QUEUE)
-    private readonly contentPipelineQueue: Queue,
+    private readonly contentPipelineQueue: Queue<ResearchRunJobPayload>,
   ) {}
 
   async enqueueResearch(payload: ResearchRunJobPayload): Promise<string> {

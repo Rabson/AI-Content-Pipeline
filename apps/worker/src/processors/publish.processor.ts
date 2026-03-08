@@ -1,13 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import { PUBLISH_ARTICLE_JOB, PUBLISHING_QUEUE, type PublishArticleJobPayload } from '@aicp/shared-types';
 import { PublisherOrchestrator } from '../../../api/src/modules/publisher/publisher.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
-
-const PUBLISHING_QUEUE = 'publishing';
-const PUBLISH_ARTICLE_JOB = 'publish.article';
 
 @Processor(PUBLISHING_QUEUE)
 export class WorkerPublishProcessor extends WorkerHost {
@@ -20,7 +18,7 @@ export class WorkerPublishProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(job: Job<PublishArticleJobPayload, any, string>): Promise<any> {
     this.metrics.recordStart(job.queueName);
     const execution = await this.jobExecutionService.start(job);
 

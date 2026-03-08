@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { SourceType, TopicStatus } from '@prisma/client';
 import { ResearchReadRepository } from './repositories/research-read.repository';
 import { ResearchWriteRepository } from './repositories/research-write.repository';
@@ -42,7 +42,7 @@ export class ResearchRepository {
   ) {
     const latest = await this.latestResearchByTopic(topicId);
     if (!latest) {
-      throw new Error('No research artifact exists yet');
+      throw new NotFoundException('No research artifact exists yet');
     }
 
     return this.writeRepository.addManualSource(topicId, latest.id, data);
@@ -86,7 +86,7 @@ export class ResearchRepository {
       this.findTopicById(params.topicId),
     ]);
     if (!topic) {
-      throw new Error('Topic not found');
+      throw new NotFoundException('Topic not found');
     }
 
     return this.writeRepository.persistResearchResult({

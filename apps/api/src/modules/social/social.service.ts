@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { ContentState, SocialPostStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
+import type { SocialLinkedInGenerateJobPayload } from '@aicp/shared-types';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { isPhaseEnabled } from '../../config/feature-flags';
 import { WorkflowService } from '../workflow/workflow.service';
@@ -16,7 +17,7 @@ export class SocialService {
     private readonly repository: SocialRepository,
     private readonly workflowService: WorkflowService,
     @InjectQueue(SOCIAL_QUEUE)
-    private readonly queue: Queue,
+    private readonly queue: Queue<SocialLinkedInGenerateJobPayload>,
   ) {}
 
   async enqueueLinkedIn(topicId: string, dto: GenerateLinkedInDto, actorId: string) {

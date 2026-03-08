@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@aicp/shared-config": "0.1.0",
+    "@aicp/shared-types": "0.1.0",
     "@nestjs/bullmq": "^11.0.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",

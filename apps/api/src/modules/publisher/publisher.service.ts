@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { ContentState, PublicationChannel, PublicationStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { Queue } from 'bullmq';
+import type { PublishArticleJobPayload } from '@aicp/shared-types';
 import { AppRole } from '../../common/auth/roles.enum';
 import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
@@ -24,7 +25,7 @@ export class PublisherService {
     private readonly ownershipService: UserTopicOwnershipService,
     private readonly securityEventService: SecurityEventService,
     private readonly credentialResolver: UserPublisherTokenResolverService,
-    @InjectQueue(PUBLISHING_QUEUE) private readonly queue: Queue,
+    @InjectQueue(PUBLISHING_QUEUE) private readonly queue: Queue<PublishArticleJobPayload>,
   ) {}
 
   async listPublications(topicId: string, actor?: AuthenticatedUser) {

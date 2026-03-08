@@ -1,12 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB, type SeoGenerateJobPayload } from '@aicp/shared-types';
 import { SeoOrchestrator } from '../../../api/src/modules/seo/seo.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
-
-const CONTENT_PIPELINE_QUEUE = 'content.pipeline';
-const SEO_GENERATE_JOB = 'seo.generate';
 
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerSeoProcessor extends WorkerHost {
@@ -19,7 +17,7 @@ export class WorkerSeoProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(job: Job<SeoGenerateJobPayload, any, string>): Promise<any> {
     this.metrics.recordStart(job.queueName);
     const execution = await this.jobExecutionService.start(job);
 

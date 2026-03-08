@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import type { WorkflowRepository } from './workflow.repository';
 import type { WorkflowTransitionService } from './workflow-transition.service';
 import type { SyncTopicStatusParams, TransitionContentStateParams } from './workflow.service.types';
@@ -51,7 +51,7 @@ export async function transitionContentState(
 
 async function loadWorkflowContext(repository: WorkflowRepository, topicId: string) {
   const topic = await repository.findTopic(topicId);
-  if (!topic) throw new Error('Topic not found');
+  if (!topic) throw new NotFoundException('Topic not found');
   const contentItem = topic.contentItem ?? (await repository.ensureContentItemForTopic(topicId));
   return { topic, contentItem };
 }

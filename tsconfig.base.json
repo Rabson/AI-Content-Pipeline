@@ -12,9 +12,6 @@
     "resolveJsonModule": true,
     "outDir": "dist",
     "rootDir": ".",
-    "baseUrl": ".",
-    "paths": {
-      "@aicp/shared-types": ["packages/shared-types/src/index.ts"]
-    }
+    "baseUrl": "."
   }
 }

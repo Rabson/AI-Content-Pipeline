@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PublicationChannel } from '@prisma/client';
 import { DevtoAdapter } from './devto.adapter';
 import { LinkedInAdapter } from './linkedin.adapter';
@@ -20,7 +20,7 @@ export class PublisherRegistryService {
   get(channel: PublicationChannel): PublisherAdapter {
     const adapter = this.adapters.find((candidate) => candidate.channel === channel);
     if (!adapter) {
-      throw new Error(`No publisher adapter registered for ${channel}`);
+      throw new InternalServerErrorException(`No publisher adapter registered for ${channel}`);
     }
 
     return adapter;

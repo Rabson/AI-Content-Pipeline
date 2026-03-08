@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import type { AnalyticsRollupDailyJobPayload } from '@aicp/shared-types';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { isPhaseEnabled } from '../../config/feature-flags';
 import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB } from './constants/analytics.constants';
@@ -13,7 +14,7 @@ export class AnalyticsService {
   constructor(
     private readonly repository: AnalyticsRepository,
     @InjectQueue(ANALYTICS_QUEUE)
-    private readonly queue: Queue,
+    private readonly queue: Queue<AnalyticsRollupDailyJobPayload>,
   ) {}
 
   async enqueueDailyRollup(dto: RunRollupDto, actorId: string) {

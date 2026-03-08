@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { WorkflowRunStatus } from '@prisma/client';
 import type { WorkflowRepository } from './workflow.repository';
 import type { RecordWorkflowEventParams, StartWorkflowRunParams } from './workflow.service.types';
@@ -31,7 +32,7 @@ export async function startWorkflowRun(repository: WorkflowRepository, params: S
 
 async function loadWorkflowContext(repository: WorkflowRepository, topicId: string) {
   const topic = await repository.findTopic(topicId);
-  if (!topic) throw new Error('Topic not found');
+  if (!topic) throw new NotFoundException('Topic not found');
   const contentItem = topic.contentItem ?? (await repository.ensureContentItemForTopic(topicId));
   return { topic, contentItem };
 }

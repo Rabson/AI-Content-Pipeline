@@ -1,2 +1,1 @@
-export const PUBLISHING_QUEUE = 'publishing';
-export const PUBLISH_ARTICLE_JOB = 'publish.article';
+export { PUBLISH_ARTICLE_JOB, PUBLISHING_QUEUE } from '@aicp/shared-types';

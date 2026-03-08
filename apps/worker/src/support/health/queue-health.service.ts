@@ -1,10 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import { ANALYTICS_QUEUE } from '../../../../api/src/modules/analytics/constants/analytics.constants';
-import { PUBLISHING_QUEUE } from '../../../../api/src/modules/publisher/constants/publisher.constants';
-import { SOCIAL_QUEUE } from '../../../../api/src/modules/social/constants/social.constants';
-import { CONTENT_PIPELINE_QUEUE } from '../../../../api/src/modules/topic/constants/topic-queue.constants';
+import { ANALYTICS_QUEUE, CONTENT_PIPELINE_QUEUE, PUBLISHING_QUEUE, SOCIAL_QUEUE } from '@aicp/shared-types';
 
 @Injectable()
 export class QueueHealthService {

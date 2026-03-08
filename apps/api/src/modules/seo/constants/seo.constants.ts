@@ -1,2 +1,1 @@
-export const CONTENT_PIPELINE_QUEUE = 'content.pipeline';
-export const SEO_GENERATE_JOB = 'seo.generate';
+export { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB } from '@aicp/shared-types';

@@ -1,8 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import { CONTENT_PIPELINE_QUEUE, DISCOVERY_IMPORT_JOB, type DiscoveryImportJobPayload } from '@aicp/shared-types';
 import { DiscoveryService } from '../../../api/src/modules/discovery/discovery.service';
-import { CONTENT_PIPELINE_QUEUE } from '../../../api/src/modules/topic/constants/topic-queue.constants';
-import { DISCOVERY_IMPORT_JOB } from '../../../api/src/modules/discovery/constants/discovery.constants';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
@@ -18,7 +17,7 @@ export class WorkerDiscoveryProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(job: Job<DiscoveryImportJobPayload, any, string>): Promise<any> {
     this.metrics.recordStart(job.queueName);
     const execution = await this.jobExecutionService.start(job);
 

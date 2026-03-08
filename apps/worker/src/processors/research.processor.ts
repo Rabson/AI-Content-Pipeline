@@ -1,12 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import { CONTENT_PIPELINE_QUEUE, RESEARCH_RUN_JOB, type ResearchRunJobPayload } from '@aicp/shared-types';
 import { ResearchOrchestrator } from '../../../api/src/modules/research/research.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
-
-const CONTENT_PIPELINE_QUEUE = 'content.pipeline';
-const RESEARCH_RUN_JOB = 'research.run';
 
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerResearchProcessor extends WorkerHost {
@@ -19,7 +17,7 @@ export class WorkerResearchProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(job: Job<ResearchRunJobPayload, any, string>): Promise<any> {
     this.metrics.recordStart(job.queueName);
     const execution = await this.jobExecutionService.start(job);
 

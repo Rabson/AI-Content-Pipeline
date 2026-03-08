@@ -1,2 +1,1 @@
-export const CONTENT_PIPELINE_QUEUE = 'content.pipeline';
-export const OUTLINE_GENERATE_JOB = 'outline.generate';
+export { CONTENT_PIPELINE_QUEUE, OUTLINE_GENERATE_JOB } from '@aicp/shared-types';

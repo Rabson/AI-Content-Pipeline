@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import type { OutlineGenerateJobPayload } from '@aicp/shared-types';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { GenerateOutlineDto } from './dto/generate-outline.dto';
 import { GetOutlineQueryDto } from './dto/get-outline-query.dto';
@@ -12,7 +13,7 @@ export class OutlineService {
   constructor(
     private readonly repository: OutlineRepository,
     @InjectQueue(CONTENT_PIPELINE_QUEUE)
-    private readonly contentPipelineQueue: Queue,
+    private readonly contentPipelineQueue: Queue<OutlineGenerateJobPayload>,
   ) {}
 
   async enqueue(topicId: string, dto: GenerateOutlineDto, actorId: string) {

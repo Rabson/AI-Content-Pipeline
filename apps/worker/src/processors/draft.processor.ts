@@ -1,15 +1,19 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import {
+  CONTENT_PIPELINE_QUEUE,
+  DRAFT_GENERATE_FINALIZE_JOB,
+  DRAFT_GENERATE_SECTION_JOB,
+  DRAFT_GENERATE_START_JOB,
+  type DraftGenerateFinalizeJobPayload,
+  type DraftGenerateSectionJobPayload,
+  type DraftGenerateStartJobPayload,
+} from '@aicp/shared-types';
 import { DraftOrchestrator } from '../../../api/src/modules/draft/draft.orchestrator';
 import { DraftRepository } from '../../../api/src/modules/draft/draft.repository';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
-
-const CONTENT_PIPELINE_QUEUE = 'content.pipeline';
-const DRAFT_GENERATE_START_JOB = 'draft.generate.start';
-const DRAFT_GENERATE_SECTION_JOB = 'draft.generate.section';
-const DRAFT_GENERATE_FINALIZE_JOB = 'draft.generate.finalize';
 
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerDraftProcessor extends WorkerHost {
@@ -23,7 +27,9 @@ export class WorkerDraftProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(
+    job: Job<DraftGenerateStartJobPayload | DraftGenerateSectionJobPayload | DraftGenerateFinalizeJobPayload, any, string>,
+  ): Promise<any> {
     this.metrics.recordStart(job.queueName);
     const execution = await this.jobExecutionService.start(job);
 
@@ -35,7 +41,7 @@ export class WorkerDraftProcessor extends WorkerHost {
       }
 
       if (job.name === DRAFT_GENERATE_SECTION_JOB) {
-        const result = await this.orchestrator.processSection(job.data);
+        const result = await this.orchestrator.processSection(job.data as DraftGenerateSectionJobPayload);
         this.metrics.recordSuccess(job.queueName);
         await this.jobExecutionService.succeed(execution.id);
         return result;

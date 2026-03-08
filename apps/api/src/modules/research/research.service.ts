@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { TopicStatus } from '@prisma/client';
 import { Queue } from 'bullmq';
+import type { ResearchRunJobPayload } from '@aicp/shared-types';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { AddSourceDto } from './dto/add-source.dto';
 import { ResearchQueryDto } from './dto/research-query.dto';
@@ -19,7 +20,7 @@ export class ResearchService {
     private readonly sourceNormalizer: SourceNormalizerService,
     private readonly workflowService: WorkflowService,
     @InjectQueue(CONTENT_PIPELINE_QUEUE)
-    private readonly contentPipelineQueue: Queue,
+    private readonly contentPipelineQueue: Queue<ResearchRunJobPayload>,
   ) {}
 
   async enqueue(topicId: string, dto: RunResearchDto, actorId: string) {

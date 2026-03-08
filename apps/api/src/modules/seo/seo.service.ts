@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import type { SeoGenerateJobPayload } from '@aicp/shared-types';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { isPhaseEnabled } from '../../config/feature-flags';
 import { GenerateSeoDto } from './dto/generate-seo.dto';
@@ -12,7 +13,7 @@ export class SeoService {
   constructor(
     private readonly repository: SeoRepository,
     @InjectQueue(CONTENT_PIPELINE_QUEUE)
-    private readonly queue: Queue,
+    private readonly queue: Queue<SeoGenerateJobPayload>,
   ) {}
 
   async enqueue(topicId: string, dto: GenerateSeoDto, actorId: string) {

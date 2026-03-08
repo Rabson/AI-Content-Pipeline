@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ContentState, PublicationChannel, PublicationStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { WorkflowService } from '../workflow/workflow.service';
 import { UserPublisherTokenResolverService } from '../user/services/user-publisher-token-resolver.service';
@@ -26,7 +26,7 @@ export class PublisherOrchestrator {
     const draft = publication.draftVersion;
 
     if (!draft?.assembledMarkdown) {
-      throw new Error('No pinned markdown draft available for publishing');
+      throw new BadRequestException('No pinned markdown draft available for publishing');
     }
 
     const adapter = this.registry.get(publication.channel);

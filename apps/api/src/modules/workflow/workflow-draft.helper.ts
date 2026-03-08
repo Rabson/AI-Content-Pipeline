@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { ContentState, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import type { WorkflowRepository } from './workflow.repository';
 import type { WorkflowService } from './workflow.service';
@@ -46,6 +47,6 @@ export async function lockDraftForPublish(
 
 async function getContentItem(repository: WorkflowRepository, topicId: string) {
   const topic = await repository.findTopic(topicId);
-  if (!topic) throw new Error('Topic not found');
+  if (!topic) throw new NotFoundException('Topic not found');
   return topic.contentItem ?? repository.ensureContentItemForTopic(topicId);
 }

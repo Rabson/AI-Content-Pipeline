@@ -1,13 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import { SOCIAL_LINKEDIN_GENERATE_JOB, SOCIAL_QUEUE, type SocialLinkedInGenerateJobPayload } from '@aicp/shared-types';
 import { SocialOrchestrator } from '../../../api/src/modules/social/social.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
-
-const SOCIAL_QUEUE = 'social';
-const SOCIAL_LINKEDIN_GENERATE_JOB = 'social.linkedin.generate';
 
 @Processor(SOCIAL_QUEUE)
 export class WorkerSocialProcessor extends WorkerHost {
@@ -20,7 +18,7 @@ export class WorkerSocialProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(job: Job<SocialLinkedInGenerateJobPayload, any, string>): Promise<any> {
     this.metrics.recordStart(job.queueName);
     const execution = await this.jobExecutionService.start(job);
 

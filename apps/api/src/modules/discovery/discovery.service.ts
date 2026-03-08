@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import type { DiscoveryImportJobPayload } from '@aicp/shared-types';
 import { CreateDiscoveryTopicDto } from './dto/create-discovery-topic.dto';
 import { DiscoveryQueryDto } from './dto/discovery-query.dto';
 import { ImportDiscoveryTopicsDto } from './dto/import-discovery-topics.dto';
 import { ListDiscoveryCandidatesQueryDto } from './dto/list-discovery-candidates-query.dto';
-import { DiscoveryImportJobPayload } from './discovery.queue.service';
 import { DiscoveryRepository } from './discovery.repository';
 import { DiscoveryImportService } from './services/discovery-import.service';
 import { DiscoveryIngestService } from './services/discovery-ingest.service';

@@ -2,26 +2,16 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { createHash } from 'crypto';
+import type { DiscoveryImportJobPayload } from '@aicp/shared-types';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { CONTENT_PIPELINE_QUEUE } from '../topic/constants/topic-queue.constants';
 import { DISCOVERY_IMPORT_JOB } from './constants/discovery.constants';
-
-export interface DiscoveryImportJobPayload {
-  provider: string;
-  query?: string;
-  limit: number;
-  audience?: string;
-  tags?: string[];
-  autoScore: boolean;
-  minimumScore: number;
-  actorId: string;
-}
 
 @Injectable()
 export class DiscoveryQueueService {
   constructor(
     @InjectQueue(CONTENT_PIPELINE_QUEUE)
-    private readonly contentPipelineQueue: Queue,
+    private readonly contentPipelineQueue: Queue<DiscoveryImportJobPayload>,
   ) {}
 
   async enqueueImport(payload: DiscoveryImportJobPayload): Promise<string> {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ContentState, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
 import { env } from '../../config/env';
@@ -33,7 +33,7 @@ export class DraftOrchestrator {
   async processSection(payload: DraftSectionJobPayload) {
     const topic = await this.repository.findTopicById(payload.topicId);
     if (!topic) {
-      throw new Error('Topic not found for draft section generation');
+      throw new NotFoundException('Topic not found for draft section generation');
     }
 
     const promptInput = {

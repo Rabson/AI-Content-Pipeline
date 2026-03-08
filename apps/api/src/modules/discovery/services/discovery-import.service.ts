@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable, Optional, ServiceUnavailableException } from '@nestjs/common';
+import type { DiscoveryImportJobPayload } from '@aicp/shared-types';
 import { DISCOVERY_PROVIDER_HACKER_NEWS } from '../constants/discovery.constants';
 import { ImportDiscoveryTopicsDto } from '../dto/import-discovery-topics.dto';
 import { DiscoveryProvider } from '../providers/discovery-provider.interface';
 import { HackerNewsDiscoveryProvider } from '../providers/hacker-news-discovery.provider';
 import { assertDiscoveryEnabled } from '../utils/discovery.util';
 import { DiscoveryIngestService } from './discovery-ingest.service';
-import { DiscoveryImportJobPayload, DiscoveryQueueService } from '../discovery.queue.service';
+import { DiscoveryQueueService } from '../discovery.queue.service';
 
 @Injectable()
 export class DiscoveryImportService {
