@@ -23,6 +23,10 @@ export class TokenCryptoService {
     return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
   }
 
+  currentKeyVersion() {
+    return env.userTokenEncryptionKeyVersion;
+  }
+
   private key() {
     const seed = env.userTokenEncryptionKey?.trim();
     if (!seed) {

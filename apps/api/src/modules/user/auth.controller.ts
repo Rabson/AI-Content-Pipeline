@@ -15,8 +15,12 @@ export class AuthController {
   @Public()
   @Post('login')
   async login(@Body() dto: LoginUserDto, @Req() req: AuthenticatedRequest) {
-    this.rateLimitService.enforce(this.limitKey(dto.email, req.ip ?? 'local'), 5, 10 * 60 * 1000);
-    return this.authService.login(dto.email, dto.password);
+    await this.rateLimitService.enforce(this.limitKey(dto.email, req.ip ?? 'local'), 5, 10 * 60 * 1000);
+    return this.authService.login(dto.email, dto.password, {
+      ipAddress: req.ip ?? null,
+      userAgent: req.header('user-agent')?.trim() ?? null,
+      path: req.originalUrl,
+    });
   }
 
   private limitKey(email: string, ip: string) {

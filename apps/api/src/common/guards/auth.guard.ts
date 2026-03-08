@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { verifyServiceToken } from '@aicp/shared-config/auth/service-token';
 import { Reflector } from '@nestjs/core';
 import { env } from '../../config/env';
 import { parseAppRole } from '../auth/role-parser';
@@ -18,7 +19,7 @@ export class AuthGuard implements CanActivate {
     private readonly securityEventService: SecurityEventService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -29,61 +30,57 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const serviceToken = this.readBearerToken(request);
     const canBypass = env.appEnv === 'local' && env.authAllowHeaderBypass;
 
-    const actorId = request.header('x-actor-id')?.trim();
-    const actorRole = request.header('x-actor-role')?.trim();
-    const actorEmail = request.header('x-user-email')?.trim();
-    const actorName = request.header('x-user-name')?.trim();
+    if (serviceToken) {
+      try {
+        const claims = verifyServiceToken({
+          token: serviceToken,
+          secret: env.internalServiceJwtSecret,
+          expectedIssuer: env.internalServiceJwtIssuer,
+          expectedAudience: env.internalServiceJwtAudience,
+          clockSkewSeconds: env.internalServiceJwtClockSkewSeconds,
+        });
+        request.user = {
+          id: claims.sub,
+          role: parseAppRole(claims.role),
+          email: claims.email,
+          name: claims.name,
+        };
+        return true;
+      } catch (error) {
+        await this.securityEventService.authFailure({
+          reason: 'invalid-service-token',
+          path: request.originalUrl,
+          error: error instanceof Error ? error.message : 'unknown',
+        });
+        throw new UnauthorizedException('Untrusted caller');
+      }
+    }
 
     if (canBypass) {
       request.user = {
-        id: actorId || 'local-dev',
-        role: parseAppRole(actorRole ?? 'ADMIN'),
-        email: actorEmail || 'local-dev@example.com',
-        name: actorName || 'Local Dev',
+        id: 'local-dev',
+        role: parseAppRole('ADMIN'),
+        email: 'local-dev@example.com',
+        name: 'Local Dev',
       };
       return true;
     }
 
-    if (!this.hasTrustedInternalToken(request)) {
-      this.securityEventService.authFailure({
-        reason: 'invalid-internal-token',
-        path: request.originalUrl,
-      });
-      throw new UnauthorizedException('Untrusted caller');
-    }
-
-    if (!actorId || !actorRole || !actorEmail) {
-      this.securityEventService.authFailure({
-        reason: 'missing-auth-headers',
-        path: request.originalUrl,
-      });
-      throw new UnauthorizedException('Missing authenticated user headers');
-    }
-
-    try {
-      request.user = {
-        id: actorId,
-        role: parseAppRole(actorRole),
-        email: actorEmail,
-        name: actorName,
-      };
-    } catch (error) {
-      this.securityEventService.authFailure({
-        reason: 'invalid-actor-role',
-        path: request.originalUrl,
-        actorRole,
-      });
-      throw error;
-    }
-
-    return true;
+    await this.securityEventService.authFailure({
+      reason: 'missing-service-token',
+      path: request.originalUrl,
+    });
+    throw new UnauthorizedException('Untrusted caller');
   }
 
-  private hasTrustedInternalToken(request: AuthenticatedRequest) {
-    const expectedToken = env.internalApiToken?.trim();
-    const providedToken = request.header('x-internal-api-token')?.trim();
-    return Boolean(expectedToken && providedToken && providedToken === expectedToken);
+  private readBearerToken(request: AuthenticatedRequest) {
+    const authorization = request.header('authorization')?.trim();
+    if (!authorization?.startsWith('Bearer ')) {
+      return null;
+    }
+    return authorization.slice('Bearer '.length).trim() || null;
   }
 }

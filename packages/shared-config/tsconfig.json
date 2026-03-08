@@ -5,6 +5,6 @@
     "outDir": ".",
     "declaration": true
   },
-  "include": ["env/**/*.ts"],
-  "exclude": ["env/**/*.d.ts", "env/**/*.js"]
+  "include": ["env/**/*.ts", "auth/**/*.ts"],
+  "exclude": ["env/**/*.d.ts", "env/**/*.js", "auth/**/*.d.ts", "auth/**/*.js"]
 }

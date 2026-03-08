@@ -10,6 +10,8 @@ import { PasswordService } from './services/password.service';
 import { TokenCryptoService } from './services/token-crypto.service';
 import { UserAccountService } from './services/user-account.service';
 import { UserAuthService } from './services/user-auth.service';
+import { UserPublisherCredentialAccessService } from './services/user-publisher-credential-access.service';
+import { UserPublisherCredentialAuditService } from './services/user-publisher-credential-audit.service';
 import { UserPublisherCredentialService } from './services/user-publisher-credential.service';
 import { UserPublisherTokenResolverService } from './services/user-publisher-token-resolver.service';
 import { UserTopicOwnershipService } from './services/user-topic-ownership.service';
@@ -26,6 +28,8 @@ import { UserTopicOwnershipService } from './services/user-topic-ownership.servi
     UserPublisherTokenResolverService,
     UserAccountService,
     UserAuthService,
+    UserPublisherCredentialAccessService,
+    UserPublisherCredentialAuditService,
     UserPublisherCredentialService,
     UserTopicOwnershipService,
   ],

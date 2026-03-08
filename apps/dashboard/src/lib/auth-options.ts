@@ -3,9 +3,27 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { env } from '../config/env';
 import { clearAuthRateLimit, enforceAuthRateLimit } from './auth-rate-limit';
 
-export const authOptions: NextAuthOptions = {
-  session: { strategy: 'jwt' },
+type DashboardAuthOptions = NextAuthOptions & {
+  trustHost?: boolean;
+  useSecureCookies?: boolean;
+};
+
+export const authOptions: DashboardAuthOptions = {
+  trustHost: !env.isLocal,
+  useSecureCookies: !env.isLocal,
+  session: { strategy: 'jwt', maxAge: env.sessionMaxAgeSeconds },
   pages: { signIn: '/signin' },
+  cookies: {
+    sessionToken: {
+      name: env.isLocal ? 'next-auth.session-token' : '__Secure-next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: !env.isLocal,
+      },
+    },
+  },
   providers: [
     CredentialsProvider({
       name: 'Internal access',
@@ -18,7 +36,7 @@ export const authOptions: NextAuthOptions = {
         const password = credentials?.password?.trim();
         const rateLimitKey = `${email ?? 'unknown'}:${request.headers?.['x-forwarded-for'] ?? 'local'}`;
         if (!email || !password) return null;
-        enforceAuthRateLimit(rateLimitKey, env.authRateLimitMaxAttempts, env.authRateLimitWindowMs);
+        await enforceAuthRateLimit(rateLimitKey, env.authRateLimitMaxAttempts, env.authRateLimitWindowMs);
         try {
           const response = await fetch(`${env.apiBase}/v1/auth/login`, {
             method: 'POST',
@@ -27,7 +45,7 @@ export const authOptions: NextAuthOptions = {
             cache: 'no-store',
           });
           if (!response.ok) return null;
-          clearAuthRateLimit(rateLimitKey);
+          await clearAuthRateLimit(rateLimitKey);
           const user = (await response.json()) as { id: string; email: string; role: string; name?: string | null };
           return { id: user.id, email: user.email, role: user.role, name: user.name } as any;
         } catch {

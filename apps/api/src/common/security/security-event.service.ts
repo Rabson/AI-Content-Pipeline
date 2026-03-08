@@ -1,29 +1,61 @@
 import { Injectable } from '@nestjs/common';
-import { env } from '../../config/env';
+import { Prisma, PublisherCredentialAuditAction, SecurityEventType } from '@prisma/client';
 import { AppLogger } from '../logger/app-logger.service';
-
-interface Entry {
-  count: number;
-  resetAt: number;
-}
+import { env } from '../../config/env';
+import { SecurityEventRepository } from './security-event.repository';
 
 @Injectable()
 export class SecurityEventService {
-  private readonly counters = new Map<string, Entry>();
+  private readonly counters = new Map<string, { count: number; resetAt: number }>();
 
-  constructor(private readonly logger: AppLogger) {}
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly repository: SecurityEventRepository,
+  ) {}
 
-  authFailure(metadata: Record<string, unknown>) {
+  async authFailure(metadata: Record<string, unknown>) {
     this.bumpThreshold('auth-failure');
-    this.logger.warn({ event: 'auth-failure', ...metadata }, 'SecurityEventService');
+    await this.record(SecurityEventType.AUTH_FAILURE, metadata);
   }
 
-  replayRequested(metadata: Record<string, unknown>) {
-    this.logger.log({ event: 'job-replay-requested', ...metadata }, 'SecurityEventService');
+  async loginFailed(metadata: Record<string, unknown>) {
+    this.bumpThreshold('login-failed');
+    await this.record(SecurityEventType.LOGIN_FAILED, metadata);
   }
 
-  publishRequested(metadata: Record<string, unknown>) {
-    this.logger.log({ event: 'publish-requested', ...metadata }, 'SecurityEventService');
+  async loginSucceeded(metadata: Record<string, unknown>) {
+    await this.record(SecurityEventType.LOGIN_SUCCEEDED, metadata);
+  }
+
+  async accountLocked(metadata: Record<string, unknown>) {
+    await this.record(SecurityEventType.ACCOUNT_LOCKED, metadata);
+  }
+
+  async replayRequested(metadata: Record<string, unknown>) {
+    await this.record(SecurityEventType.JOB_REPLAY_REQUESTED, metadata);
+  }
+
+  async publishRequested(metadata: Record<string, unknown>) {
+    await this.record(SecurityEventType.PUBLISH_REQUESTED, metadata);
+  }
+
+  async adminPublishOnBehalf(metadata: Record<string, unknown>) {
+    await this.record(SecurityEventType.ADMIN_PUBLISH_ON_BEHALF, metadata);
+  }
+
+  async credentialChanged(action: PublisherCredentialAuditAction, metadata: Record<string, unknown>) {
+    const eventType = {
+      UPSERTED: SecurityEventType.CREDENTIAL_UPSERTED,
+      ROTATED: SecurityEventType.CREDENTIAL_ROTATED,
+      REENCRYPTED: SecurityEventType.CREDENTIAL_REENCRYPTED,
+      REVOKED: SecurityEventType.CREDENTIAL_REVOKED,
+    }[action];
+
+    await this.record(eventType, metadata);
+  }
+
+  listRecent(limit: number, eventType?: SecurityEventType) {
+    return this.repository.listRecent({ limit, eventType });
   }
 
   private bumpThreshold(key: string) {
@@ -43,4 +75,24 @@ export class SecurityEventService {
       );
     }
   }
+
+  private async record(eventType: SecurityEventType, metadata: Record<string, unknown>) {
+    this.logger.log({ event: eventType, ...metadata }, 'SecurityEventService');
+    await this.repository.create({
+      eventType,
+      actorUserId: readStringValue(metadata.actorUserId),
+      subjectUserId: readStringValue(metadata.subjectUserId),
+      subjectEmail: readStringValue(metadata.subjectEmail),
+      ipAddress: readStringValue(metadata.ipAddress),
+      userAgent: readStringValue(metadata.userAgent),
+      path: readStringValue(metadata.path),
+      resourceType: readStringValue(metadata.resourceType),
+      resourceId: readStringValue(metadata.resourceId),
+      metadata: metadata as Prisma.InputJsonValue,
+    });
+  }
+}
+
+function readStringValue(value: unknown) {
+  return typeof value === 'string' && value.trim() ? value : null;
 }

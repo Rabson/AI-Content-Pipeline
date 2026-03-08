@@ -154,6 +154,27 @@ enum UserRole {
   USER
 }
 
+enum SecurityEventType {
+  AUTH_FAILURE
+  LOGIN_FAILED
+  LOGIN_SUCCEEDED
+  ACCOUNT_LOCKED
+  PUBLISH_REQUESTED
+  ADMIN_PUBLISH_ON_BEHALF
+  CREDENTIAL_UPSERTED
+  CREDENTIAL_ROTATED
+  CREDENTIAL_REENCRYPTED
+  CREDENTIAL_REVOKED
+  JOB_REPLAY_REQUESTED
+}
+
+enum PublisherCredentialAuditAction {
+  UPSERTED
+  ROTATED
+  REENCRYPTED
+  REVOKED
+}
+
 enum PublicationChannel {
   DEVTO
   MEDIUM
@@ -245,13 +266,21 @@ model User {
   name         String?
   role         UserRole @default(USER)
   isActive     Boolean  @default(true)
+  failedLoginAttempts Int @default(0)
+  lastLoginAt  DateTime?
+  lastFailedLoginAt DateTime?
+  lockedUntil  DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   ownedTopics           Topic[]                   @relation("TopicOwner")
   publisherCredentials  UserPublisherCredential[]
+  publisherCredentialAudits UserPublisherCredentialAudit[] @relation("UserCredentialAuditSubject")
+  actedCredentialAudits     UserPublisherCredentialAudit[] @relation("UserCredentialAuditActor")
   requestedPublications Publication[]             @relation("PublicationRequestedBy")
   publisherPublications Publication[]             @relation("PublicationPublisher")
+  actedSecurityEvents   SecurityEvent[]           @relation("SecurityEventActor")
+  subjectSecurityEvents SecurityEvent[]           @relation("SecurityEventSubject")
 
   @@index([role, isActive, createdAt(sort: Asc)])
 }
@@ -261,15 +290,61 @@ model UserPublisherCredential {
   userId         String
   channel        PublicationChannel
   encryptedToken String
+  keyVersion     Int                @default(1)
   tokenHint      String?
   settingsJson   Json?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audits UserPublisherCredentialAudit[]
 
   @@unique([userId, channel])
   @@index([channel, updatedAt(sort: Desc)])
+}
+
+model UserPublisherCredentialAudit {
+  id                String                       @id @default(uuid())
+  credentialId      String?
+  userId            String
+  actorUserId       String?
+  channel           PublicationChannel
+  action            PublisherCredentialAuditAction
+  encryptedToken    String?
+  keyVersion        Int
+  tokenHint         String?
+  settingsJson      Json?
+  createdAt         DateTime                     @default(now())
+
+  credential UserPublisherCredential? @relation(fields: [credentialId], references: [id], onDelete: SetNull)
+  user       User                    @relation("UserCredentialAuditSubject", fields: [userId], references: [id], onDelete: Cascade)
+  actorUser  User?                   @relation("UserCredentialAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([userId, channel, createdAt(sort: Desc)])
+  @@index([actorUserId, createdAt(sort: Desc)])
+}
+
+model SecurityEvent {
+  id            String            @id @default(uuid())
+  eventType     SecurityEventType
+  actorUserId   String?
+  subjectUserId String?
+  subjectEmail  String?
+  ipAddress     String?
+  userAgent     String?
+  path          String?
+  resourceType  String?
+  resourceId    String?
+  metadata      Json?
+  createdAt     DateTime          @default(now())
+
+  actorUser   User? @relation("SecurityEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  subjectUser User? @relation("SecurityEventSubject", fields: [subjectUserId], references: [id], onDelete: SetNull)
+
+  @@index([eventType, createdAt(sort: Desc)])
+  @@index([actorUserId, createdAt(sort: Desc)])
+  @@index([subjectUserId, createdAt(sort: Desc)])
+  @@index([resourceType, resourceId, createdAt(sort: Desc)])
 }
 
 model ContentItem {

@@ -8,6 +8,10 @@ const userSummarySelect = {
   name: true,
   role: true,
   isActive: true,
+  failedLoginAttempts: true,
+  lastLoginAt: true,
+  lastFailedLoginAt: true,
+  lockedUntil: true,
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.UserSelect;
@@ -43,6 +47,30 @@ export class UserAccountRepository {
       where: { role, isActive: true },
       select: { id: true, email: true, name: true, role: true },
       orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  recordFailedLogin(userId: string, lockedUntil?: Date | null) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        failedLoginAttempts: { increment: 1 },
+        lastFailedLoginAt: new Date(),
+        lockedUntil: lockedUntil ?? null,
+      },
+      select: userSummarySelect,
+    });
+  }
+
+  clearLoginFailures(userId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        lastLoginAt: new Date(),
+      },
+      select: userSummarySelect,
     });
   }
 }

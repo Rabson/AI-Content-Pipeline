@@ -1,4 +1,5 @@
 import { getServerSession } from 'next-auth';
+import { signServiceToken } from '@aicp/shared-config/auth/service-token';
 import { env } from '../config/env';
 import { authOptions } from './auth-options';
 
@@ -39,10 +40,15 @@ export async function getDashboardAuthHeaders() {
 
   return {
     'Content-Type': 'application/json',
-    'x-actor-id': user.id,
-    'x-actor-role': user.role,
-    'x-user-email': user.email,
-    ...(user.name ? { 'x-user-name': user.name } : {}),
-    ...(env.internalApiToken ? { 'x-internal-api-token': env.internalApiToken } : {}),
+    Authorization: `Bearer ${signServiceToken({
+      secret: env.internalServiceJwtSecret,
+      issuer: env.internalServiceJwtIssuer,
+      audience: env.internalServiceJwtAudience,
+      subject: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      ttlSeconds: env.internalServiceJwtTtlSeconds,
+    })}`,
   };
 }

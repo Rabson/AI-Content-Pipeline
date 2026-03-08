@@ -1,9 +1,7 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { PublicationChannel } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { PublicationChannel, PublisherCredentialAuditAction } from '@prisma/client';
 import { AuthenticatedUser } from '../../../common/interfaces/authenticated-request.interface';
-import { CasbinAuthorizationService } from '../../../common/auth/casbin-authorization.service';
 import { UpsertUserPublisherCredentialDto } from '../dto/upsert-user-publisher-credential.dto';
-import { UserAccountRepository } from '../repositories/user-account.repository';
 import { UserPublisherCredentialRepository } from '../repositories/user-publisher-credential.repository';
 import {
   buildCredentialSettings,
@@ -11,16 +9,18 @@ import {
   sanitizeCredential,
 } from './helpers/user-publisher-credential.helper';
 import { TokenCryptoService } from './token-crypto.service';
+import { UserPublisherCredentialAccessService } from './user-publisher-credential-access.service';
+import { UserPublisherCredentialAuditService } from './user-publisher-credential-audit.service';
 import { UserPublisherTokenResolverService } from './user-publisher-token-resolver.service';
 
 @Injectable()
 export class UserPublisherCredentialService {
   constructor(
-    private readonly accountRepository: UserAccountRepository,
     private readonly credentialRepository: UserPublisherCredentialRepository,
-    private readonly authorizationService: CasbinAuthorizationService,
     private readonly tokenCryptoService: TokenCryptoService,
     private readonly tokenResolver: UserPublisherTokenResolverService,
+    private readonly accessService: UserPublisherCredentialAccessService,
+    private readonly auditService: UserPublisherCredentialAuditService,
   ) {}
 
   async listOwn(userId: string) {
@@ -29,38 +29,56 @@ export class UserPublisherCredentialService {
   }
 
   async upsertOwn(actor: AuthenticatedUser, channel: PublicationChannel, dto: UpsertUserPublisherCredentialDto) {
-    await this.assertCredentialScope(actor, actor.id, 'own');
-    await this.ensureUser(actor.id);
-    return sanitizeCredential(await this.credentialRepository.upsert({
+    await this.accessService.assertOwnCredentialAccess(actor);
+    const current = await this.credentialRepository.findByUserAndChannel(actor.id, channel);
+    const encryptedToken = this.tokenCryptoService.encrypt(dto.token.trim());
+    const keyVersion = this.tokenCryptoService.currentKeyVersion();
+    const tokenHint = buildTokenHint(dto.token);
+    const settingsJson = buildCredentialSettings(dto);
+    const updated = await this.credentialRepository.upsert({
       userId: actor.id,
       channel,
-      encryptedToken: this.tokenCryptoService.encrypt(dto.token.trim()),
-      tokenHint: buildTokenHint(dto.token),
-      settingsJson: buildCredentialSettings(dto),
-    }));
+      encryptedToken,
+      keyVersion,
+      tokenHint,
+      settingsJson,
+    });
+    const action = current
+      ? PublisherCredentialAuditAction.ROTATED
+      : PublisherCredentialAuditAction.UPSERTED;
+    await this.auditService.recordChange(action, {
+      actorUserId: actor.id,
+      userId: actor.id,
+      channel,
+      credentialId: updated.id,
+      encryptedToken,
+      keyVersion,
+      tokenHint,
+      settingsJson,
+    });
+    return sanitizeCredential(updated);
   }
 
   async deleteOwn(actor: AuthenticatedUser, channel: PublicationChannel) {
-    await this.assertCredentialScope(actor, actor.id, 'own');
+    await this.accessService.assertOwnCredentialAccess(actor);
+    const current = await this.credentialRepository.findByUserAndChannel(actor.id, channel);
+    if (current) {
+      await this.auditService.recordChange(PublisherCredentialAuditAction.REVOKED, {
+        actorUserId: actor.id,
+        userId: actor.id,
+        channel,
+        credentialId: current.id,
+        encryptedToken: current.encryptedToken,
+        keyVersion: current.keyVersion,
+        tokenHint: current.tokenHint,
+        settingsJson: current.settingsJson,
+      });
+    }
     await this.credentialRepository.delete(actor.id, channel);
     return { deleted: true, channel };
   }
 
   async resolveToken(userId: string, channel: PublicationChannel) {
     return this.tokenResolver.resolveToken(userId, channel);
-  }
-
-  private async ensureUser(userId: string) {
-    if (!(await this.accountRepository.findById(userId))) {
-      throw new NotFoundException('User not found');
-    }
-  }
-
-  private async assertCredentialScope(actor: AuthenticatedUser, targetUserId: string, ownScope: 'own' | 'any') {
-    const scope = actor.id === targetUserId ? ownScope : 'any';
-    await this.authorizationService.assertCredentialAccess(actor.role, scope);
-    if (scope === 'any' && actor.id !== targetUserId) {
-      throw new ForbiddenException('Cross-user credential access is not enabled');
-    }
   }
 }
