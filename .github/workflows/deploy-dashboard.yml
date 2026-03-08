@@ -19,11 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Resolve preview Vercel project id
+        id: project
+        run: echo "id=${VERCEL_PREVIEW_PROJECT_ID:-$VERCEL_PROJECT_ID}" >> "$GITHUB_OUTPUT"
+        env:
+          VERCEL_PREVIEW_PROJECT_ID: ${{ secrets.VERCEL_PREVIEW_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       - uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PREVIEW_PROJECT_ID || secrets.VERCEL_PROJECT_ID }}
+          vercel-project-id: ${{ steps.project.outputs.id }}
           working-directory: apps/dashboard
 
   staging:

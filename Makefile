@@ -4,7 +4,6 @@ SHELL := /bin/bash
 COMPOSE_BASE_FILE := infra/docker/compose.base.yml
 COMPOSE_LOCAL_FILE := infra/docker/compose.local.yml
 STAGINGLIKE_COMPOSE_FILE := infra/docker/docker-compose.staginglike.yml
-PRISMA_SCHEMA := apps/api/src/prisma/schema.prisma
 ENV_FILE ?= .env
 
 .PHONY: help install prisma-generate prisma-migrate-dev prisma-migrate-deploy prisma-studio \
@@ -25,7 +24,7 @@ prisma-generate: ## Generate Prisma client from schema
 	@set -a; \
 	if [ -f "$(ENV_FILE)" ]; then source "$(ENV_FILE)"; else echo "Missing $(ENV_FILE). Create it from .env.example."; exit 0; fi; \
 	set +a; \
-	npx prisma generate --schema $(PRISMA_SCHEMA)
+	npx prisma generate
 
 prisma-migrate-dev: ## Run Prisma dev migration (use: make prisma-migrate-dev NAME=your_migration)
 	@if [ -z "$(NAME)" ]; then echo "Usage: make prisma-migrate-dev NAME=your_migration"; exit 0; fi
@@ -39,7 +38,7 @@ prisma-migrate-dev: ## Run Prisma dev migration (use: make prisma-migrate-dev NA
 	  echo "Database $$DB_HOST:$$DB_PORT is not reachable; skipping prisma-migrate-dev."; \
 	  exit 0; \
 	fi; \
-	npx prisma migrate dev --schema $(PRISMA_SCHEMA) --name $(NAME)
+	npx prisma migrate dev --name $(NAME)
 
 prisma-migrate-deploy: ## Apply Prisma migrations in deploy mode
 	@set -a; \
@@ -52,7 +51,7 @@ prisma-migrate-deploy: ## Apply Prisma migrations in deploy mode
 	  echo "Database $$DB_HOST:$$DB_PORT is not reachable; skipping prisma-migrate-deploy."; \
 	  exit 0; \
 	fi; \
-	npx prisma migrate deploy --schema $(PRISMA_SCHEMA)
+	npx prisma migrate deploy
 
 prisma-studio: ## Open Prisma Studio
 	@set -a; \
@@ -65,7 +64,7 @@ prisma-studio: ## Open Prisma Studio
 	  echo "Database $$DB_HOST:$$DB_PORT is not reachable; skipping prisma-studio."; \
 	  exit 0; \
 	fi; \
-	npx prisma studio --schema $(PRISMA_SCHEMA)
+	npx prisma studio
 
 dev-api: ## Run API in dev mode
 	@set -a; \

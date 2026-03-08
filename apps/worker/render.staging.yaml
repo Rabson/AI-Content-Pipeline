@@ -4,7 +4,7 @@ services:
     runtime: node
     rootDir: .
     plan: starter
-    buildCommand: npm install && npx prisma generate --schema apps/api/src/prisma/schema.prisma && npm run build:worker
+    buildCommand: npm install && npx prisma generate && npm run build:worker
     startCommand: npm run start:worker
     envVars:
       - key: APP_ENV

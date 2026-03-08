@@ -19,7 +19,7 @@ if [ "$LOCK_HASH" != "$CURRENT_HASH" ] || [ "$PRISMA_READY" -ne 1 ]; then
     npm ci --no-audit
   fi
 
-  ./node_modules/.bin/prisma generate --schema apps/api/src/prisma/schema.prisma
+  ./node_modules/.bin/prisma generate
   mkdir -p node_modules
   printf '%s' "$LOCK_HASH" > node_modules/.package-lock.hash
 fi
