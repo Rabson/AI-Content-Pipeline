@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Prisma, SocialPlatform, SocialPostStatus } from '@prisma/client';
 import { estimateLlmCostUsd } from '../../common/llm/usage-cost.util';
 import type { PrismaService } from '../../prisma/prisma.service';
@@ -6,7 +7,7 @@ import type { PersistGeneratedLinkedInDraftParams } from './social.repository.ty
 
 export async function persistGeneratedLinkedInDraft(prisma: PrismaService, params: PersistGeneratedLinkedInDraftParams) {
   const topic = await findTopicById(prisma, params.topicId);
-  if (!topic) throw new Error('Topic not found');
+  if (!topic) throw new NotFoundException('Topic not found');
 
   return prisma.$transaction(async (tx) => {
     const socialPost = await ensureLinkedInPost(tx, params.topicId, topic.contentItemId ?? undefined);

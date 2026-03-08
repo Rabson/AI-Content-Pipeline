@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import { TopicStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import type { DiscoveryCandidate } from '../providers/discovery-provider.interface';
 import { extractDiscoveryTokens } from '../utils/discovery.util';
@@ -57,7 +58,7 @@ export async function rejectDiscoveryCandidate(
     reason,
     topicUpdate: { rejectedBy: actorId, rejectedAt: new Date(), rejectionReason: reason },
   });
-  if (!rejected) throw new Error('Failed to filter discovery candidate');
+  if (!rejected) throw new ConflictException('Failed to filter discovery candidate');
   await deps.workflowService.syncTopicStatus({
     topicId,
     topicStatus: TopicStatus.REJECTED,

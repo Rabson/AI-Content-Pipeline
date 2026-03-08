@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import { Prisma, TopicStatus } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 
@@ -19,7 +20,7 @@ export async function transitionTopicStatus(
       where: { id: topicId, status: fromStatus, deletedAt: null },
       data: { status: toStatus, ...(topicUpdate ?? {}) },
     });
-    if (updated.count !== 1) throw new Error('Status transition failed due to stale state');
+    if (updated.count !== 1) throw new ConflictException('Status transition failed due to stale state');
     await tx.topicStatusHistory.create({
       data: { topicId, fromStatus, toStatus, actorId, reason, metadata },
     });

@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import { env } from './env';
 
 export function isPhaseEnabled(phase: 2 | 3): boolean {
@@ -8,6 +9,6 @@ export function isPhaseEnabled(phase: 2 | 3): boolean {
 
 export function assertPhaseEnabled(phase: 2 | 3) {
   if (!isPhaseEnabled(phase)) {
-    throw new Error(`Phase ${phase} features are disabled in this environment`);
+    throw new ServiceUnavailableException(`Phase ${phase} features are disabled in this environment`);
   }
 }

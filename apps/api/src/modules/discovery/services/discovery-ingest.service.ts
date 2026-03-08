@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { TopicRepository } from '../../topic/topic.repository';
 import { TopicScoringService } from '../../topic/topic.scoring.service';
 import { DEFAULT_DISCOVERY_MIN_SCORE } from '../constants/discovery.constants';
@@ -49,7 +49,7 @@ export class DiscoveryIngestService {
     }
 
     const scored = await this.deps.topicRepository.findById(intake.submitted.id);
-    if (!scored) throw new Error('Scored discovery candidate not found');
+    if (!scored) throw new NotFoundException('Scored discovery candidate not found');
     return { topic: scored, disposition: 'scored' as const, scoreTotal: score.total };
   }
 }

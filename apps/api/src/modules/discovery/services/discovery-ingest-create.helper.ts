@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import { TopicStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { normalizeTopicTags, slugifyTopicTitle } from '../../topic/utils/topic-normalization.util';
 import type { DiscoveryCandidate } from '../providers/discovery-provider.interface';
@@ -47,7 +48,7 @@ export async function prepareCandidateIngest(
     reason: 'Discovery intake',
     metadata: { source: candidate.source, sourceUrl: candidate.sourceUrl ?? null, externalId: candidate.externalId ?? null },
   });
-  if (!submitted) throw new Error('Failed to submit discovery candidate');
+  if (!submitted) throw new ConflictException('Failed to submit discovery candidate');
   await deps.workflowService.syncTopicStatus({
     topicId: created.id,
     topicStatus: TopicStatus.SUBMITTED,

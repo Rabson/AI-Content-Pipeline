@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { env } from '../../../config/env';
 
@@ -22,7 +22,7 @@ export class StorageSigningService {
   getBucketOrThrow() {
     const bucket = env.storageBucket;
     if (!bucket) {
-      throw new Error('STORAGE_BUCKET is not configured');
+      throw new InternalServerErrorException('STORAGE_BUCKET is not configured');
     }
 
     return bucket;

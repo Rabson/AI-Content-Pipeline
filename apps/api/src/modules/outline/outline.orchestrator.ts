@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ContentState, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
 import { env } from '../../config/env';
@@ -18,9 +18,7 @@ export class OutlineOrchestrator {
 
   async run(topicId: string) {
     const topic = await this.repository.findTopicById(topicId);
-    if (!topic) {
-      throw new Error('Topic not found');
-    }
+    if (!topic) throw new NotFoundException('Topic not found');
 
     const research = await this.repository.getLatestResearch(topicId);
 

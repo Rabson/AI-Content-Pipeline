@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ArtifactType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { estimateLlmCostUsd } from '../../common/llm/usage-cost.util';
@@ -54,9 +54,7 @@ export class SeoRepository {
   }) {
     const versionNumber = await this.nextVersion(params.topicId);
     const topic = await this.findTopicById(params.topicId);
-    if (!topic) {
-      throw new Error('Topic not found');
-    }
+    if (!topic) throw new NotFoundException('Topic not found');
 
     return this.prisma.$transaction(async (tx) => {
       const artifact = await this.createArtifactVersion(tx, params, versionNumber);
