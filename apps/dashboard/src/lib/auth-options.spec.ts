@@ -55,6 +55,34 @@ describe('dashboard auth options', () => {
     expect(result).toBeNull();
   });
 
+  it('maps role and name into the JWT/session callbacks', async () => {
+    const jwt = authOptions.callbacks?.jwt as NonNullable<typeof authOptions.callbacks>['jwt'];
+    const session = authOptions.callbacks?.session as NonNullable<typeof authOptions.callbacks>['session'];
+
+    const token = await jwt({
+      token: { sub: 'user-1' } as any,
+      user: { id: 'user-1', email: 'editor@example.com', role: 'EDITOR', name: 'Editor User' } as any,
+      account: null,
+      profile: undefined,
+      trigger: 'signIn',
+      session: undefined,
+      isNewUser: false,
+    });
+
+    const mapped = await session({
+      session: { user: { email: 'editor@example.com' } } as any,
+      token,
+      user: undefined,
+      newSession: undefined,
+      trigger: 'update',
+    });
+
+    const user = mapped.user as { role: string; id: string; name?: string | null };
+    expect(user.role).toBe('EDITOR');
+    expect(user.id).toBe('user-1');
+    expect(user.name).toBe('Editor User');
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
     Object.assign(env as Record<string, unknown>, original);
