@@ -94,10 +94,10 @@ export async function generateLinkedInAction(topicId: string) {
   refreshTopicPaths(topicId);
 }
 
-export async function publishDevtoAction(topicId: string) {
-  await backendMutation(`/v1/topics/${topicId}/publications/devto`, {
+export async function requestPublicationAction(topicId: string, channel: string) {
+  await backendMutation(`/v1/topics/${topicId}/publications`, {
     method: 'POST',
-    body: JSON.stringify({ tags: ['ai', 'contentops'] }),
+    body: JSON.stringify({ channel, tags: ['ai', 'contentops'] }),
   });
   refreshTopicPaths(topicId);
 }

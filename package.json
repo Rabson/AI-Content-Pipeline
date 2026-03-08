@@ -6,6 +6,10 @@
     "apps/*",
     "packages/*"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rabson/AI-Content-Pipeline.git"
+  },
   "scripts": {
     "build:shared-config": "npm --workspace @aicp/shared-config run build",
     "dev:api": "npm run build:shared-config && node scripts/run-with-root-env.mjs npm --workspace @aicp/api run start:dev",
@@ -25,7 +29,7 @@
     "test": "npm run test --workspaces"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^15.2.0",
+    "@next/eslint-plugin-next": "^15.5.12",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
     "eslint": "^8.57.1",

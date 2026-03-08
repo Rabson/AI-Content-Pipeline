@@ -4,12 +4,16 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { GenerateSeoDto } from './dto/generate-seo.dto';
 import { SeoService } from './seo.service';
+import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 
-@Roles(AppRole.EDITOR)
 @Controller('v1/topics/:topicId/seo')
 export class SeoController {
-  constructor(private readonly seoService: SeoService) {}
+  constructor(
+    private readonly seoService: SeoService,
+    private readonly ownershipService: UserTopicOwnershipService,
+  ) {}
 
+  @Roles(AppRole.EDITOR)
   @Post('generate')
   generate(
     @Param('topicId') topicId: string,
@@ -20,8 +24,10 @@ export class SeoController {
     return this.seoService.enqueue(topicId, dto, actorId);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get()
-  latest(@Param('topicId') topicId: string) {
+  async latest(@Param('topicId') topicId: string, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.seoService.getLatest(topicId);
   }
 }

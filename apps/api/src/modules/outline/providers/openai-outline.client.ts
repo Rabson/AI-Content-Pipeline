@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { env } from '../../../config/env';
+import { requestOpenAiChatCompletion } from '../../../common/llm/openai-request.util';
 import { OUTLINE_SYSTEM_PROMPT } from '../prompts/outline-system.prompt';
 import { OUTLINE_OUTPUT_SCHEMA } from '../prompts/outline-json-schema';
 import { buildOutlinePrompt, OutlinePromptInput } from '../prompts/outline.prompt';
@@ -16,18 +17,8 @@ export class OpenAiOutlineClient {
     };
     usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
   }> {
-    const apiKey = env.openAiApiKey;
-    if (!apiKey) {
-      throw new InternalServerErrorException('OPENAI_API_KEY is not configured');
-    }
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    const json = await requestOpenAiChatCompletion(
+      {
         model: this.model,
         temperature: 0.2,
         messages: [
@@ -38,15 +29,9 @@ export class OpenAiOutlineClient {
           type: 'json_schema',
           json_schema: OUTLINE_OUTPUT_SCHEMA,
         },
-      }),
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new InternalServerErrorException(`OpenAI outline generation failed: ${response.status} ${text}`);
-    }
-
-    const json = await response.json();
+      },
+      'OpenAI outline generation',
+    );
     const content = json?.choices?.[0]?.message?.content;
 
     if (!content) {

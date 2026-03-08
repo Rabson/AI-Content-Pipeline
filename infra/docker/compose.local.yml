@@ -1,9 +1,27 @@
 version: '3.9'
 services:
+  postgres:
+    volumes:
+      - ../../.local-data/postgres:/var/lib/postgresql/data
+
+  redis:
+    command:
+      - redis-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --stop-writes-on-bgsave-error
+      - "no"
+
   api:
     build:
       target: dev
     working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - sh scripts/docker-dev-bootstrap.sh dev:api
     volumes:
       - ../../:/workspace
       - api_node_modules:/workspace/node_modules
@@ -15,6 +33,10 @@ services:
     build:
       target: dev
     working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - sh scripts/docker-dev-bootstrap.sh dev:worker
     volumes:
       - ../../:/workspace
       - worker_node_modules:/workspace/node_modules
@@ -25,6 +47,10 @@ services:
     build:
       target: dev
     working_dir: /workspace
+    command:
+      - sh
+      - -lc
+      - sh scripts/docker-dev-bootstrap.sh dev:dashboard
     volumes:
       - ../../:/workspace
       - dashboard_node_modules:/workspace/node_modules

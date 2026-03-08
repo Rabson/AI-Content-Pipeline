@@ -6,12 +6,16 @@ import { AddSourceDto } from './dto/add-source.dto';
 import { ResearchQueryDto } from './dto/research-query.dto';
 import { RunResearchDto } from './dto/run-research.dto';
 import { ResearchService } from './research.service';
+import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 
-@Roles(AppRole.EDITOR)
 @Controller('v1/topics/:topicId/research')
 export class ResearchController {
-  constructor(private readonly researchService: ResearchService) {}
+  constructor(
+    private readonly researchService: ResearchService,
+    private readonly ownershipService: UserTopicOwnershipService,
+  ) {}
 
+  @Roles(AppRole.EDITOR)
   @Post('run')
   run(
     @Param('topicId') topicId: string,
@@ -21,13 +25,17 @@ export class ResearchController {
     return this.researchService.enqueue(topicId, dto, this.actorId(req));
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get()
-  latest(@Param('topicId') topicId: string, @Query() query: ResearchQueryDto) {
+  async latest(@Param('topicId') topicId: string, @Query() query: ResearchQueryDto, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.researchService.getLatest(topicId, query);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get('versions')
-  versions(@Param('topicId') topicId: string) {
+  async versions(@Param('topicId') topicId: string, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.researchService.listVersions(topicId);
   }
 

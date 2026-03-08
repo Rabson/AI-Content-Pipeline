@@ -14,7 +14,7 @@
     "@aicp/shared-config": "0.1.0",
     "@aws-sdk/client-s3": "^3.1004.0",
     "@aws-sdk/s3-request-presigner": "^3.1004.0",
-    "next": "15.2.0",
+    "next": "^15.5.12",
     "next-auth": "^4.24.13",
     "react": "19.0.0",
     "react-dom": "19.0.0"

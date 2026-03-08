@@ -20,6 +20,7 @@ export class StorageRepository {
     objectKey: string;
     publicUrl?: string;
     mimeType?: string;
+    sizeBytes?: number;
     purpose: any;
     createdBy?: string;
   }) {

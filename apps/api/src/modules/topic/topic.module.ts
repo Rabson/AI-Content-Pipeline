@@ -8,6 +8,7 @@ import { TopicStatusMachine } from './topic.status-machine';
 import { TopicQueueService } from './topic.queue.service';
 import { CONTENT_PIPELINE_QUEUE } from './constants/topic-queue.constants';
 import { PrismaService } from '../../prisma/prisma.service';
+import { UserModule } from '../user/user.module';
 import { TopicCommandService } from './services/topic-command.service';
 import { TopicIntakeCommandService } from './services/topic-intake-command.service';
 import { TopicQueryService } from './services/topic-query.service';
@@ -15,6 +16,7 @@ import { TopicReviewCommandService } from './services/topic-review-command.servi
 
 @Module({
   imports: [
+    UserModule,
     BullModule.registerQueue({
       name: CONTENT_PIPELINE_QUEUE,
     }),

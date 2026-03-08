@@ -8,6 +8,7 @@ function getNavItems(user: DashboardShellUser, phase3Enabled: boolean) {
   return [
     { href: '/', label: 'Overview', enabled: true },
     { href: '/topics', label: 'Topics', enabled: true },
+    { href: '/account', label: 'Account', enabled: Boolean(user.role) },
     { href: '/analytics', label: 'Analytics', enabled: phase3Enabled },
     { href: '/ops', label: 'Ops', enabled: user.role === 'ADMIN' },
   ].filter((item) => item.enabled);

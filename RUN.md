@@ -29,6 +29,9 @@ cd <repo-root>
 docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d
 ```
 
+First local boot after a `package-lock.json` change is slower because each app container refreshes its own `node_modules` volume. API and worker also regenerate Prisma during that refresh.
+Local Postgres data is stored in `.local-data/postgres` on the host, so local Docker boots do not depend on a Docker Desktop volume for database writes.
+
 ### Verify
 ```bash
 curl -fsS http://localhost:3001/api/health
@@ -119,11 +122,14 @@ make clean
 
 ## Local Access
 - Dashboard sign-in: `http://localhost:3003/signin`
-- `ADMIN`: `operator@example.com` / `local-access`
-- `REVIEWER`: `reviewer@example.com` / `local-access`
-- `EDITOR`: `editor@example.com` / `local-access`
+- `ADMIN`: `admin@example.com` / `AdminPass123!`
+- `EDITOR`: `editor@example.com` / `EditorPass123!`
+- `REVIEWER`: `reviewer@example.com` / `ReviewerPass123!`
+- `USER`: `normal_user@example.com` / `UserPass123!`
 
 ## Notes
 - Root `npm start` is not defined; use `start:api`, `start:worker`, and `start:dashboard`.
 - Root scripts build `@aicp/shared-config` and inject the repo-level `.env` automatically.
+- API and worker must share the same `USER_TOKEN_ENCRYPTION_KEY`, because publisher tokens are encrypted in API and decrypted in worker during publish jobs.
 - For Docker-only command detail, see [docker-local-commands.md](./docs/docker-local-commands.md).
+- Non-local dashboard -> API calls require `INTERNAL_API_TOKEN`; local mode can still use `AUTH_ALLOW_HEADER_BYPASS=true`.

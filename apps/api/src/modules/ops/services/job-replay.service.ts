@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, WorkflowEventType, WorkflowStage } from '@prisma/client';
+import { SecurityEventService } from '../../../common/security/security-event.service';
 import { WorkflowService } from '../../workflow/workflow.service';
 import { JobExecutionRepository } from '../repositories/job-execution.repository';
 import { QueueRegistryService } from './queue-registry.service';
@@ -10,9 +11,11 @@ export class JobReplayService {
     private readonly jobExecutionRepository: JobExecutionRepository,
     private readonly workflowService: WorkflowService,
     private readonly queueRegistry: QueueRegistryService,
+    private readonly securityEventService: SecurityEventService,
   ) {}
 
   async replayExecution(executionId: string, actorId: string) {
+    this.securityEventService.replayRequested({ executionId, actorId });
     const execution = await this.jobExecutionRepository.findExecutionById(executionId);
     if (!execution) {
       throw new NotFoundException('Job execution not found');

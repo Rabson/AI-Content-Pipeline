@@ -18,7 +18,7 @@ describe('OutlineService', () => {
     expect(queue.add).toHaveBeenCalledWith(
       'outline.generate',
       expect.objectContaining({ topicId: 'topic-1' }),
-      expect.objectContaining({ jobId: 'outline:topic:topic-1:latest' }),
+      expect.objectContaining({ jobId: 'outline__topic__topic-1__latest' }),
     );
   });
 });

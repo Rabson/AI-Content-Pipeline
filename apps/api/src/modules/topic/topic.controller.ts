@@ -20,38 +20,49 @@ import { RejectTopicDto } from './dto/reject-topic.dto';
 import { HandoffResearchDto } from './dto/handoff-research.dto';
 import { ListTopicsQueryDto } from './dto/list-topics-query.dto';
 import { TopicService } from './topic.service';
+import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 
-@Roles(AppRole.EDITOR)
 @Controller('v1/topics')
 export class TopicController {
-  constructor(private readonly topicService: TopicService) {}
+  constructor(
+    private readonly topicService: TopicService,
+    private readonly ownershipService: UserTopicOwnershipService,
+  ) {}
 
+  @Roles(AppRole.EDITOR)
   @Post()
   create(@Body() dto: CreateTopicDto, @Req() req: AuthenticatedRequest) {
     const actorId = this.actorId(req);
     return this.topicService.createTopic(dto, actorId);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get()
-  list(@Query() query: ListTopicsQueryDto) {
-    return this.topicService.listTopics(query);
+  list(@Query() query: ListTopicsQueryDto, @Req() req: AuthenticatedRequest) {
+    return this.topicService.listTopics(query, req.user);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get(':id')
-  get(@Param('id') id: string) {
+  async get(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, id);
     return this.topicService.getTopic(id);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get(':id/status-history')
-  statusHistory(@Param('id') id: string) {
+  async statusHistory(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, id);
     return this.topicService.getStatusHistory(id);
   }
 
+  @Roles(AppRole.EDITOR)
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateTopicDto) {
     return this.topicService.updateTopic(id, dto);
   }
 
+  @Roles(AppRole.EDITOR)
   @Post(':id/submit')
   submit(
     @Param('id') id: string,
@@ -87,6 +98,7 @@ export class TopicController {
     return this.topicService.rejectTopic(id, dto, this.actorId(req));
   }
 
+  @Roles(AppRole.EDITOR)
   @Post(':id/handoff-research')
   handoffResearch(
     @Param('id') id: string,

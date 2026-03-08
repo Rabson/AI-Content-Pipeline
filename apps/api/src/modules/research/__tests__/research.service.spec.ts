@@ -5,7 +5,7 @@ import { ResearchService } from '../research.service';
 describe('ResearchService', () => {
   it('enqueues research job with an idempotent key', async () => {
     const queue = {
-      getJob: vi.fn().mockResolvedValue({ id: 'research:topic:1:v1' }),
+      getJob: vi.fn().mockResolvedValue({ id: 'research__topic__1__v1' }),
     } as any;
     const repository = {
       findTopicById: vi.fn().mockResolvedValue({ id: 'topic-1', status: TopicStatus.APPROVED }),
@@ -26,7 +26,7 @@ describe('ResearchService', () => {
         idempotent: true,
       }),
     );
-    expect(queue.getJob).toHaveBeenCalledWith('research:topic:topic-1:v1');
+    expect(queue.getJob).toHaveBeenCalledWith('research__topic__topic-1__v1');
   });
 
   it('returns the latest structured research artifact', async () => {

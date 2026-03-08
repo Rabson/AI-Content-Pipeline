@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { env } from '../../../config/env';
+import { requestOpenAiChatCompletion } from '../../../common/llm/openai-request.util';
 
 export interface SeoGenerationInput {
   topicTitle: string;
@@ -30,22 +31,20 @@ export class SeoGeneratorService {
       };
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.openAiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(this.buildRequest(input)),
-    });
-
-    if (!response.ok) {
+    try {
+      const json = await requestOpenAiChatCompletion(
+        this.buildRequest(input),
+        'OpenAI SEO generation',
+      );
+      return {
+        output: JSON.parse(json.choices[0].message.content) as SeoGenerationOutput,
+        usage: json.usage,
+      };
+    } catch {
       return {
         output: this.fallback(input),
       };
     }
-
-    return this.parseResponse(response);
   }
 
   private buildRequest(input: SeoGenerationInput) {
@@ -90,15 +89,6 @@ export class SeoGeneratorService {
       },
     };
   }
-
-  private async parseResponse(response: Response) {
-    const json = await response.json();
-    return {
-      output: JSON.parse(json.choices[0].message.content) as SeoGenerationOutput,
-      usage: json.usage,
-    };
-  }
-
   private fallback(input: SeoGenerationInput): SeoGenerationOutput {
     const description = (input.topicBrief ?? input.markdown ?? input.topicTitle)
       .replace(/\s+/g, ' ')

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaService } from '../../prisma/prisma.service';
+import { UserModule } from '../user/user.module';
 import { CONTENT_PIPELINE_QUEUE } from './constants/seo.constants';
 import { SeoController } from './seo.controller';
 import { SeoOrchestrator } from './seo.orchestrator';
@@ -10,6 +11,7 @@ import { SeoGeneratorService } from './providers/seo-generator.service';
 
 @Module({
   imports: [
+    UserModule,
     BullModule.registerQueue({
       name: CONTENT_PIPELINE_QUEUE,
     }),

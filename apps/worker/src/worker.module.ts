@@ -59,6 +59,8 @@ import { WorkerAnalyticsProcessor } from './processors/analytics.processor';
 import { PublisherRepository } from '../../api/src/modules/publisher/publisher.repository';
 import { PublisherOrchestrator } from '../../api/src/modules/publisher/publisher.orchestrator';
 import { DevtoAdapter } from '../../api/src/modules/publisher/providers/devto.adapter';
+import { LinkedInAdapter } from '../../api/src/modules/publisher/providers/linkedin.adapter';
+import { MediumAdapter } from '../../api/src/modules/publisher/providers/medium.adapter';
 import { PublicationVerifierService } from '../../api/src/modules/publisher/providers/publication-verifier.service';
 import { PublisherRegistryService } from '../../api/src/modules/publisher/providers/publisher-registry.service';
 import { WorkerPublishProcessor } from './processors/publish.processor';
@@ -73,6 +75,9 @@ import { CONTENT_PIPELINE_QUEUE } from '../../api/src/modules/topic/constants/to
 import { SOCIAL_QUEUE } from '../../api/src/modules/social/constants/social.constants';
 import { PUBLISHING_QUEUE } from '../../api/src/modules/publisher/constants/publisher.constants';
 import { ANALYTICS_QUEUE } from '../../api/src/modules/analytics/constants/analytics.constants';
+import { UserPublisherCredentialRepository } from '../../api/src/modules/user/repositories/user-publisher-credential.repository';
+import { TokenCryptoService } from '../../api/src/modules/user/services/token-crypto.service';
+import { UserPublisherTokenResolverService } from '../../api/src/modules/user/services/user-publisher-token-resolver.service';
 
 @Module({
   imports: [
@@ -143,8 +148,13 @@ import { ANALYTICS_QUEUE } from '../../api/src/modules/analytics/constants/analy
     WorkerAnalyticsProcessor,
 
     PublisherRepository,
+    UserPublisherCredentialRepository,
+    TokenCryptoService,
+    UserPublisherTokenResolverService,
     PublisherOrchestrator,
     DevtoAdapter,
+    MediumAdapter,
+    LinkedInAdapter,
     PublisherRegistryService,
     PublicationVerifierService,
     WorkerPublishProcessor,

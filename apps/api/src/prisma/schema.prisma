@@ -147,8 +147,17 @@ enum RevisionRunStatus {
   FAILED
 }
 
+enum UserRole {
+  ADMIN
+  EDITOR
+  REVIEWER
+  USER
+}
+
 enum PublicationChannel {
   DEVTO
+  MEDIUM
+  LINKEDIN
 }
 
 enum PublicationStatus {
@@ -191,6 +200,7 @@ model Topic {
   rejectedBy         String?
   approvalNote       String?
   rejectionReason    String?
+  ownerUserId        String?
   contentItemId      String?     @unique
   researchJobId      String?
   researchEnqueuedAt DateTime?
@@ -200,25 +210,60 @@ model Topic {
   updatedAt          DateTime    @updatedAt
   deletedAt          DateTime?
 
-  contentItem        ContentItem?        @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
-  history            TopicStatusHistory[]
-  tags               TopicTag[]
-  researchArtifacts  ResearchArtifact[]
-  artifactVersions   ArtifactVersion[]
-  llmUsageLogs       LlmUsageLog[]
-  draftVersions      DraftVersion[]
-  reviewSessions     ReviewSession[]
-  revisionRuns       RevisionRun[]
-  outlines           Outline[]
-  publications       Publication[]
-  seoMetadata        SeoMetadata[]
-  socialPosts        SocialPost[]
-  workflowRuns       WorkflowRun[]
-  workflowEvents     WorkflowEvent[]
-  storageObjects     StorageObject[]
+  owner             User?                @relation("TopicOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  contentItem       ContentItem?         @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  history           TopicStatusHistory[]
+  tags              TopicTag[]
+  researchArtifacts ResearchArtifact[]
+  artifactVersions  ArtifactVersion[]
+  llmUsageLogs      LlmUsageLog[]
+  draftVersions     DraftVersion[]
+  reviewSessions    ReviewSession[]
+  revisionRuns      RevisionRun[]
+  outlines          Outline[]
+  publications      Publication[]
+  seoMetadata       SeoMetadata[]
+  socialPosts       SocialPost[]
+  workflowRuns      WorkflowRun[]
+  workflowEvents    WorkflowEvent[]
+  storageObjects    StorageObject[]
 
   @@index([status, createdAt(sort: Desc)])
   @@index([scoreTotal(sort: Desc)])
+  @@index([ownerUserId, updatedAt(sort: Desc)])
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         UserRole @default(USER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownedTopics           Topic[]                   @relation("TopicOwner")
+  publisherCredentials  UserPublisherCredential[]
+  requestedPublications Publication[]             @relation("PublicationRequestedBy")
+  publisherPublications Publication[]             @relation("PublicationPublisher")
+
+  @@index([role, isActive, createdAt(sort: Asc)])
+}
+
+model UserPublisherCredential {
+  id             String             @id @default(uuid())
+  userId         String
+  channel        PublicationChannel
+  encryptedToken String
+  tokenHint      String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channel])
+  @@index([channel, updatedAt(sort: Desc)])
 }
 
 model ContentItem {
@@ -231,31 +276,31 @@ model ContentItem {
   createdAt                    DateTime     @default(now())
   updatedAt                    DateTime     @updatedAt
 
-  topic                        Topic?
-  currentDraftVersion          DraftVersion?        @relation("ContentCurrentDraft", fields: [currentDraftVersionId], references: [id], onDelete: SetNull)
-  latestApprovedDraftVersion   DraftVersion?        @relation("ContentApprovedDraft", fields: [latestApprovedDraftVersionId], references: [id], onDelete: SetNull)
-  publications                 Publication[]
-  seoMetadata                  SeoMetadata[]
-  socialPosts                  SocialPost[]
-  workflowRuns                 WorkflowRun[]
-  workflowEvents               WorkflowEvent[]
-  llmUsageLogs                 LlmUsageLog[]
-  storageObjects               StorageObject[]
+  topic                      Topic?
+  currentDraftVersion        DraftVersion?   @relation("ContentCurrentDraft", fields: [currentDraftVersionId], references: [id], onDelete: SetNull)
+  latestApprovedDraftVersion DraftVersion?   @relation("ContentApprovedDraft", fields: [latestApprovedDraftVersionId], references: [id], onDelete: SetNull)
+  publications               Publication[]
+  seoMetadata                SeoMetadata[]
+  socialPosts                SocialPost[]
+  workflowRuns               WorkflowRun[]
+  workflowEvents             WorkflowEvent[]
+  llmUsageLogs               LlmUsageLog[]
+  storageObjects             StorageObject[]
 
   @@index([currentState, updatedAt(sort: Desc)])
 }
 
 model TopicStatusHistory {
-  id         String      @id @default(uuid())
+  id         String       @id @default(uuid())
   topicId    String
   fromStatus TopicStatus?
   toStatus   TopicStatus
   actorId    String
   reason     String?
   metadata   Json?
-  createdAt  DateTime    @default(now())
+  createdAt  DateTime     @default(now())
 
-  topic      Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   @@index([topicId, createdAt(sort: Desc)])
 }
@@ -271,9 +316,9 @@ model WorkflowRun {
   startedAt     DateTime          @default(now())
   endedAt       DateTime?
 
-  contentItem   ContentItem       @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
-  topic         Topic?            @relation(fields: [topicId], references: [id], onDelete: SetNull)
-  events        WorkflowEvent[]
+  contentItem ContentItem     @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  topic       Topic?          @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  events      WorkflowEvent[]
 
   @@index([contentItemId, startedAt(sort: Desc)])
   @@index([stage, status, startedAt(sort: Desc)])
@@ -292,9 +337,9 @@ model WorkflowEvent {
   metadata      Json?
   createdAt     DateTime          @default(now())
 
-  contentItem   ContentItem       @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
-  topic         Topic?            @relation(fields: [topicId], references: [id], onDelete: SetNull)
-  workflowRun   WorkflowRun?      @relation(fields: [workflowRunId], references: [id], onDelete: SetNull)
+  contentItem ContentItem  @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  topic       Topic?       @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  workflowRun WorkflowRun? @relation(fields: [workflowRunId], references: [id], onDelete: SetNull)
 
   @@index([contentItemId, createdAt(sort: Desc)])
   @@index([topicId, createdAt(sort: Desc)])
@@ -304,7 +349,7 @@ model WorkflowEvent {
 model TopicTag {
   topicId String
   tag     String
-  topic   Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topic   Topic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   @@id([topicId, tag])
 }
@@ -320,11 +365,11 @@ model ArtifactVersion {
   promptHash    String?
   createdAt     DateTime       @default(now())
 
-  topic         Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  research      ResearchArtifact?
-  outline       Outline?
-  draftVersion  DraftVersion?
-  seoMetadata   SeoMetadata?
+  topic        Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  research     ResearchArtifact?
+  outline      Outline?
+  draftVersion DraftVersion?
+  seoMetadata  SeoMetadata?
 
   @@unique([topicId, artifactType, versionNumber])
   @@index([topicId, artifactType, createdAt(sort: Desc)])
@@ -338,27 +383,27 @@ model Outline {
   objective         String
   createdAt         DateTime @default(now())
 
-  topic             Topic           @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  artifactVersion   ArtifactVersion @relation(fields: [artifactVersionId], references: [id], onDelete: Cascade)
-  sections          OutlineSection[]
+  topic           Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  artifactVersion ArtifactVersion  @relation(fields: [artifactVersionId], references: [id], onDelete: Cascade)
+  sections        OutlineSection[]
 
   @@index([topicId, createdAt(sort: Desc)])
 }
 
 model OutlineSection {
-  id              String          @id @default(uuid())
+  id              String   @id @default(uuid())
   outlineId       String
   sectionKey      String
   parentSectionId String?
   position        Int
   heading         String
   objective       String
-  targetWords     Int             @default(250)
-  createdAt       DateTime        @default(now())
+  targetWords     Int      @default(250)
+  createdAt       DateTime @default(now())
 
-  outline         Outline         @relation(fields: [outlineId], references: [id], onDelete: Cascade)
-  parentSection   OutlineSection? @relation("OutlineSectionHierarchy", fields: [parentSectionId], references: [id], onDelete: SetNull)
-  childSections   OutlineSection[] @relation("OutlineSectionHierarchy")
+  outline       Outline          @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+  parentSection OutlineSection?  @relation("OutlineSectionHierarchy", fields: [parentSectionId], references: [id], onDelete: SetNull)
+  childSections OutlineSection[] @relation("OutlineSectionHierarchy")
 
   @@unique([outlineId, sectionKey])
   @@index([outlineId, position])
@@ -374,60 +419,60 @@ model ResearchArtifact {
   confidenceScore   Decimal? @db.Decimal(3, 2)
   createdAt         DateTime @default(now())
 
-  topic             Topic           @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  artifactVersion   ArtifactVersion @relation(fields: [artifactVersionId], references: [id], onDelete: Cascade)
-  sources           SourceReference[]
-  keyPoints         ResearchKeyPoint[]
-  examples          ResearchExample[]
+  topic           Topic              @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  artifactVersion ArtifactVersion    @relation(fields: [artifactVersionId], references: [id], onDelete: Cascade)
+  sources         SourceReference[]
+  keyPoints       ResearchKeyPoint[]
+  examples        ResearchExample[]
 
   @@index([topicId, createdAt(sort: Desc)])
 }
 
 model SourceReference {
-  id                 String           @id @default(uuid())
+  id                 String     @id @default(uuid())
   researchArtifactId String
   url                String
   domain             String?
   title              String?
-  sourceType         SourceType       @default(OTHER)
+  sourceType         SourceType @default(OTHER)
   publishedAt        DateTime?
-  credibilityScore   Decimal?         @db.Decimal(3, 2)
-  relevanceScore     Decimal?         @db.Decimal(3, 2)
+  credibilityScore   Decimal?   @db.Decimal(3, 2)
+  relevanceScore     Decimal?   @db.Decimal(3, 2)
   excerpt            String?
   snippets           Json?
   language           String?
   notes              String?
-  createdAt          DateTime         @default(now())
+  createdAt          DateTime   @default(now())
 
-  researchArtifact   ResearchArtifact @relation(fields: [researchArtifactId], references: [id], onDelete: Cascade)
+  researchArtifact ResearchArtifact @relation(fields: [researchArtifactId], references: [id], onDelete: Cascade)
 
   @@index([researchArtifactId, createdAt(sort: Desc)])
   @@index([domain])
 }
 
 model ResearchKeyPoint {
-  id                 String           @id @default(uuid())
+  id                 String   @id @default(uuid())
   researchArtifactId String
   point              String
   importance         String
   sourceRefIds       Json
-  createdAt          DateTime         @default(now())
+  createdAt          DateTime @default(now())
 
-  researchArtifact   ResearchArtifact @relation(fields: [researchArtifactId], references: [id], onDelete: Cascade)
+  researchArtifact ResearchArtifact @relation(fields: [researchArtifactId], references: [id], onDelete: Cascade)
 
   @@index([researchArtifactId, createdAt(sort: Desc)])
 }
 
 model ResearchExample {
-  id                 String           @id @default(uuid())
+  id                 String   @id @default(uuid())
   researchArtifactId String
   exampleTitle       String
   exampleBody        String
   takeaway           String?
   sourceRefIds       Json
-  createdAt          DateTime         @default(now())
+  createdAt          DateTime @default(now())
 
-  researchArtifact   ResearchArtifact @relation(fields: [researchArtifactId], references: [id], onDelete: Cascade)
+  researchArtifact ResearchArtifact @relation(fields: [researchArtifactId], references: [id], onDelete: Cascade)
 
   @@index([researchArtifactId, createdAt(sort: Desc)])
 }
@@ -448,7 +493,7 @@ model JobExecution {
 }
 
 model LlmUsageLog {
-  id               String       @id @default(uuid())
+  id               String   @id @default(uuid())
   topicId          String
   contentItemId    String?
   module           String
@@ -456,57 +501,57 @@ model LlmUsageLog {
   promptTokens     Int
   completionTokens Int
   totalTokens      Int
-  costUsd          Decimal?     @db.Decimal(10, 6)
-  createdAt        DateTime     @default(now())
+  costUsd          Decimal? @db.Decimal(10, 6)
+  createdAt        DateTime @default(now())
 
-  topic            Topic        @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  contentItem      ContentItem? @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  topic       Topic        @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  contentItem ContentItem? @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
 
   @@index([topicId, createdAt(sort: Desc)])
   @@index([contentItemId, createdAt(sort: Desc)])
 }
 
 model DraftVersion {
-  id                         String             @id @default(uuid())
-  topicId                    String
-  artifactVersionId          String?            @unique
-  versionNumber             Int
-  status                    DraftVersionStatus @default(IN_PROGRESS)
-  assembledMarkdown         String?
-  createdBy                 String
-  approvedBy                String?
-  approvedAt                DateTime?
-  createdAt                 DateTime           @default(now())
-  updatedAt                 DateTime           @updatedAt
+  id                String             @id @default(uuid())
+  topicId           String
+  artifactVersionId String?            @unique
+  versionNumber     Int
+  status            DraftVersionStatus @default(IN_PROGRESS)
+  assembledMarkdown String?
+  createdBy         String
+  approvedBy        String?
+  approvedAt        DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
-  topic                     Topic              @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  artifactVersion           ArtifactVersion?   @relation(fields: [artifactVersionId], references: [id], onDelete: SetNull)
-  sections                  DraftSection[]
-  reviewSessions            ReviewSession[]
-  reviewComments            ReviewComment[]
-  revisionsFrom             RevisionRun[]      @relation("RevisionFrom")
-  revisionsTo               RevisionRun[]      @relation("RevisionTo")
-  currentForContentItems    ContentItem[]      @relation("ContentCurrentDraft")
-  approvedForContentItems   ContentItem[]      @relation("ContentApprovedDraft")
-  publications              Publication[]
+  topic                   Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  artifactVersion         ArtifactVersion? @relation(fields: [artifactVersionId], references: [id], onDelete: SetNull)
+  sections                DraftSection[]
+  reviewSessions          ReviewSession[]
+  reviewComments          ReviewComment[]
+  revisionsFrom           RevisionRun[]    @relation("RevisionFrom")
+  revisionsTo             RevisionRun[]    @relation("RevisionTo")
+  currentForContentItems  ContentItem[]    @relation("ContentCurrentDraft")
+  approvedForContentItems ContentItem[]    @relation("ContentApprovedDraft")
+  publications            Publication[]
 
   @@unique([topicId, versionNumber])
   @@index([topicId, createdAt(sort: Desc)])
 }
 
 model DraftSection {
-  id             String         @id @default(uuid())
+  id             String   @id @default(uuid())
   draftVersionId String
   sectionKey     String
   heading        String
   position       Int
   contentMd      String
-  wordCount      Int            @default(0)
+  wordCount      Int      @default(0)
   model          String?
   promptHash     String?
-  createdAt      DateTime       @default(now())
+  createdAt      DateTime @default(now())
 
-  draftVersion   DraftVersion   @relation(fields: [draftVersionId], references: [id], onDelete: Cascade)
+  draftVersion   DraftVersion    @relation(fields: [draftVersionId], references: [id], onDelete: Cascade)
   reviewComments ReviewComment[]
   revisionItems  RevisionItem[]
   sectionDiffs   SectionDiff[]
@@ -524,32 +569,32 @@ model ReviewSession {
   submittedAt    DateTime?
   createdAt      DateTime            @default(now())
 
-  topic          Topic               @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  draftVersion   DraftVersion        @relation(fields: [draftVersionId], references: [id], onDelete: Cascade)
-  comments       ReviewComment[]
-  revisionRuns   RevisionRun[]
+  topic        Topic           @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  draftVersion DraftVersion    @relation(fields: [draftVersionId], references: [id], onDelete: Cascade)
+  comments     ReviewComment[]
+  revisionRuns RevisionRun[]
 
   @@index([topicId, createdAt(sort: Desc)])
   @@index([draftVersionId])
 }
 
 model ReviewComment {
-  id             String               @id @default(uuid())
+  id              String                @id @default(uuid())
   reviewSessionId String
-  draftVersionId String
-  draftSectionId String
-  sectionKey     String
-  commentMd      String
-  severity       ReviewCommentSeverity
-  status         ReviewCommentStatus  @default(OPEN)
-  resolutionNote String?
-  createdBy      String
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
+  draftVersionId  String
+  draftSectionId  String
+  sectionKey      String
+  commentMd       String
+  severity        ReviewCommentSeverity
+  status          ReviewCommentStatus   @default(OPEN)
+  resolutionNote  String?
+  createdBy       String
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
 
-  reviewSession  ReviewSession        @relation(fields: [reviewSessionId], references: [id], onDelete: Cascade)
-  draftVersion   DraftVersion         @relation(fields: [draftVersionId], references: [id], onDelete: Cascade)
-  draftSection   DraftSection         @relation(fields: [draftSectionId], references: [id], onDelete: Cascade)
+  reviewSession ReviewSession @relation(fields: [reviewSessionId], references: [id], onDelete: Cascade)
+  draftVersion  DraftVersion  @relation(fields: [draftVersionId], references: [id], onDelete: Cascade)
+  draftSection  DraftSection  @relation(fields: [draftSectionId], references: [id], onDelete: Cascade)
 
   @@index([reviewSessionId, createdAt(sort: Desc)])
   @@index([draftVersionId, sectionKey])
@@ -566,12 +611,12 @@ model RevisionRun {
   createdAt          DateTime          @default(now())
   completedAt        DateTime?
 
-  topic              Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  reviewSession      ReviewSession     @relation(fields: [reviewSessionId], references: [id], onDelete: Cascade)
-  fromDraftVersion   DraftVersion      @relation("RevisionFrom", fields: [fromDraftVersionId], references: [id], onDelete: Cascade)
-  toDraftVersion     DraftVersion?     @relation("RevisionTo", fields: [toDraftVersionId], references: [id], onDelete: SetNull)
-  items              RevisionItem[]
-  sectionDiffs       SectionDiff[]
+  topic            Topic          @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  reviewSession    ReviewSession  @relation(fields: [reviewSessionId], references: [id], onDelete: Cascade)
+  fromDraftVersion DraftVersion   @relation("RevisionFrom", fields: [fromDraftVersionId], references: [id], onDelete: Cascade)
+  toDraftVersion   DraftVersion?  @relation("RevisionTo", fields: [toDraftVersionId], references: [id], onDelete: SetNull)
+  items            RevisionItem[]
+  sectionDiffs     SectionDiff[]
 
   @@index([topicId, createdAt(sort: Desc)])
   @@index([reviewSessionId])
@@ -588,51 +633,51 @@ model RevisionItem {
   error            String?
   createdAt        DateTime          @default(now())
 
-  revisionRun      RevisionRun       @relation(fields: [revisionRunId], references: [id], onDelete: Cascade)
-  draftSection     DraftSection      @relation(fields: [draftSectionId], references: [id], onDelete: Cascade)
+  revisionRun  RevisionRun  @relation(fields: [revisionRunId], references: [id], onDelete: Cascade)
+  draftSection DraftSection @relation(fields: [draftSectionId], references: [id], onDelete: Cascade)
 
   @@index([revisionRunId, createdAt(sort: Desc)])
   @@index([draftSectionId])
 }
 
 model SectionDiff {
-  id             String       @id @default(uuid())
+  id             String   @id @default(uuid())
   revisionRunId  String
   draftSectionId String
   sectionKey     String
   beforeMd       String
   afterMd        String
   diffUnifiedMd  String
-  createdAt      DateTime     @default(now())
+  createdAt      DateTime @default(now())
 
-  revisionRun    RevisionRun  @relation(fields: [revisionRunId], references: [id], onDelete: Cascade)
-  draftSection   DraftSection @relation(fields: [draftSectionId], references: [id], onDelete: Cascade)
+  revisionRun  RevisionRun  @relation(fields: [revisionRunId], references: [id], onDelete: Cascade)
+  draftSection DraftSection @relation(fields: [draftSectionId], references: [id], onDelete: Cascade)
 
   @@index([revisionRunId, createdAt(sort: Desc)])
   @@index([draftSectionId])
 }
 
 model SeoMetadata {
-  id                 String          @id @default(uuid())
-  topicId            String
-  contentItemId      String?
-  artifactVersionId  String?         @unique
-  slug               String
-  metaTitle          String
-  metaDescription    String
-  canonicalUrl       String?
-  tags               String[]        @default([])
-  keywords           String[]        @default([])
-  openGraphTitle     String?
+  id                   String   @id @default(uuid())
+  topicId              String
+  contentItemId        String?
+  artifactVersionId    String?  @unique
+  slug                 String
+  metaTitle            String
+  metaDescription      String
+  canonicalUrl         String?
+  tags                 String[] @default([])
+  keywords             String[] @default([])
+  openGraphTitle       String?
   openGraphDescription String?
-  model              String?
-  promptHash         String?
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
+  model                String?
+  promptHash           String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
-  topic              Topic           @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  contentItem        ContentItem?    @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
-  artifactVersion    ArtifactVersion? @relation(fields: [artifactVersionId], references: [id], onDelete: SetNull)
+  topic           Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  contentItem     ContentItem?     @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  artifactVersion ArtifactVersion? @relation(fields: [artifactVersionId], references: [id], onDelete: SetNull)
 
   @@index([topicId, createdAt(sort: Desc)])
   @@index([contentItemId, createdAt(sort: Desc)])
@@ -654,59 +699,64 @@ model SocialPost {
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
 
-  topic                 Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  contentItem           ContentItem?     @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
-  versions              SocialPostVersion[]
+  topic       Topic               @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  contentItem ContentItem?        @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  versions    SocialPostVersion[]
 
   @@unique([topicId, platform])
   @@index([contentItemId, createdAt(sort: Desc)])
 }
 
 model SocialPostVersion {
-  id             String        @id @default(uuid())
-  socialPostId   String
-  versionNumber  Int
-  headline       String
-  bodyText       String
-  hashtags       String[]      @default([])
-  cta            String
-  model          String?
-  promptHash     String?
-  createdAt      DateTime      @default(now())
+  id            String   @id @default(uuid())
+  socialPostId  String
+  versionNumber Int
+  headline      String
+  bodyText      String
+  hashtags      String[] @default([])
+  cta           String
+  model         String?
+  promptHash    String?
+  createdAt     DateTime @default(now())
 
-  socialPost     SocialPost    @relation(fields: [socialPostId], references: [id], onDelete: Cascade)
+  socialPost SocialPost @relation(fields: [socialPostId], references: [id], onDelete: Cascade)
 
   @@unique([socialPostId, versionNumber])
   @@index([socialPostId, createdAt(sort: Desc)])
 }
 
 model Publication {
-  id               String             @id @default(uuid())
-  topicId          String
-  contentItemId    String?
-  draftVersionId   String?
-  channel          PublicationChannel
-  status           PublicationStatus  @default(PENDING)
-  lockedForPublish Boolean            @default(false)
-  title            String
-  externalId       String?
-  externalUrl      String?
-  payloadJson      Json?
-  error            String?
+  id                 String             @id @default(uuid())
+  topicId            String
+  contentItemId      String?
+  draftVersionId     String?
+  requestedByUserId  String?
+  publisherUserId    String?
+  channel            PublicationChannel
+  status             PublicationStatus  @default(PENDING)
+  lockedForPublish   Boolean            @default(false)
+  title              String
+  externalId         String?
+  externalUrl        String?
+  payloadJson        Json?
+  error              String?
   verificationStatus String?
-  verifiedAt       DateTime?
-  publishedAt      DateTime?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  verifiedAt         DateTime?
+  publishedAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
-  topic            Topic              @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  contentItem      ContentItem?       @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
-  draftVersion     DraftVersion?      @relation(fields: [draftVersionId], references: [id], onDelete: SetNull)
-  attempts         PublicationAttempt[]
+  topic           Topic                @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  contentItem     ContentItem?         @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  draftVersion    DraftVersion?        @relation(fields: [draftVersionId], references: [id], onDelete: SetNull)
+  requestedByUser User?                @relation("PublicationRequestedBy", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+  publisherUser   User?                @relation("PublicationPublisher", fields: [publisherUserId], references: [id], onDelete: SetNull)
+  attempts        PublicationAttempt[]
 
   @@index([topicId, createdAt(sort: Desc)])
   @@index([contentItemId, createdAt(sort: Desc)])
   @@index([channel, status])
+  @@index([publisherUserId, createdAt(sort: Desc)])
 }
 
 model PublicationAttempt {
@@ -718,7 +768,7 @@ model PublicationAttempt {
   error               String?
   createdAt           DateTime          @default(now())
 
-  publication         Publication       @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
   @@index([publicationId, createdAt(sort: Desc)])
 }
@@ -738,17 +788,17 @@ model AnalyticsDailyUsage {
 }
 
 model AnalyticsDailyOverview {
-  id                    String   @id @default(uuid())
-  usageDate             DateTime @unique
-  throughputCount       Int      @default(0)
-  revisionCount         Int      @default(0)
-  publishCount          Int      @default(0)
-  publishCadenceCount   Int      @default(0)
-  avgLeadTimeHours      Decimal  @default(0) @db.Decimal(12, 4)
-  avgRevisionRate       Decimal  @default(0) @db.Decimal(12, 4)
-  avgApprovalLatencyHours Decimal @default(0) @db.Decimal(12, 4)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                      String   @id @default(uuid())
+  usageDate               DateTime @unique
+  throughputCount         Int      @default(0)
+  revisionCount           Int      @default(0)
+  publishCount            Int      @default(0)
+  publishCadenceCount     Int      @default(0)
+  avgLeadTimeHours        Decimal  @default(0) @db.Decimal(12, 4)
+  avgRevisionRate         Decimal  @default(0) @db.Decimal(12, 4)
+  avgApprovalLatencyHours Decimal  @default(0) @db.Decimal(12, 4)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   @@index([usageDate(sort: Desc)])
 }
@@ -767,8 +817,8 @@ model StorageObject {
   createdBy     String?
   createdAt     DateTime             @default(now())
 
-  topic         Topic?               @relation(fields: [topicId], references: [id], onDelete: SetNull)
-  contentItem   ContentItem?         @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  topic       Topic?       @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  contentItem ContentItem? @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
 
   @@unique([bucket, objectKey])
   @@index([contentItemId, createdAt(sort: Desc)])

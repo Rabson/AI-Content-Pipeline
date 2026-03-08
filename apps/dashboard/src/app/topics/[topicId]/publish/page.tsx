@@ -1,5 +1,6 @@
 import type { LinkedInDraftView, PublicationView, SeoMetadataView, TopicDetail } from '@aicp/shared-types';
 import { getLinkedInDraft, getPublications, getSeo, getTopic } from '../../../../lib/api-client';
+import { getDashboardUser } from '../../../../lib/auth';
 import { isPhaseEnabled } from '../../../../lib/feature-flags';
 import { formatDate } from '../../../../lib/formatting';
 import { TopicPageHeader } from '../../../../components/shared/topic-page-header';
@@ -87,14 +88,15 @@ function DistributionPanel({ topicId, seo, social }: { topicId: string; seo: Seo
 function PublicationHistoryPanel({ publications }: { publications: PublicationView[] }) {
   return (
     <div className="panel">
-      <h3>Dev.to publish history</h3>
+      <h3>Publish history</h3>
       <div className="list">
         {publications.map((publication) => (
           <div className="list-item" key={publication.id}>
             <div>
-              <strong>{publication.title}</strong>
+              <strong>{publication.title} · {publication.channel}</strong>
               <p>{publication.externalUrl ?? publication.error ?? 'Pending external URL.'}</p>
               <p className="topic-meta">Created {formatDate(publication.createdAt)}</p>
+              <p className="topic-meta">Publisher: {publication.publisherUser?.email ?? 'system default'}</p>
               <p className="topic-meta">Verification: {publication.verificationStatus ?? 'pending'}</p>
             </div>
             <span className="pill">{publication.status}</span>
@@ -113,6 +115,7 @@ export default async function TopicPublishPage({
 }) {
   const { topicId } = await params;
   const phase2Enabled = isPhaseEnabled(2);
+  const user = await getDashboardUser();
   const { topic, seo, social, publications } = await loadPublishPageData(topicId, phase2Enabled);
 
   return (
@@ -121,7 +124,7 @@ export default async function TopicPublishPage({
         eyebrow="Publish"
         title={topic?.title ?? 'Topic'}
         topicId={topicId}
-        actions={phase2Enabled ? <PublishActions topicId={topicId} /> : undefined}
+        actions={phase2Enabled ? <PublishActions topicId={topicId} role={user.role} /> : undefined}
       />
       {!phase2Enabled ? (
         <DisabledPhaseState />

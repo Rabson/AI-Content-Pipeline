@@ -7,7 +7,7 @@ import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
 
 const PUBLISHING_QUEUE = 'publishing';
-const DEVTO_PUBLISH_JOB = 'publish.devto';
+const PUBLISH_ARTICLE_JOB = 'publish.article';
 
 @Processor(PUBLISHING_QUEUE)
 export class WorkerPublishProcessor extends WorkerHost {
@@ -25,7 +25,7 @@ export class WorkerPublishProcessor extends WorkerHost {
     const execution = await this.jobExecutionService.start(job);
 
     try {
-      if (job.name !== DEVTO_PUBLISH_JOB) {
+      if (job.name !== PUBLISH_ARTICLE_JOB) {
         this.metrics.recordSuccess(job.queueName);
         await this.jobExecutionService.succeed(execution.id);
         return null;

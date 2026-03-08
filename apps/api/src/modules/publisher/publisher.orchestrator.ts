@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ContentState, PublicationChannel, PublicationStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { WorkflowService } from '../workflow/workflow.service';
+import { UserPublisherTokenResolverService } from '../user/services/user-publisher-token-resolver.service';
 import { PublicationVerifierService } from './providers/publication-verifier.service';
 import { PublisherRegistryService } from './providers/publisher-registry.service';
 import { PublisherRepository } from './publisher.repository';
@@ -12,6 +13,7 @@ export class PublisherOrchestrator {
     private readonly registry: PublisherRegistryService,
     private readonly verifier: PublicationVerifierService,
     private readonly workflowService: WorkflowService,
+    private readonly credentialResolver: UserPublisherTokenResolverService,
   ) {}
 
   async publish(params: {
@@ -34,9 +36,10 @@ export class PublisherOrchestrator {
       canonicalUrl: params.canonicalUrl,
       tags: params.tags,
     };
+    const credential = await this.resolveCredential(publication.channel, publication.publisherUserId);
 
     try {
-      const response = await adapter.publish(requestPayload);
+      const response = await adapter.publish(requestPayload, credential);
       return this.completePublish(params.topicId, params.publicationId, draft.id, publication.channel, requestPayload, response);
     } catch (error) {
       await this.failPublish(params.topicId, params.publicationId, requestPayload, error);
@@ -46,6 +49,17 @@ export class PublisherOrchestrator {
 
   buildPublicationTitle(topicTitle: string) {
     return topicTitle;
+  }
+
+  private async resolveCredential(channel: PublicationChannel, publisherUserId?: string | null) {
+    if (publisherUserId) {
+      const accessToken = await this.credentialResolver.resolveToken(publisherUserId, channel);
+      if (accessToken) {
+        return { accessToken };
+      }
+    }
+
+    return undefined;
   }
 
   private async completePublish(

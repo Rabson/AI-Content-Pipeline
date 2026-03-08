@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { TopicStatus } from '@prisma/client';
 import { Queue } from 'bullmq';
+import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { AddSourceDto } from './dto/add-source.dto';
 import { ResearchQueryDto } from './dto/research-query.dto';
 import { RunResearchDto } from './dto/run-research.dto';
@@ -27,7 +28,7 @@ export class ResearchService {
       throw new NotFoundException('Topic not found');
     }
 
-    const jobId = `research:topic:${topicId}:v1`;
+    const jobId = buildQueueJobId('research', 'topic', topicId, 'v1');
     const existingJob = await this.contentPipelineQueue.getJob(jobId);
     if (existingJob || topic.status === TopicStatus.RESEARCH_QUEUED || topic.status === TopicStatus.RESEARCH_IN_PROGRESS) {
       return {

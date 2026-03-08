@@ -5,12 +5,16 @@ import { AuthenticatedRequest } from '../../common/interfaces/authenticated-requ
 import { GenerateLinkedInDto } from './dto/generate-linkedin.dto';
 import { UpdateSocialPostStatusDto } from './dto/update-social-post-status.dto';
 import { SocialService } from './social.service';
+import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 
-@Roles(AppRole.EDITOR)
 @Controller('v1')
 export class SocialController {
-  constructor(private readonly socialService: SocialService) {}
+  constructor(
+    private readonly socialService: SocialService,
+    private readonly ownershipService: UserTopicOwnershipService,
+  ) {}
 
+  @Roles(AppRole.EDITOR)
   @Post('topics/:topicId/social/linkedin/generate')
   generate(
     @Param('topicId') topicId: string,
@@ -21,8 +25,10 @@ export class SocialController {
     return this.socialService.enqueueLinkedIn(topicId, dto, actorId);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get('topics/:topicId/social/linkedin')
-  latest(@Param('topicId') topicId: string) {
+  async latest(@Param('topicId') topicId: string, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.socialService.getLatestLinkedIn(topicId);
   }
 

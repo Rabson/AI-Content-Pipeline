@@ -1,7 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { IsArray, IsEnum, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { PublicationChannel } from '@prisma/client';
 
-export class PublishDevtoDto {
+export class RequestPublicationDto {
+  @IsEnum(PublicationChannel)
+  channel!: PublicationChannel;
+
   @IsOptional()
   @IsString()
   @MaxLength(500)

@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { CONTENT_PIPELINE_QUEUE, RESEARCH_RUN_JOB } from './constants/topic-queue.constants';
 
 export interface ResearchRunJobPayload {
@@ -21,7 +22,7 @@ export class TopicQueueService {
   ) {}
 
   async enqueueResearch(payload: ResearchRunJobPayload): Promise<string> {
-    const jobId = `research:topic:${payload.topicId}:v1`;
+    const jobId = buildQueueJobId('research', 'topic', payload.topicId, 'v1');
     const existingJob = await this.contentPipelineQueue.getJob(jobId);
     if (existingJob) {
       return existingJob.id ?? jobId;

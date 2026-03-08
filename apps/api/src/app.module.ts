@@ -16,10 +16,12 @@ import { StorageModule } from './modules/storage/storage.module';
 import { CommonModule } from './common/common.module';
 import { env } from './config/env';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
     CommonModule,
+    UserModule,
     BullModule.forRoot({
       connection: {
         url: env.redisUrl,

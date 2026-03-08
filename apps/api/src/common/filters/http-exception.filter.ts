@@ -6,7 +6,9 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { env } from '../../config/env';
 import { AppLogger } from '../logger/app-logger.service';
+import { redactSensitiveValues } from '../security/redact.util';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -33,28 +35,35 @@ export class HttpExceptionFilter implements ExceptionFilter {
               exception instanceof Error ? exception.message : 'Internal server error',
           };
 
+    const code =
+      typeof errorMessage === 'object' && errorMessage !== null && 'code' in errorMessage
+        ? (errorMessage as { code?: string }).code ?? 'UNHANDLED_ERROR'
+        : 'UNHANDLED_ERROR';
+    const message =
+      typeof errorMessage === 'object' && errorMessage !== null && 'message' in errorMessage
+        ? (errorMessage as { message?: string | string[] }).message ?? 'Unknown error'
+        : 'Unknown error';
+
     this.logger.error(
       {
         method: request.method,
         url: request.originalUrl,
-        error: errorMessage,
+        status,
+        error: redactSensitiveValues(errorMessage),
       },
       undefined,
       'HttpExceptionFilter',
     );
 
     response.status(status).json({
-      error: {
-        code:
-          typeof errorMessage === 'object' && errorMessage !== null && 'code' in errorMessage
-            ? (errorMessage as { code?: string }).code ?? 'UNHANDLED_ERROR'
-            : 'UNHANDLED_ERROR',
-        message:
-          typeof errorMessage === 'object' && errorMessage !== null && 'message' in errorMessage
-            ? (errorMessage as { message?: string }).message ?? 'Unknown error'
-            : 'Unknown error',
-        details: errorMessage,
-      },
+      error:
+        env.appEnv === 'local'
+          ? { code, message, details: redactSensitiveValues(errorMessage) }
+          : {
+              code,
+              message: status >= 500 ? 'Internal server error' : message,
+              details: status >= 500 ? undefined : undefined,
+            },
     });
   }
 }

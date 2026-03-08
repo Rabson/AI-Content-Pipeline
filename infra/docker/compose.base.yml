@@ -9,6 +9,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ai_content_pipeline
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d ai_content_pipeline']
+      interval: 5s
+      timeout: 5s
+      retries: 20
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -39,7 +44,8 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_content_pipeline
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: 'no'
 
   api:
@@ -74,6 +80,7 @@ services:
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-}
       OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
       OTEL_LOG_LEVEL: ${OTEL_LOG_LEVEL:-error}
+      USER_TOKEN_ENCRYPTION_KEY: ${USER_TOKEN_ENCRYPTION_KEY:-local-dev-user-token-key}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -110,6 +117,7 @@ services:
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-}
       OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
       OTEL_LOG_LEVEL: ${OTEL_LOG_LEVEL:-error}
+      USER_TOKEN_ENCRYPTION_KEY: ${USER_TOKEN_ENCRYPTION_KEY:-local-dev-user-token-key}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -130,10 +138,6 @@ services:
       NEXT_PUBLIC_FEATURE_PHASE3_ENABLED: 'true'
       NEXTAUTH_URL: http://localhost:${DASHBOARD_HOST_PORT:-3003}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-local-dev-secret}
-      DASHBOARD_ACCESS_CODE: ${DASHBOARD_ACCESS_CODE:-local-access}
-      AUTH_ALLOWED_EMAIL_DOMAINS: ${AUTH_ALLOWED_EMAIL_DOMAINS:-example.com}
-      AUTH_ADMIN_EMAILS: ${AUTH_ADMIN_EMAILS:-operator@example.com}
-      AUTH_REVIEWER_EMAILS: ${AUTH_REVIEWER_EMAILS:-reviewer@example.com}
     depends_on:
       - api
     ports:

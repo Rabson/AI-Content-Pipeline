@@ -5,6 +5,7 @@ export interface AuthenticatedUser {
   id: string;
   role: AppRole;
   email?: string;
+  name?: string;
 }
 
 export interface AuthenticatedRequest extends Request {

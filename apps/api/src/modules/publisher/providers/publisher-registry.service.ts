@@ -1,14 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { PublicationChannel } from '@prisma/client';
 import { DevtoAdapter } from './devto.adapter';
+import { LinkedInAdapter } from './linkedin.adapter';
+import { MediumAdapter } from './medium.adapter';
 import { PublisherAdapter } from './publisher-adapter.interface';
 
 @Injectable()
 export class PublisherRegistryService {
   private readonly adapters: PublisherAdapter[];
 
-  constructor(devtoAdapter: DevtoAdapter) {
-    this.adapters = [devtoAdapter];
+  constructor(
+    devtoAdapter: DevtoAdapter,
+    mediumAdapter: MediumAdapter,
+    linkedinAdapter: LinkedInAdapter,
+  ) {
+    this.adapters = [devtoAdapter, mediumAdapter, linkedinAdapter];
   }
 
   get(channel: PublicationChannel): PublisherAdapter {

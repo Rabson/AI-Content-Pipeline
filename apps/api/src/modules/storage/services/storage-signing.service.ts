@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { env } from '../../../config/env';
 
@@ -31,6 +31,20 @@ export class StorageSigningService {
   buildObjectKey(topicId: string, filename: string) {
     const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '-');
     return `topics/${topicId}/${randomUUID()}-${safeFilename}`;
+  }
+
+  validateUploadInput(filename: string, mimeType?: string, sizeBytes?: number) {
+    if (filename !== filename.replace(/[^a-zA-Z0-9._-]/g, '-')) {
+      throw new BadRequestException('Filename contains unsupported characters');
+    }
+
+    if (mimeType && !env.storageAllowedMimeTypes.includes(mimeType)) {
+      throw new BadRequestException('Unsupported mime type');
+    }
+
+    if (sizeBytes && sizeBytes > env.storageMaxUploadBytes) {
+      throw new BadRequestException('Upload exceeds configured size limit');
+    }
   }
 
   signUploadUrl(bucket: string, objectKey: string, mimeType?: string) {

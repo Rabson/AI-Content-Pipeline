@@ -1,10 +1,12 @@
 import { getServerSession } from 'next-auth';
+import { env } from '../config/env';
 import { authOptions } from './auth-options';
 
 export interface DashboardUser {
   id: string;
   role: string;
   email: string;
+  name?: string | null;
   authorized: boolean;
 }
 
@@ -15,6 +17,7 @@ export async function getDashboardUser(): Promise<DashboardUser> {
       id: '',
       role: '',
       email: '',
+      name: '',
       authorized: false,
     };
   }
@@ -23,6 +26,7 @@ export async function getDashboardUser(): Promise<DashboardUser> {
     id: session.user.id,
     role: session.user.role,
     email: session.user.email,
+    name: session.user.name,
     authorized: true,
   };
 }
@@ -38,5 +42,7 @@ export async function getDashboardAuthHeaders() {
     'x-actor-id': user.id,
     'x-actor-role': user.role,
     'x-user-email': user.email,
+    ...(user.name ? { 'x-user-name': user.name } : {}),
+    ...(env.internalApiToken ? { 'x-internal-api-token': env.internalApiToken } : {}),
   };
 }

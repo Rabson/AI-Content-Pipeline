@@ -2,10 +2,14 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { ContentState, PublicationChannel, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { Queue } from 'bullmq';
+import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
+import { buildQueueJobId } from '../../common/queue/job-id.util';
+import { SecurityEventService } from '../../common/security/security-event.service';
 import { isPhaseEnabled } from '../../config/feature-flags';
+import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 import { WorkflowService } from '../workflow/workflow.service';
-import { PUBLISHING_QUEUE, DEVTO_PUBLISH_JOB } from './constants/publisher.constants';
-import { PublishDevtoDto } from './dto/publish-devto.dto';
+import { PUBLISH_ARTICLE_JOB, PUBLISHING_QUEUE } from './constants/publisher.constants';
+import { RequestPublicationDto } from './dto/request-publication.dto';
 import { PublisherOrchestrator } from './publisher.orchestrator';
 import { PublisherRepository } from './publisher.repository';
 
@@ -15,131 +19,67 @@ export class PublisherService {
     private readonly repository: PublisherRepository,
     private readonly orchestrator: PublisherOrchestrator,
     private readonly workflowService: WorkflowService,
-    @InjectQueue(PUBLISHING_QUEUE)
-    private readonly queue: Queue,
+    private readonly ownershipService: UserTopicOwnershipService,
+    private readonly securityEventService: SecurityEventService,
+    @InjectQueue(PUBLISHING_QUEUE) private readonly queue: Queue,
   ) {}
 
-  listPublications(topicId: string) {
+  async listPublications(topicId: string, actor?: AuthenticatedUser) {
+    await this.ownershipService.assertTopicReadAccess(actor, topicId);
     return this.repository.listPublications(topicId);
   }
 
-  async enqueueDevtoPublish(topicId: string, dto: PublishDevtoDto, actorId: string) {
-    if (!isPhaseEnabled(2)) {
-      throw new ServiceUnavailableException('Phase 2 features are disabled');
+  async enqueuePublication(topicId: string, dto: RequestPublicationDto, actor: AuthenticatedUser) {
+    this.securityEventService.publishRequested({ topicId, actorId: actor.id, channel: dto.channel });
+    if (!isPhaseEnabled(2)) throw new ServiceUnavailableException('Phase 2 features are disabled');
+    if (dto.channel !== PublicationChannel.DEVTO) {
+      throw new ServiceUnavailableException(`${dto.channel} publishing is not implemented yet`);
     }
-
     const topic = await this.getTopicOrThrow(topicId);
-    const targetDraft = await this.getPublishableDraft(topicId, dto.draftVersionNumber);
-
-    const pending = await this.repository.findPendingPublication(topicId, PublicationChannel.DEVTO);
-    if (pending) {
-      return this.idempotentResponse(topicId, pending.id);
-    }
-
-    await this.preparePublish(topicId, targetDraft.id, targetDraft.versionNumber, actorId);
+    await this.ownershipService.assertPublishAccess(actor, topic.ownerUserId ?? null);
+    const draft = await this.getPublishableDraft(topicId, dto.draftVersionNumber);
+    const publisherUserId = topic.ownerUserId ?? actor.id;
+    const pending = await this.repository.findPendingPublication(topicId, dto.channel, publisherUserId);
+    if (pending) return { enqueued: true, topicId, publicationId: pending.id, idempotent: true };
+    await this.preparePublish(topicId, draft.id, draft.versionNumber, actor.id);
     const publication = await this.repository.createPublicationShell({
       topicId,
       contentItemId: topic.contentItemId ?? undefined,
-      draftVersionId: targetDraft.id,
-      channel: PublicationChannel.DEVTO,
+      draftVersionId: draft.id,
+      channel: dto.channel,
+      requestedByUserId: actor.id,
+      publisherUserId,
       title: this.orchestrator.buildPublicationTitle(topic.title),
-      payload: {
-        canonicalUrl: dto.canonicalUrl,
-        tags: dto.tags ?? [],
-        requestedBy: actorId,
-        draftVersionNumber: targetDraft.versionNumber,
-      },
+      payload: { canonicalUrl: dto.canonicalUrl, tags: dto.tags ?? [], draftVersionNumber: draft.versionNumber },
     });
-
-    const { job, jobId } = await this.enqueuePublishJob(topicId, publication.id, dto, actorId);
-    const queuedJobId = job.id ?? jobId;
-    await this.recordQueuedPublish(topicId, publication.id, queuedJobId, actorId);
-
-    return {
-      enqueued: true,
-      topicId,
-      publicationId: publication.id,
-      jobId: queuedJobId,
-    };
+    const jobId = await this.enqueuePublishJob(topicId, publication.id, dto, actor.id);
+    await this.workflowService.recordEvent({ topicId, stage: WorkflowStage.PUBLISH, eventType: WorkflowEventType.ENQUEUED, actorId: actor.id, metadata: { publicationId: publication.id, jobId, channel: dto.channel } });
+    return { enqueued: true, topicId, publicationId: publication.id, jobId };
   }
 
   private async getTopicOrThrow(topicId: string) {
     const topic = await this.repository.findTopicById(topicId);
-    if (!topic) {
-      throw new NotFoundException('Topic not found');
-    }
-
+    if (!topic) throw new NotFoundException('Topic not found');
     return topic;
   }
 
   private async getPublishableDraft(topicId: string, requestedVersion?: number) {
-    const latestApprovedDraft = await this.repository.getLatestApprovedDraft(topicId);
-    if (!latestApprovedDraft) {
-      throw new BadRequestException('No approved draft version is available for publishing');
-    }
-
-    const targetDraft = requestedVersion
-      ? await this.repository.getApprovedDraftByVersion(topicId, requestedVersion)
-      : latestApprovedDraft;
-
-    if (!targetDraft) {
-      throw new BadRequestException('Requested approved draft version was not found');
-    }
-
-    if (targetDraft.versionNumber !== latestApprovedDraft.versionNumber) {
-      throw new BadRequestException('Only the latest approved draft version can be published');
-    }
-
-    return targetDraft;
-  }
-
-  private idempotentResponse(topicId: string, publicationId: string) {
-    return {
-      enqueued: true,
-      topicId,
-      publicationId,
-      idempotent: true,
-    };
+    const latest = await this.repository.getLatestApprovedDraft(topicId);
+    if (!latest) throw new BadRequestException('No approved draft version is available for publishing');
+    const target = requestedVersion ? await this.repository.getApprovedDraftByVersion(topicId, requestedVersion) : latest;
+    if (!target) throw new BadRequestException('Requested approved draft version was not found');
+    if (target.versionNumber !== latest.versionNumber) throw new BadRequestException('Only the latest approved draft version can be published');
+    return target;
   }
 
   private async preparePublish(topicId: string, draftVersionId: string, versionNumber: number, actorId: string) {
     await this.workflowService.lockForPublish(topicId, draftVersionId, true);
-    await this.workflowService.transitionContentState({
-      topicId,
-      stage: WorkflowStage.PUBLISH,
-      toState: ContentState.PUBLISH_IN_PROGRESS,
-      actorId,
-      metadata: { draftVersionId, versionNumber },
-      eventType: WorkflowEventType.PUBLISH_REQUESTED,
-    });
+    await this.workflowService.transitionContentState({ topicId, stage: WorkflowStage.PUBLISH, toState: ContentState.PUBLISH_IN_PROGRESS, actorId, metadata: { draftVersionId, versionNumber }, eventType: WorkflowEventType.PUBLISH_REQUESTED });
   }
 
-  private enqueuePublishJob(topicId: string, publicationId: string, dto: PublishDevtoDto, actorId: string) {
-    const jobId = `publish:devto:${topicId}:${publicationId}`;
-    return this.queue.add(
-      DEVTO_PUBLISH_JOB,
-      {
-        publicationId,
-        topicId,
-        canonicalUrl: dto.canonicalUrl,
-        tags: dto.tags ?? [],
-        requestedBy: actorId,
-      },
-      {
-        jobId,
-        attempts: 5,
-        backoff: { type: 'exponential', delay: 60000 },
-      },
-    ).then((job) => ({ job, jobId }));
-  }
-
-  private async recordQueuedPublish(topicId: string, publicationId: string, jobId: string, actorId: string) {
-    await this.workflowService.recordEvent({
-      topicId,
-      stage: WorkflowStage.PUBLISH,
-      eventType: WorkflowEventType.ENQUEUED,
-      actorId,
-      metadata: { publicationId, jobId },
-    });
+  private async enqueuePublishJob(topicId: string, publicationId: string, dto: RequestPublicationDto, actorId: string) {
+    const jobId = buildQueueJobId('publish', dto.channel.toLowerCase(), topicId, publicationId);
+    const job = await this.queue.add(PUBLISH_ARTICLE_JOB, { publicationId, topicId, channel: dto.channel, canonicalUrl: dto.canonicalUrl, tags: dto.tags ?? [], requestedBy: actorId }, { jobId, attempts: 5, backoff: { type: 'exponential', delay: 60000 } });
+    return job.id ?? jobId;
   }
 }

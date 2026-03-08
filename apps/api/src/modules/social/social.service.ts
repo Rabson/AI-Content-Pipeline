@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { ContentState, SocialPostStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
+import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { isPhaseEnabled } from '../../config/feature-flags';
 import { WorkflowService } from '../workflow/workflow.service';
 import { GenerateLinkedInDto } from './dto/generate-linkedin.dto';
@@ -28,7 +29,7 @@ export class SocialService {
       throw new NotFoundException('Topic not found');
     }
 
-    const jobId = `social:linkedin:${topicId}:latest`;
+    const jobId = buildQueueJobId('social', 'linkedin', topicId, 'latest');
     const existingJob = await this.queue.getJob(jobId);
     if (existingJob) {
       return { enqueued: true, topicId, jobId: existingJob.id ?? jobId, idempotent: true };

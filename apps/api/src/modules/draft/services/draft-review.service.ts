@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ContentState, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { WorkflowService } from '../../workflow/workflow.service';
+import { UserTopicOwnershipService } from '../../user/services/user-topic-ownership.service';
 import { CreateReviewCommentDto } from '../dto/create-review-comment.dto';
 import { CreateReviewSessionDto } from '../dto/create-review-session.dto';
 import { UpdateReviewCommentDto } from '../dto/update-review-comment.dto';
@@ -11,6 +12,7 @@ export class DraftReviewService {
   constructor(
     private readonly repository: DraftRepository,
     private readonly workflowService: WorkflowService,
+    private readonly ownershipService: UserTopicOwnershipService,
   ) {}
 
   async createReviewSession(draftVersionId: string, dto: CreateReviewSessionDto, actorId: string) {
@@ -107,6 +109,7 @@ export class DraftReviewService {
   async approveDraft(draftVersionId: string, actorId: string) {
     const approved = await this.repository.markDraftApproved(draftVersionId, actorId);
     await this.workflowService.markApprovedDraft(approved.topicId, draftVersionId, actorId);
+    await this.ownershipService.assignDefaultOwner(approved.topicId);
     return approved;
   }
 

@@ -1,43 +1,46 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PublicationChannel } from '@prisma/client';
+import { fetchWithTimeout, throwUpstreamHttpError } from '../../../common/http/external-fetch.util';
 import { env } from '../../../config/env';
-import { PublishRequest, PublishResponse, PublisherAdapter } from './publisher-adapter.interface';
+import { PublishRequest, PublishResponse, PublisherAdapter, PublisherCredentialInput } from './publisher-adapter.interface';
 
 @Injectable()
 export class DevtoAdapter implements PublisherAdapter {
   readonly channel = PublicationChannel.DEVTO;
 
-  async publish(input: PublishRequest): Promise<PublishResponse> {
-    const apiKey = env.devtoApiKey;
+  async publish(input: PublishRequest, credential?: PublisherCredentialInput): Promise<PublishResponse> {
+    const apiKey = credential?.accessToken ?? env.devtoApiKey;
     if (!apiKey) {
-      throw new InternalServerErrorException('DEVTO_API_KEY is not configured');
+      throw new InternalServerErrorException('No Dev.to credential is configured for publishing');
     }
 
-    const response = await fetch('https://dev.to/api/articles', {
-      method: 'POST',
-      headers: {
-        'api-key': apiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        article: {
-          title: input.title,
-          body_markdown: input.markdown,
-          published: true,
-          canonical_url: input.canonicalUrl,
-          tags: input.tags,
+    const response = await fetchWithTimeout(
+      'https://dev.to/api/articles',
+      {
+        method: 'POST',
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
         },
-      }),
-    });
-
-    const payload = await response.json();
+        body: JSON.stringify({
+          article: {
+            title: input.title,
+            body_markdown: input.markdown,
+            published: true,
+            canonical_url: input.canonicalUrl,
+            tags: input.tags,
+          },
+        }),
+      },
+      env.externalRequestTimeoutMs,
+      'Dev.to publish',
+    );
 
     if (!response.ok) {
-      throw new InternalServerErrorException(
-        `Dev.to publish failed: ${response.status} ${JSON.stringify(payload)}`,
-      );
+      await throwUpstreamHttpError(response, 'Dev.to publish');
     }
 
+    const payload = await response.json();
     return {
       externalId: String(payload.id),
       url: payload.url as string,
@@ -47,7 +50,12 @@ export class DevtoAdapter implements PublisherAdapter {
 
   async verify(externalUrl: string) {
     try {
-      const response = await fetch(externalUrl, { method: 'GET' });
+      const response = await fetchWithTimeout(
+        externalUrl,
+        { method: 'GET' },
+        env.externalRequestTimeoutMs,
+        'Dev.to verification',
+      );
       return {
         ok: response.ok,
         metadata: {

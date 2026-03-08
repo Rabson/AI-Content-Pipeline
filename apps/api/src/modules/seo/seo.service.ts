@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { isPhaseEnabled } from '../../config/feature-flags';
 import { GenerateSeoDto } from './dto/generate-seo.dto';
 import { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB } from './constants/seo.constants';
@@ -24,7 +25,7 @@ export class SeoService {
       throw new NotFoundException('Topic not found');
     }
 
-    const jobId = `seo:topic:${topicId}:latest`;
+    const jobId = buildQueueJobId('seo', 'topic', topicId, 'latest');
     const existingJob = await this.queue.getJob(jobId);
     if (existingJob) {
       return { enqueued: true, topicId, jobId: existingJob.id ?? jobId, idempotent: true };

@@ -4,6 +4,7 @@ This folder holds the detailed reference material.
 It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
 
 ## File Ownership
+
 - [README.md](../README.md)
   - repo entry point
   - high-level project overview
@@ -18,6 +19,7 @@ It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
   - detailed design, runbooks, and reference material
 
 ## Docs In This Folder
+
 - [docker-local-commands.md](./docker-local-commands.md)
   - Docker-specific local commands and smoke checks
 - [local-runtime-and-discovery-flow.md](./local-runtime-and-discovery-flow.md)
@@ -36,6 +38,11 @@ It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
   - structure and lint expectations
 - [branch-protection-policy.md](./branch-protection-policy.md)
   - repository protection policy
+- [security-model.md](./security-model.md)
+  - auth, trusted-caller, upload, and outbound request model
+- [env-reference.md](./env-reference.md)
+  - service-by-service environment variable reference
 
 ## Rule
+
 If content belongs in one of the root docs, link to it instead of duplicating it here.

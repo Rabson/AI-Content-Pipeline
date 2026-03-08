@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { GenerateOutlineDto } from './dto/generate-outline.dto';
 import { GetOutlineQueryDto } from './dto/get-outline-query.dto';
 import { CONTENT_PIPELINE_QUEUE, OUTLINE_GENERATE_JOB } from './constants/outline.constants';
@@ -20,7 +21,7 @@ export class OutlineService {
       throw new NotFoundException('Topic not found');
     }
 
-    const jobId = `outline:topic:${topicId}:latest`;
+    const jobId = buildQueueJobId('outline', 'topic', topicId, 'latest');
     const existingJob = await this.contentPipelineQueue.getJob(jobId);
     if (existingJob) {
       return {

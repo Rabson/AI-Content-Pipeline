@@ -17,6 +17,7 @@ export class StorageService {
   async createUploadUrl(topicId: string, dto: CreateUploadUrlDto, actorId: string) {
     const topic = await this.getTopicOrThrow(topicId);
     const bucket = this.storageSigningService.getBucketOrThrow();
+    this.storageSigningService.validateUploadInput(dto.filename, dto.mimeType, dto.sizeBytes);
     const objectKey = this.storageSigningService.buildObjectKey(topicId, dto.filename);
     const uploadUrl = await this.storageSigningService.signUploadUrl(bucket, objectKey, dto.mimeType);
     const publicUrl = this.storageSigningService.buildPublicUrl(objectKey);
@@ -28,6 +29,7 @@ export class StorageService {
       objectKey,
       publicUrl,
       mimeType: dto.mimeType,
+      sizeBytes: dto.sizeBytes,
       purpose: dto.purpose ?? StorageObjectPurpose.ATTACHMENT,
       createdBy: actorId,
     });
@@ -40,6 +42,7 @@ export class StorageService {
       objectKey,
       uploadUrl,
       publicUrl,
+      maxBytes: env.storageMaxUploadBytes,
       expiresInSeconds: 900,
     };
   }

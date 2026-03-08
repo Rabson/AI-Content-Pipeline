@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, TopicStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { transitionTopicStatus } from './repositories/topic-status-transition.helper';
 
 @Injectable()
 export class TopicRepository {
@@ -13,7 +14,7 @@ export class TopicRepository {
   findById(id: string) {
     return this.prisma.topic.findFirst({
       where: { id, deletedAt: null },
-      include: { tags: true },
+      include: { tags: true, owner: { select: { id: true, email: true, name: true, role: true } } },
     });
   }
 
@@ -21,15 +22,17 @@ export class TopicRepository {
     status?: TopicStatus;
     q?: string;
     minScore?: number;
+    ownerUserId?: string;
     skip: number;
     take: number;
   }) {
-    const { status, q, minScore, skip, take } = params;
+    const { status, q, minScore, ownerUserId, skip, take } = params;
 
     return this.prisma.topic.findMany({
       where: {
         deletedAt: null,
         status,
+        ownerUserId,
         scoreTotal: minScore === undefined ? undefined : { gte: minScore },
         OR: q
           ? [
@@ -41,7 +44,22 @@ export class TopicRepository {
       orderBy: [{ scoreTotal: 'desc' }, { createdAt: 'desc' }],
       skip,
       take,
-      include: { tags: true },
+      include: { tags: true, owner: { select: { id: true, email: true, name: true, role: true } } },
+    });
+  }
+
+  assignOwner(id: string, ownerUserId: string) {
+    return this.prisma.topic.update({
+      where: { id },
+      data: { ownerUserId },
+      include: { tags: true, owner: { select: { id: true, email: true, name: true, role: true } } },
+    });
+  }
+
+  findOwner(id: string) {
+    return this.prisma.topic.findFirst({
+      where: { id, deletedAt: null },
+      select: { id: true, ownerUserId: true },
     });
   }
 
@@ -58,34 +76,7 @@ export class TopicRepository {
     metadata?: Prisma.JsonObject;
     topicUpdate?: Prisma.TopicUpdateManyMutationInput;
   }) {
-    const { topicId, fromStatus, toStatus, actorId, reason, metadata, topicUpdate } = params;
-
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.topic.updateMany({
-        where: { id: topicId, status: fromStatus, deletedAt: null },
-        data: {
-          status: toStatus,
-          ...(topicUpdate ?? {}),
-        },
-      });
-
-      if (updated.count !== 1) {
-        throw new Error('Status transition failed due to stale state');
-      }
-
-      await tx.topicStatusHistory.create({
-        data: {
-          topicId,
-          fromStatus,
-          toStatus,
-          actorId,
-          reason,
-          metadata,
-        },
-      });
-
-      return tx.topic.findUnique({ where: { id: topicId }, include: { tags: true } });
-    });
+    return transitionTopicStatus(this.prisma, params);
   }
 
   findStatusHistory(topicId: string) {

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { fetchWithTimeout } from '../../../common/http/external-fetch.util';
 import { env } from '../../../config/env';
 
 @Injectable()
@@ -28,7 +29,12 @@ export class WorkerRuntimeClient {
 
   private async fetchJson(url: string) {
     try {
-      const response = await fetch(url, { cache: 'no-store' });
+      const response = await fetchWithTimeout(
+        url,
+        { cache: 'no-store' },
+        env.externalRequestTimeoutMs,
+        'Worker runtime probe',
+      );
       const payload = (await response.json()) as Record<string, unknown>;
       return { ok: response.ok, statusCode: response.status, payload };
     } catch (error) {

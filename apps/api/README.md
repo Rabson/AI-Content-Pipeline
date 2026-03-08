@@ -4,6 +4,7 @@ NestJS HTTP API for the AI content pipeline.
 
 ## Responsibilities
 - topic, discovery, research, outline, draft, revision, publish, analytics, and ops APIs
+- user accounts, email/password login, Casbin RBAC, and publisher credential vault
 - Prisma/PostgreSQL persistence
 - BullMQ job enqueueing
 - storage signing and publication adapters
@@ -19,6 +20,14 @@ NestJS HTTP API for the AI content pipeline.
   - [render.yaml](./render.yaml)
   - [render.staging.yaml](./render.staging.yaml)
 
+## Security Notes
+- Non-local API access requires `INTERNAL_API_TOKEN` plus forwarded actor headers.
+- Unknown roles are rejected.
+- Publisher credentials are encrypted with `USER_TOKEN_ENCRYPTION_KEY`.
+- Upload signing enforces mime and size limits.
+- Outbound discovery and publish clients use shared timeout handling.
+- Reference: [security-model.md](../../docs/security-model.md)
+
 ## Common Commands
 ```bash
 npm run dev:api
@@ -30,3 +39,9 @@ npm run build:api
 - `/api/health`
 - `/api/ready`
 - `/api/v1/ops/runtime-status`
+
+## Auth and User Endpoints
+- `POST /api/v1/auth/login`
+- `GET /api/v1/users/me`
+- `GET /api/v1/users/me/publisher-credentials`
+- `PUT /api/v1/users/me/publisher-credentials/:channel`

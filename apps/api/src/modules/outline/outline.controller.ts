@@ -5,12 +5,16 @@ import { AuthenticatedRequest } from '../../common/interfaces/authenticated-requ
 import { GenerateOutlineDto } from './dto/generate-outline.dto';
 import { GetOutlineQueryDto } from './dto/get-outline-query.dto';
 import { OutlineService } from './outline.service';
+import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 
-@Roles(AppRole.EDITOR)
 @Controller('v1/topics/:topicId/outline')
 export class OutlineController {
-  constructor(private readonly outlineService: OutlineService) {}
+  constructor(
+    private readonly outlineService: OutlineService,
+    private readonly ownershipService: UserTopicOwnershipService,
+  ) {}
 
+  @Roles(AppRole.EDITOR)
   @Post('generate')
   generate(
     @Param('topicId') topicId: string,
@@ -20,8 +24,10 @@ export class OutlineController {
     return this.outlineService.enqueue(topicId, dto, this.actorId(req));
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get()
-  get(@Param('topicId') topicId: string, @Query() query: GetOutlineQueryDto) {
+  async get(@Param('topicId') topicId: string, @Query() query: GetOutlineQueryDto, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.outlineService.getOutline(topicId, query);
   }
 

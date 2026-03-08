@@ -11,6 +11,14 @@ export type TopicStatus =
   | 'ARCHIVED';
 
 export type SocialPostStatus = 'DRAFT' | 'APPROVED' | 'POSTED' | 'FAILED';
+export type UserRole = 'ADMIN' | 'EDITOR' | 'REVIEWER' | 'USER';
+
+export interface UserSummary {
+  id: string;
+  email: string;
+  name?: string | null;
+  role: UserRole;
+}
 
 export interface TopicSummary {
   id: string;
@@ -29,6 +37,8 @@ export interface TopicSummary {
   approvedAt?: string | null;
   rejectedAt?: string | null;
   contentItemId?: string | null;
+  ownerUserId?: string | null;
+  owner?: UserSummary | null;
   tags?: Array<{ tag: string }>;
 }
 
@@ -115,7 +125,7 @@ export interface LinkedInDraftView {
 
 export interface PublicationView {
   id: string;
-  channel: 'DEVTO';
+  channel: 'DEVTO' | 'MEDIUM' | 'LINKEDIN';
   status: 'PENDING' | 'PUBLISHED' | 'FAILED';
   title: string;
   externalUrl?: string | null;
@@ -123,6 +133,15 @@ export interface PublicationView {
   createdAt: string;
   lockedForPublish?: boolean;
   verificationStatus?: string | null;
+  publisherUser?: UserSummary | null;
+  requestedByUser?: UserSummary | null;
+}
+
+export interface UserPublisherCredentialView {
+  channel: 'DEVTO' | 'MEDIUM' | 'LINKEDIN';
+  tokenHint?: string | null;
+  configured: boolean;
+  updatedAt: string;
 }
 
 export interface AnalyticsUsageView {

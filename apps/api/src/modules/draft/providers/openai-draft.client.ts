@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { env } from '../../../config/env';
+import { requestOpenAiChatCompletion } from '../../../common/llm/openai-request.util';
 import { DRAFT_SECTION_SYSTEM_PROMPT } from '../prompts/draft-system.prompt';
 import { buildDraftSectionPrompt, DraftSectionPromptInput } from '../prompts/draft-section.prompt';
 
@@ -11,32 +12,17 @@ export class OpenAiDraftClient {
     markdown: string;
     usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
   }> {
-    const apiKey = env.openAiApiKey;
-    if (!apiKey) {
-      throw new InternalServerErrorException('OPENAI_API_KEY is not configured');
-    }
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    const json = await requestOpenAiChatCompletion(
+      {
         model: this.model,
         temperature: 0.3,
         messages: [
           { role: 'system', content: DRAFT_SECTION_SYSTEM_PROMPT },
           { role: 'user', content: buildDraftSectionPrompt(input) },
         ],
-      }),
-    });
-
-    if (!response.ok) {
-      throw new InternalServerErrorException(`OpenAI draft generation failed: ${response.status}`);
-    }
-
-    const json = await response.json();
+      },
+      'OpenAI draft generation',
+    );
     const markdown = json?.choices?.[0]?.message?.content;
 
     if (!markdown || typeof markdown !== 'string') {

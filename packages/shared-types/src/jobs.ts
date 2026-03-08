@@ -11,7 +11,7 @@ export type ContentPipelineJobName =
   | 'revision.apply.finalize'
   | 'seo.generate'
   | 'social.linkedin.generate'
-  | 'publish.devto'
+  | 'publish.article'
   | 'analytics.rollup.daily';
 
 export interface ResearchRunJobPayload {

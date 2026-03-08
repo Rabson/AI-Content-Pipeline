@@ -1,4 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import {
+  assertAllowedHost,
+  fetchWithTimeout,
+  throwUpstreamHttpError,
+} from '../../../common/http/external-fetch.util';
 import { env } from '../../../config/env';
 import {
   DiscoveryCandidate,
@@ -26,12 +31,15 @@ export class HackerNewsDiscoveryProvider implements DiscoveryProvider {
   readonly providerName = 'hackernews';
 
   async fetchCandidates(params: DiscoveryImportParams): Promise<DiscoveryCandidate[]> {
-    const response = await fetch(this.buildSearchUrl(params), {
-      headers: { accept: 'application/json' },
-    });
+    const response = await fetchWithTimeout(
+      this.buildSearchUrl(params),
+      { headers: { accept: 'application/json' } },
+      env.externalRequestTimeoutMs,
+      'Hacker News discovery',
+    );
 
     if (!response.ok) {
-      throw new Error(`Hacker News discovery failed with status ${response.status}`);
+      await throwUpstreamHttpError(response, 'Hacker News discovery');
     }
 
     const payload = (await response.json()) as HackerNewsResponse;
@@ -41,7 +49,11 @@ export class HackerNewsDiscoveryProvider implements DiscoveryProvider {
   }
 
   private buildSearchUrl(params: DiscoveryImportParams) {
-    const url = new URL(env.discoveryHnApiBaseUrl);
+    const url = assertAllowedHost(
+      env.discoveryHnApiBaseUrl,
+      env.discoveryAllowedHosts,
+      'Hacker News discovery',
+    );
     url.searchParams.set('tags', 'story');
     url.searchParams.set('hitsPerPage', String(Math.min(Math.max(params.limit, 1), 20)));
     url.searchParams.set('query', params.query?.trim() || 'ai automation');

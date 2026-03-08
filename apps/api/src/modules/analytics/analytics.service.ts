@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { isPhaseEnabled } from '../../config/feature-flags';
 import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB } from './constants/analytics.constants';
 import { AnalyticsRepository } from './analytics.repository';
@@ -23,7 +24,7 @@ export class AnalyticsService {
     const usageDate = dto.usageDate ? new Date(dto.usageDate) : new Date();
     usageDate.setUTCHours(0, 0, 0, 0);
     const key = usageDate.toISOString().slice(0, 10);
-    const jobId = `analytics:rollup:${key}`;
+    const jobId = buildQueueJobId('analytics', 'rollup', key);
     const existingJob = await this.queue.getJob(jobId);
 
     if (existingJob) {

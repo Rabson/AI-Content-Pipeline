@@ -2,26 +2,26 @@ import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { AppRole } from '../../common/auth/roles.enum';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
-import { PublishDevtoDto } from './dto/publish-devto.dto';
+import { RequestRateLimitService } from '../../common/security/request-rate-limit.service';
+import { RequestPublicationDto } from './dto/request-publication.dto';
 import { PublisherService } from './publisher.service';
 
-@Roles(AppRole.REVIEWER)
+@Roles(AppRole.USER)
 @Controller('v1/topics/:topicId/publications')
 export class PublisherController {
-  constructor(private readonly publisherService: PublisherService) {}
+  constructor(
+    private readonly publisherService: PublisherService,
+    private readonly rateLimitService: RequestRateLimitService,
+  ) {}
 
   @Get()
-  list(@Param('topicId') topicId: string) {
-    return this.publisherService.listPublications(topicId);
+  list(@Param('topicId') topicId: string, @Req() req: AuthenticatedRequest) {
+    return this.publisherService.listPublications(topicId, req.user);
   }
 
-  @Post('devto')
-  publishDevto(
-    @Param('topicId') topicId: string,
-    @Body() dto: PublishDevtoDto,
-    @Req() req: AuthenticatedRequest,
-  ) {
-    const actorId = req.user?.id ?? req.header('x-actor-id')?.trim() ?? 'system';
-    return this.publisherService.enqueueDevtoPublish(topicId, dto, actorId);
+  @Post()
+  publish(@Param('topicId') topicId: string, @Body() dto: RequestPublicationDto, @Req() req: AuthenticatedRequest) {
+    this.rateLimitService.enforce(`publish:${req.ip}:${req.user?.id ?? 'anonymous'}:${topicId}`, 3, 60_000);
+    return this.publisherService.enqueuePublication(topicId, dto, req.user!);
   }
 }

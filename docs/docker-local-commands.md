@@ -45,6 +45,13 @@ Starts:
 docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml up -d
 ```
 
+Note:
+- In local dev mode, `api`, `worker`, and `dashboard` each maintain their own `node_modules` volume.
+- On the first startup after a `package-lock.json` change, each service runs `npm ci`.
+- `api` and `worker` also run `prisma generate` during that refresh.
+- Local Postgres persists to `.local-data/postgres` on the host.
+- That first boot is slower by design; later restarts reuse the lock-hash marker and start normally.
+
 ## Start Services Step by Step
 
 ### 1. Infrastructure
@@ -165,9 +172,10 @@ From the current [`.env`](../.env):
 ## Dashboard Access
 - Sign-in URL: `http://localhost:3003/signin`
 - Seeded local identities:
-  - `operator@example.com` / `local-access` (`ADMIN`)
-  - `reviewer@example.com` / `local-access` (`REVIEWER`)
-  - `editor@example.com` / `local-access` (`EDITOR`)
+  - `admin@example.com` / `AdminPass123!` (`ADMIN`)
+  - `editor@example.com` / `EditorPass123!` (`EDITOR`)
+  - `reviewer@example.com` / `ReviewerPass123!` (`REVIEWER`)
+  - `normal_user@example.com` / `UserPass123!` (`USER`)
 - `Ops` is visible only to `ADMIN`
 - Protected routes redirect to sign-in until authenticated
 
@@ -203,9 +211,9 @@ curl -fsS 'http://localhost:3001/api/v1/discovery/candidates?limit=10'
 ### Check admin ops payload
 ```bash
 curl -fsS http://localhost:3001/api/v1/ops/runtime-status \
-  -H 'x-user-email: operator@example.com' \
+  -H 'x-user-email: admin@example.com' \
   -H 'x-actor-role: ADMIN' \
-  -H 'x-actor-id: operator@example.com'
+  -H 'x-actor-id: admin@example.com'
 ```
 
 ## Make Shortcuts

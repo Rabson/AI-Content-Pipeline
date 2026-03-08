@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { ContentState, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { Queue } from 'bullmq';
+import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { RevisionRepository } from './revision.repository';
 import { REVISION_APPLY_FINALIZE_JOB, REVISION_APPLY_SECTION_JOB, REVISION_APPLY_START_JOB } from './constants/revision.constants';
 import { RunRevisionDto } from './dto/run-revision.dto';
@@ -33,9 +34,9 @@ async function enqueueRevisionJobs(
   toDraftVersionId: string,
   items: Array<{ id: string; sectionKey: string; instructionMd: string }>,
 ) {
-  await queue.add(REVISION_APPLY_START_JOB, { topicId: reviewSession.topicId, revisionRunId, fromDraftVersionId: reviewSession.draftVersionId, toDraftVersionId }, { jobId: `revision:start:${reviewSession.topicId}:${revisionRunId}` });
+  await queue.add(REVISION_APPLY_START_JOB, { topicId: reviewSession.topicId, revisionRunId, fromDraftVersionId: reviewSession.draftVersionId, toDraftVersionId }, { jobId: buildQueueJobId('revision', 'start', reviewSession.topicId, revisionRunId) });
   for (const item of items) await enqueueRevisionSection(queue, reviewSession, revisionRunId, toDraftVersionId, item);
-  await queue.add(REVISION_APPLY_FINALIZE_JOB, { revisionRunId }, { jobId: `revision:finalize:${reviewSession.topicId}:${revisionRunId}` });
+  await queue.add(REVISION_APPLY_FINALIZE_JOB, { revisionRunId }, { jobId: buildQueueJobId('revision', 'finalize', reviewSession.topicId, revisionRunId) });
 }
 
 function enqueueRevisionSection(
@@ -48,5 +49,5 @@ function enqueueRevisionSection(
   const fromSection = reviewSession.draftVersion.sections.find((section) => section.sectionKey === item.sectionKey);
   if (!fromSection) return;
   const commentTexts = reviewSession.comments.filter((comment) => comment.sectionKey === item.sectionKey).map((comment) => comment.commentMd);
-  return queue.add(REVISION_APPLY_SECTION_JOB, { topicId: reviewSession.topicId, topicTitle: reviewSession.topic.title, revisionRunId, revisionItemId: item.id, toDraftVersionId, sectionKey: item.sectionKey, heading: fromSection.heading, currentSectionMarkdown: fromSection.contentMd, instructionMd: item.instructionMd, commentTexts }, { jobId: `revision:section:${reviewSession.topicId}:${revisionRunId}:${item.sectionKey}`, attempts: 3, backoff: { type: 'exponential', delay: 30000 } });
+  return queue.add(REVISION_APPLY_SECTION_JOB, { topicId: reviewSession.topicId, topicTitle: reviewSession.topic.title, revisionRunId, revisionItemId: item.id, toDraftVersionId, sectionKey: item.sectionKey, heading: fromSection.heading, currentSectionMarkdown: fromSection.contentMd, instructionMd: item.instructionMd, commentTexts }, { jobId: buildQueueJobId('revision', 'section', reviewSession.topicId, revisionRunId, item.sectionKey), attempts: 3, backoff: { type: 'exponential', delay: 30000 } });
 }

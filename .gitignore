@@ -13,3 +13,4 @@ apps/dashboard/.next-docker/
 packages/shared-config/env/*.js
 packages/shared-config/env/*.d.ts
 misc/
+.local-data/

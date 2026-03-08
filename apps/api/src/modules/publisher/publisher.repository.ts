@@ -9,7 +9,10 @@ export class PublisherRepository {
   findTopicById(topicId: string) {
     return this.prisma.topic.findFirst({
       where: { id: topicId, deletedAt: null },
-      include: { contentItem: true },
+      include: {
+        contentItem: true,
+        owner: { select: { id: true, email: true, name: true, role: true } },
+      },
     });
   }
 
@@ -40,15 +43,18 @@ export class PublisherRepository {
       include: {
         attempts: { orderBy: { createdAt: 'desc' } },
         draftVersion: true,
+        publisherUser: { select: { id: true, email: true, name: true, role: true } },
+        requestedByUser: { select: { id: true, email: true, name: true, role: true } },
       },
     });
   }
 
-  findPendingPublication(topicId: string, channel: PublicationChannel) {
+  findPendingPublication(topicId: string, channel: PublicationChannel, publisherUserId?: string) {
     return this.prisma.publication.findFirst({
       where: {
         topicId,
         channel,
+        publisherUserId,
         status: PublicationStatus.PENDING,
       },
       orderBy: { createdAt: 'desc' },
@@ -60,6 +66,8 @@ export class PublisherRepository {
     contentItemId?: string;
     draftVersionId: string;
     channel: PublicationChannel;
+    requestedByUserId?: string;
+    publisherUserId?: string;
     title: string;
     payload: Record<string, unknown>;
   }) {
@@ -69,6 +77,8 @@ export class PublisherRepository {
         contentItemId: params.contentItemId,
         draftVersionId: params.draftVersionId,
         channel: params.channel,
+        requestedByUserId: params.requestedByUserId,
+        publisherUserId: params.publisherUserId,
         title: params.title,
         payloadJson: params.payload as Prisma.InputJsonValue,
         status: PublicationStatus.PENDING,
@@ -130,7 +140,11 @@ export class PublisherRepository {
   async getPublicationOrThrow(publicationId: string) {
     const publication = await this.prisma.publication.findUnique({
       where: { id: publicationId },
-      include: { draftVersion: true, topic: { include: { contentItem: true } } },
+      include: {
+        draftVersion: true,
+        topic: { include: { contentItem: true, owner: { select: { id: true, email: true, role: true, name: true } } } },
+        publisherUser: true,
+      },
     });
 
     if (!publication) {

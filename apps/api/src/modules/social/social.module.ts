@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaService } from '../../prisma/prisma.service';
+import { UserModule } from '../user/user.module';
 import { SOCIAL_QUEUE } from './constants/social.constants';
 import { SocialController } from './social.controller';
 import { SocialOrchestrator } from './social.orchestrator';
@@ -10,6 +11,7 @@ import { SocialGeneratorService } from './providers/social-generator.service';
 
 @Module({
   imports: [
+    UserModule,
     BullModule.registerQueue({
       name: SOCIAL_QUEUE,
     }),

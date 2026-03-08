@@ -2,12 +2,16 @@ import { Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
 import { AppRole } from '../../common/auth/roles.enum';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { RequestRateLimitService } from '../../common/security/request-rate-limit.service';
 import { OpsService } from './ops.service';
 
 @Roles(AppRole.ADMIN)
 @Controller('v1/ops')
 export class OpsController {
-  constructor(private readonly opsService: OpsService) {}
+  constructor(
+    private readonly opsService: OpsService,
+    private readonly rateLimitService: RequestRateLimitService,
+  ) {}
 
   @Get('runtime-status')
   runtimeStatus() {
@@ -29,7 +33,12 @@ export class OpsController {
     @Param('executionId') executionId: string,
     @Req() req: AuthenticatedRequest,
   ) {
+    this.rateLimitService.enforce(this.limitKey(req, executionId), 3, 60_000);
     const actorId = req.user?.id ?? req.header('x-actor-id')?.trim() ?? 'system';
     return this.opsService.replayExecution(executionId, actorId);
+  }
+
+  private limitKey(req: AuthenticatedRequest, executionId: string) {
+    return `replay:${req.ip}:${req.user?.id ?? 'anonymous'}:${executionId}`;
   }
 }

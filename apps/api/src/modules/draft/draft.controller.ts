@@ -9,12 +9,16 @@ import { GetDraftQueryDto } from './dto/get-draft-query.dto';
 import { ListDraftVersionsDto } from './dto/list-draft-versions.dto';
 import { UpdateReviewCommentDto } from './dto/update-review-comment.dto';
 import { DraftService } from './draft.service';
+import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 
-@Roles(AppRole.EDITOR)
 @Controller('v1')
 export class DraftController {
-  constructor(private readonly draftService: DraftService) {}
+  constructor(
+    private readonly draftService: DraftService,
+    private readonly ownershipService: UserTopicOwnershipService,
+  ) {}
 
+  @Roles(AppRole.EDITOR)
   @Post('topics/:topicId/drafts/generate')
   generateDraft(
     @Param('topicId') topicId: string,
@@ -24,35 +28,47 @@ export class DraftController {
     return this.draftService.enqueueDraftGeneration(topicId, dto, this.actorId(req));
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get('topics/:topicId/drafts')
-  listDrafts(@Param('topicId') topicId: string, @Query() query: ListDraftVersionsDto) {
+  async listDrafts(@Param('topicId') topicId: string, @Query() query: ListDraftVersionsDto, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.draftService.listDraftVersions(topicId, query);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get('topics/:topicId/drafts/current')
-  getCurrentDraft(@Param('topicId') topicId: string, @Query() query: GetDraftQueryDto) {
+  async getCurrentDraft(@Param('topicId') topicId: string, @Query() query: GetDraftQueryDto, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.draftService.getDraft(topicId, query);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get('topics/:topicId/drafts/current/markdown')
-  getDraftMarkdown(@Param('topicId') topicId: string, @Query() query: GetDraftQueryDto) {
+  async getDraftMarkdown(@Param('topicId') topicId: string, @Query() query: GetDraftQueryDto, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.draftService.getDraftMarkdown(topicId, query);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get('topics/:topicId/draft/sections/:sectionKey')
-  getDraftSection(
+  async getDraftSection(
     @Param('topicId') topicId: string,
     @Param('sectionKey') sectionKey: string,
     @Query() query: GetDraftQueryDto,
+    @Req() req: AuthenticatedRequest,
   ) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.draftService.getDraftSection(topicId, sectionKey, query);
   }
 
+  @Roles(AppRole.USER, AppRole.EDITOR)
   @Get('topics/:topicId/reviews')
-  listReviewSessions(@Param('topicId') topicId: string) {
+  async listReviewSessions(@Param('topicId') topicId: string, @Req() req: AuthenticatedRequest) {
+    await this.ownershipService.assertTopicReadAccess(req.user, topicId);
     return this.draftService.listReviewSessions(topicId);
   }
 
+  @Roles(AppRole.EDITOR)
   @Post('drafts/:draftVersionId/reviews')
   createReviewSession(
     @Param('draftVersionId') draftVersionId: string,

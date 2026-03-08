@@ -1,5 +1,6 @@
 import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { getTraceContext } from '../observability/opentelemetry';
+import { redactSensitiveValues } from '../security/redact.util';
 
 @Injectable()
 export class AppLogger extends ConsoleLogger {
@@ -26,7 +27,7 @@ export class AppLogger extends ConsoleLogger {
     return JSON.stringify({
       level,
       context,
-      message,
+      message: redactSensitiveValues(message),
       trace,
       traceId: traceContext.traceId,
       spanId: traceContext.spanId,

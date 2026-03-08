@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { createHash } from 'crypto';
+import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { CONTENT_PIPELINE_QUEUE } from '../topic/constants/topic-queue.constants';
 import { DISCOVERY_IMPORT_JOB } from './constants/discovery.constants';
 
@@ -34,7 +35,7 @@ export class DiscoveryQueueService {
       .digest('hex')
       .slice(0, 16);
 
-    const jobId = `discovery:${payload.provider}:${digest}`;
+    const jobId = buildQueueJobId('discovery', payload.provider, digest);
     const existingJob = await this.contentPipelineQueue.getJob(jobId);
     if (existingJob) {
       return existingJob.id ?? jobId;

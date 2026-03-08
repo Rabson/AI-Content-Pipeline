@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaService } from '../../prisma/prisma.service';
+import { UserModule } from '../user/user.module';
 import { CONTENT_PIPELINE_QUEUE } from './constants/draft.constants';
 import { DraftController } from './draft.controller';
 import { DraftService } from './draft.service';
@@ -15,7 +16,7 @@ import { DraftQueryService } from './services/draft-query.service';
 import { DraftReviewService } from './services/draft-review.service';
 
 @Module({
-  imports: [BullModule.registerQueue({ name: CONTENT_PIPELINE_QUEUE })],
+  imports: [UserModule, BullModule.registerQueue({ name: CONTENT_PIPELINE_QUEUE })],
   controllers: [DraftController],
   providers: [
     PrismaService,

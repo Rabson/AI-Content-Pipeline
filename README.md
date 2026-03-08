@@ -58,14 +58,17 @@ Dashboard sign-in:
 - Dashboard: `http://localhost:3003/signin`
 
 ## Local Auth Seed
-- `ADMIN`: `operator@example.com` / `local-access`
-- `REVIEWER`: `reviewer@example.com` / `local-access`
-- `EDITOR`: `editor@example.com` / `local-access`
+- `ADMIN`: `admin@example.com` / `AdminPass123!`
+- `EDITOR`: `editor@example.com` / `EditorPass123!`
+- `REVIEWER`: `reviewer@example.com` / `ReviewerPass123!`
+- `USER`: `normal_user@example.com` / `UserPass123!`
 
 ## Important Files
 - Runtime runbook: [RUN.md](./RUN.md)
 - System summary: [summary.md](./summary.md)
 - Docs index: [docs/README.md](./docs/README.md)
+- Security model: [docs/security-model.md](./docs/security-model.md)
+- Env reference: [docs/env-reference.md](./docs/env-reference.md)
 - API service notes: [apps/api/README.md](./apps/api/README.md)
 - Worker service notes: [apps/worker/README.md](./apps/worker/README.md)
 - Dashboard service notes: [apps/dashboard/README.md](./apps/dashboard/README.md)
@@ -73,10 +76,12 @@ Dashboard sign-in:
 ## Repo Conventions
 - Root `.env` is the local runtime source.
 - Root `npm run dev:*`, `start:*`, and `build:*` scripts build `@aicp/shared-config` first.
+- `apps/api/scripts/seed-demo.mjs` seeds the local user accounts and demo publish-ready topic.
 - Service-local env access is centralized in:
   - `apps/api/src/config/env.ts`
   - `apps/worker/src/config/env.ts`
   - `apps/dashboard/src/config/env.ts`
+- API and worker share `USER_TOKEN_ENCRYPTION_KEY` so publisher credentials can be encrypted in API and decrypted in worker jobs.
 - Docker image specs live beside each service.
 - Compose files live under `infra/docker`.
 

@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { json, urlencoded } from 'express';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { env } from './config/env';
 import { AppLogger } from './common/logger/app-logger.service';
@@ -16,6 +18,25 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   app.enableShutdownHooks();
+  app.getHttpAdapter().getInstance().set('trust proxy', env.appEnv !== 'local');
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || env.apiCorsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('Origin not allowed by CORS'));
+    },
+    credentials: true,
+  });
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: false,
+      contentSecurityPolicy: false,
+    }),
+  );
+  app.use(json({ limit: env.requestBodyLimit }));
+  app.use(urlencoded({ extended: true, limit: env.requestBodyLimit }));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

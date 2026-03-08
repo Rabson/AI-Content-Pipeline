@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaService } from '../../prisma/prisma.service';
+import { UserModule } from '../user/user.module';
 import { CONTENT_PIPELINE_QUEUE } from './constants/research.constants';
 import { ResearchController } from './research.controller';
 import { ResearchService } from './research.service';
@@ -15,6 +16,7 @@ import { ResearchWriteRepository } from './repositories/research-write.repositor
 
 @Module({
   imports: [
+    UserModule,
     BullModule.registerQueue({
       name: CONTENT_PIPELINE_QUEUE,
     }),

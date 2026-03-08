@@ -7,6 +7,10 @@ export interface PublishRequest {
   tags?: string[];
 }
 
+export interface PublisherCredentialInput {
+  accessToken?: string;
+}
+
 export interface PublishResponse {
   externalId: string;
   url: string;
@@ -15,6 +19,6 @@ export interface PublishResponse {
 
 export interface PublisherAdapter {
   readonly channel: PublicationChannel;
-  publish(input: PublishRequest): Promise<PublishResponse>;
+  publish(input: PublishRequest, credential?: PublisherCredentialInput): Promise<PublishResponse>;
   verify?(externalUrl: string): Promise<{ ok: boolean; metadata?: Record<string, unknown> }>;
 }

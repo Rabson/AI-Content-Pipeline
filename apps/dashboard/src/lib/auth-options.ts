@@ -1,90 +1,54 @@
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { env } from '../config/env';
-
-function resolveRole(email: string) {
-  const adminEmails = (env.authAdminEmails ?? '')
-    .split(',')
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-  const reviewerEmails = (env.authReviewerEmails ?? '')
-    .split(',')
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-
-  const normalizedEmail = email.toLowerCase();
-  if (adminEmails.includes(normalizedEmail)) {
-    return 'ADMIN';
-  }
-  if (reviewerEmails.includes(normalizedEmail)) {
-    return 'REVIEWER';
-  }
-  return 'EDITOR';
-}
-
-function isAllowedDomain(email: string) {
-  const allowedDomains = (env.authAllowedEmailDomains ?? '')
-    .split(',')
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (!allowedDomains.length) {
-    return true;
-  }
-
-  return allowedDomains.some((domain) => email.toLowerCase().endsWith(`@${domain}`));
-}
+import { clearAuthRateLimit, enforceAuthRateLimit } from './auth-rate-limit';
 
 export const authOptions: NextAuthOptions = {
-  session: {
-    strategy: 'jwt',
-  },
-  pages: {
-    signIn: '/signin',
-  },
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/signin' },
   providers: [
     CredentialsProvider({
       name: 'Internal access',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        accessCode: { label: 'Access code', type: 'password' },
+        password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const email = credentials?.email?.trim().toLowerCase();
-        const accessCode = credentials?.accessCode?.trim();
-        const requiredAccessCode = env.dashboardAccessCode?.trim();
-
-        if (!email || !accessCode) {
+        const password = credentials?.password?.trim();
+        const rateLimitKey = `${email ?? 'unknown'}:${request.headers?.['x-forwarded-for'] ?? 'local'}`;
+        if (!email || !password) return null;
+        enforceAuthRateLimit(rateLimitKey, env.authRateLimitMaxAttempts, env.authRateLimitWindowMs);
+        try {
+          const response = await fetch(`${env.apiBase}/v1/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+            cache: 'no-store',
+          });
+          if (!response.ok) return null;
+          clearAuthRateLimit(rateLimitKey);
+          const user = (await response.json()) as { id: string; email: string; role: string; name?: string | null };
+          return { id: user.id, email: user.email, role: user.role, name: user.name } as any;
+        } catch {
           return null;
         }
-
-        if (!isAllowedDomain(email)) {
-          return null;
-        }
-
-        if (requiredAccessCode && accessCode !== requiredAccessCode) {
-          return null;
-        }
-
-        return {
-          id: email,
-          email,
-          role: resolveRole(email),
-        } as any;
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role ?? 'EDITOR';
+        token.role = (user as any).role ?? 'USER';
+        token.name = user.name;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = String(token.sub ?? session.user.email ?? 'dashboard-user');
-        session.user.role = String(token.role ?? 'EDITOR');
+        session.user.role = String(token.role ?? 'USER');
+        session.user.name = typeof token.name === 'string' ? token.name : session.user.name;
       }
       return session;
     },

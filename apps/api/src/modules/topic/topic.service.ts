@@ -5,6 +5,7 @@ import { ListTopicsQueryDto } from './dto/list-topics-query.dto';
 import { ScoreTopicDto } from './dto/score-topic.dto';
 import { ApproveTopicDto } from './dto/approve-topic.dto';
 import { RejectTopicDto } from './dto/reject-topic.dto';
+import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
 import { TopicCommandService } from './services/topic-command.service';
 import { TopicQueryService } from './services/topic-query.service';
 
@@ -19,8 +20,8 @@ export class TopicService {
     return this.topicCommandService.createTopic(dto, actorId);
   }
 
-  async listTopics(query: ListTopicsQueryDto) {
-    return this.topicQueryService.listTopics(query);
+  async listTopics(query: ListTopicsQueryDto, actor?: AuthenticatedUser) {
+    return this.topicQueryService.listTopics(query, actor);
   }
 
   async getTopic(topicId: string) {
