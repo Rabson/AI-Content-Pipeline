@@ -32,6 +32,8 @@ docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/
 First local boot after a `package-lock.json` change is slower because each app container refreshes its own `node_modules` volume. API and worker also regenerate Prisma during that refresh.
 Local Postgres data is stored in `.local-data/postgres` on the host, so local Docker boots do not depend on a Docker Desktop volume for database writes.
 
+If Docker disk space is tight, the local override can fail during `npm ci` or Prisma generate inside app containers. In that case, use the base runtime below to verify built images without bind-mounted dev bootstrap.
+
 ### Verify
 ```bash
 curl -fsS http://localhost:3001/api/health
@@ -49,6 +51,30 @@ docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/
 ### Stop
 ```bash
 docker compose --env-file .env -f infra/docker/compose.base.yml -f infra/docker/compose.local.yml down
+```
+
+## Option 1B: Base Docker Runtime
+
+This runs the built images directly and avoids the local dev bootstrap path.
+
+### Start
+```bash
+cd <repo-root>
+docker compose --env-file .env -f infra/docker/compose.base.yml up -d --build
+```
+
+### Verify
+```bash
+curl -fsS http://localhost:3001/api/health
+curl -fsS http://localhost:3001/api/ready
+curl -fsS http://localhost:3002/health
+curl -fsS http://localhost:3002/ready
+curl -I http://localhost:3003/signin
+```
+
+### Stop
+```bash
+docker compose --env-file .env -f infra/docker/compose.base.yml down
 ```
 
 ## Option 2: Docker Infra + Host Services
@@ -128,6 +154,11 @@ npm run test
 - `EDITOR`: `editor@example.com` / `EditorPass123!`
 - `REVIEWER`: `reviewer@example.com` / `ReviewerPass123!`
 - `USER`: `normal_user@example.com` / `UserPass123!`
+- After sign-in:
+  - use `/account` to store `DEVTO`, `MEDIUM`, and `LINKEDIN` credentials
+  - approved content is assigned to the `USER` owner
+  - the `USER` owner can publish to ready channels
+  - `ADMIN` can reassign ownership and publish on behalf of the owner
 
 ## Notes
 - Root `npm start` is not defined; use `start:api`, `start:worker`, and `start:dashboard`.
@@ -135,5 +166,9 @@ npm run test
 - `npm install` and `npm ci` run `postinstall`, which regenerates the Prisma client automatically.
 - Workspace tests use Vitest 4 and the shared ESM config file `vitest.config.mts`.
 - API and worker must share the same `USER_TOKEN_ENCRYPTION_KEY`, because publisher tokens are encrypted in API and decrypted in worker during publish jobs.
+- Publisher channel API env also needs:
+  - `MEDIUM_API_BASE_URL`
+  - `LINKEDIN_API_BASE_URL`
+  - `LINKEDIN_API_VERSION`
 - For Docker-only command detail, see [docker-local-commands.md](./docs/docker-local-commands.md).
 - Non-local dashboard -> API calls require `INTERNAL_API_TOKEN`; local mode can still use `AUTH_ALLOW_HEADER_BYPASS=true`.

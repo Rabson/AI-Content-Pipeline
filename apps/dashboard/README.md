@@ -8,6 +8,7 @@ Next.js internal dashboard for admins, editors, reviewers, and assigned users.
 - account page for per-user publisher credentials
 - backend error presentation and route-level error boundaries
 - mobile-friendly operator UI
+- publish readiness, banner image management, owner assignment, and publication retry views
 
 ## Runtime and Config
 - Service-local env module: [env.ts](./src/config/env.ts)
@@ -22,6 +23,8 @@ Next.js internal dashboard for admins, editors, reviewers, and assigned users.
 - Dashboard sign-in uses API-backed email/password authentication.
 - Dashboard forwards trusted caller headers to the API and includes `INTERNAL_API_TOKEN` when configured.
 - Local seeded users are created by `apps/api/scripts/seed-demo.mjs`.
+- `USER` sees assigned approved content and chooses where to publish.
+- `ADMIN` can reassign owners and publish on behalf of the assigned `USER`.
 - Reference: [security-model.md](../../docs/security-model.md)
 
 ## Common Commands
@@ -39,3 +42,6 @@ npm run build:dashboard
   - `editor@example.com` / `EditorPass123!`
   - `reviewer@example.com` / `ReviewerPass123!`
   - `normal_user@example.com` / `UserPass123!`
+- Publishing workflow:
+  - `/account` stores per-user `DEVTO`, `MEDIUM`, and `LINKEDIN` credentials
+  - `/topics/[topicId]/publish` shows channel readiness, owner assignment, banner image controls, and publication history

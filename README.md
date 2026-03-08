@@ -23,8 +23,11 @@ This file is the entry point. It stays high-level.
 6. Review and comment at section level
 7. Revise selected sections only
 8. Approve final content
-9. Publish to Dev.to
-10. Generate social distribution drafts
+9. Assign approved content to a `USER` owner
+10. Configure per-user publisher credentials
+11. Add or select a banner image
+12. Publish to Dev.to, Medium, or LinkedIn when the selected channel is ready
+13. Generate social distribution drafts
 
 ## Stack
 - Frontend: Next.js
@@ -49,6 +52,8 @@ npm run dev:dashboard
 
 Dashboard sign-in:
 - `http://localhost:3003/signin`
+- After sign-in, use `/account` to manage publisher credentials for `DEVTO`, `MEDIUM`, and `LINKEDIN`.
+- Approved topics flow to the assigned `USER` owner. That user can decide where to publish, and `ADMIN` can publish on the owner's behalf.
 
 ## Service Entry Points
 - API health: `http://localhost:3001/api/health`
@@ -84,6 +89,15 @@ Dashboard sign-in:
   - `apps/worker/src/config/env.ts`
   - `apps/dashboard/src/config/env.ts`
 - API and worker share `USER_TOKEN_ENCRYPTION_KEY` so publisher credentials can be encrypted in API and decrypted in worker jobs.
+- Publisher channel support is:
+  - `DEVTO`: implemented
+  - `MEDIUM`: implemented
+  - `LINKEDIN`: implemented
+- Publish UI includes:
+  - owner reassignment for `ADMIN`
+  - channel readiness and credential checks
+  - banner image upload/select/remove
+  - publication history and retry
 - Docker image specs live beside each service.
 - Compose files live under `infra/docker`.
 

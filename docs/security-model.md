@@ -18,10 +18,11 @@ This document defines the current security contract for the local, staging, and 
 
 ## Dashboard to API Contract
 - Dashboard is the intended internal caller for operator actions.
+- Dashboard authenticates users with API-backed email/password login and stores a server-side session.
 - Dashboard forwards authenticated user identity headers to the API.
 - In staging and production, dashboard must also send `x-internal-api-token`.
-- Shared access-code auth is acceptable for local/internal use only.
-- For non-local deployments, replace local credentials with a real identity provider or verified per-user password flow, and keep `INTERNAL_API_TOKEN` between dashboard and API.
+- Seeded local email/password accounts are acceptable for local/internal use only.
+- For non-local deployments, replace local credentials with a real identity provider or equivalent verified per-user auth flow, and keep `INTERNAL_API_TOKEN` between dashboard and API.
 
 ## Role Model
 - `ADMIN`
@@ -30,6 +31,13 @@ This document defines the current security contract for the local, staging, and 
   - topic scoring, approval/rejection, publish requests
 - `EDITOR`
   - topic creation, draft/revision workflows, upload signing
+- `USER`
+  - sees assigned approved topics
+  - manages own publisher credentials
+  - chooses where assigned content is published
+- `ADMIN`
+  - may publish on behalf of the assigned `USER`
+  - may reassign topic ownership
 - Unknown roles fail closed.
 
 ## Rate Limiting
@@ -38,6 +46,7 @@ This document defines the current security contract for the local, staging, and 
   - publish
   - upload signing
   - failed-job replay
+  - login
 - Repeated auth failures emit structured security events.
 
 ## API Hardening
@@ -67,6 +76,7 @@ This document defines the current security contract for the local, staging, and 
 - External HTTP requests use deadlines.
 - Discovery provider hosts must match `DISCOVERY_ALLOWED_HOSTS`.
 - OpenAI, Dev.to, and ops runtime calls use shared timeout/error handling.
+- Medium and LinkedIn publish calls use the same outbound timeout/error handling.
 
 ## Remaining Risk Boundary
 - The current dashboard auth model is still an internal-tool model, not full enterprise SSO.

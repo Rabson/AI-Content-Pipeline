@@ -51,6 +51,14 @@ Note:
 - `api` and `worker` also run `prisma generate` during that refresh.
 - Local Postgres persists to `.local-data/postgres` on the host.
 - That first boot is slower by design; later restarts reuse the lock-hash marker and start normally.
+- If Docker reports `ENOSPC`, use the base stack below to validate built images without the dev bootstrap path.
+
+## Start Base Runtime
+```bash
+docker compose --env-file .env -f infra/docker/compose.base.yml up -d --build
+```
+
+This mode avoids bind-mounted dev bootstrap and is the better verification path when Docker disk space is tight.
 
 ## Start Services Step by Step
 
@@ -178,6 +186,8 @@ From the current [`.env`](../.env):
   - `normal_user@example.com` / `UserPass123!` (`USER`)
 - `Ops` is visible only to `ADMIN`
 - Protected routes redirect to sign-in until authenticated
+- `/account` manages `DEVTO`, `MEDIUM`, and `LINKEDIN` credentials
+- `/topics/[topicId]/publish` manages publish readiness, banner image, owner assignment, and retry
 
 ## Service Connection Map
 - `dashboard` -> `api`

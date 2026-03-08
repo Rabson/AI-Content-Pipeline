@@ -20,6 +20,9 @@ This file is the service-by-service environment reference.
 - `OPENAI_MODEL_DRAFT`: draft/revision/outline model
 - `OPENAI_MODEL_RESEARCH`: research model
 - `DEVTO_API_KEY`: Dev.to publish key
+- `MEDIUM_API_BASE_URL`: Medium publish API base URL
+- `LINKEDIN_API_BASE_URL`: LinkedIn API base URL
+- `LINKEDIN_API_VERSION`: LinkedIn version header value for publish calls
 - `WORKER_HEALTH_BASE_URL`: worker health endpoint base URL for ops aggregation
 - `SECURITY_ALERT_THRESHOLD`: repeated auth failure threshold
 - `SECURITY_ALERT_WINDOW_MS`: threshold window
@@ -48,6 +51,9 @@ This file is the service-by-service environment reference.
 - `QUEUE_PREFIX`
 - `WORKER_METRICS_PORT`: worker health/metrics HTTP port
 - `USER_TOKEN_ENCRYPTION_KEY`: must match API so publish jobs can decrypt stored publisher tokens
+- `MEDIUM_API_BASE_URL`: Medium publish API base URL
+- `LINKEDIN_API_BASE_URL`: LinkedIn API base URL
+- `LINKEDIN_API_VERSION`: LinkedIn version header value for publish calls
 
 ## Dashboard
 - `NEXT_PUBLIC_APP_ENV`: dashboard runtime mode
@@ -72,3 +78,4 @@ This file is the service-by-service environment reference.
   - `reviewer@example.com` / `ReviewerPass123!`
   - `normal_user@example.com` / `UserPass123!`
 - Local Docker and host-process startup are documented in [RUN.md](../RUN.md).
+- Approved content is assigned to `normal_user@example.com` in the seed flow unless reassigned by `ADMIN`.

@@ -5,6 +5,7 @@ BullMQ background worker for the AI content pipeline.
 ## Responsibilities
 - consumes content pipeline, social, publishing, and analytics queues
 - runs OpenAI-backed generation workflows
+- publishes to `DEVTO`, `MEDIUM`, and `LINKEDIN` using owner-scoped credentials
 - updates workflow/job telemetry
 - exposes worker health and metrics endpoints
 
@@ -13,6 +14,10 @@ BullMQ background worker for the AI content pipeline.
 - Root `npm run dev:worker`, `start:worker`, and `build:worker` build `@aicp/shared-config` first, then inject the repo-level [`.env`](../../.env)
 - Tests run through the shared Vitest 4 config at `../../vitest.config.mts`.
 - Worker must use the same `USER_TOKEN_ENCRYPTION_KEY` as API so publish jobs can decrypt stored publisher credentials.
+- Worker publish adapters use:
+  - `MEDIUM_API_BASE_URL`
+  - `LINKEDIN_API_BASE_URL`
+  - `LINKEDIN_API_VERSION`
 - Docker image spec: [Dockerfile](./Dockerfile)
 - Docker build ignore: [Dockerfile.dockerignore](./Dockerfile.dockerignore)
 - Render manifests:
