@@ -76,6 +76,7 @@ Dashboard sign-in:
 ## Repo Conventions
 - Root `.env` is the local runtime source.
 - Root `npm run dev:*`, `start:*`, and `build:*` scripts build `@aicp/shared-config` first.
+- Root install runs `postinstall`, which regenerates the Prisma client from `apps/api/src/prisma/schema.prisma`.
 - Root and workspace tests run on Vitest 4 with shared config in `vitest.config.mts`.
 - `apps/api/scripts/seed-demo.mjs` seeds the local user accounts and demo publish-ready topic.
 - Service-local env access is centralized in:

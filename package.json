@@ -12,6 +12,8 @@
   },
   "scripts": {
     "build:shared-config": "npm --workspace @aicp/shared-config run build",
+    "prisma:generate": "npx prisma generate --schema apps/api/src/prisma/schema.prisma",
+    "postinstall": "npm run prisma:generate",
     "dev:api": "npm run build:shared-config && node scripts/run-with-root-env.mjs npm --workspace @aicp/api run start:dev",
     "dev:worker": "npm run build:shared-config && node scripts/run-with-root-env.mjs npm --workspace @aicp/worker run start:dev",
     "dev:dashboard": "npm run build:shared-config && node scripts/run-with-root-env.mjs npm --workspace @aicp/dashboard run dev",

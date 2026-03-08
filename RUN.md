@@ -132,6 +132,7 @@ npm run test
 ## Notes
 - Root `npm start` is not defined; use `start:api`, `start:worker`, and `start:dashboard`.
 - Root scripts build `@aicp/shared-config` and inject the repo-level `.env` automatically.
+- `npm install` and `npm ci` run `postinstall`, which regenerates the Prisma client automatically.
 - Workspace tests use Vitest 4 and the shared ESM config file `vitest.config.mts`.
 - API and worker must share the same `USER_TOKEN_ENCRYPTION_KEY`, because publisher tokens are encrypted in API and decrypted in worker during publish jobs.
 - For Docker-only command detail, see [docker-local-commands.md](./docs/docker-local-commands.md).
