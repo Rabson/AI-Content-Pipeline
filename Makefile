@@ -9,6 +9,7 @@ ENV_FILE ?= .env
 
 .PHONY: help install prisma-generate prisma-migrate-dev prisma-migrate-deploy prisma-studio \
 	dev-api dev-worker dev-dashboard dev-up dev-up-base dev-down dev-logs dev-ps \
+	smoke-docker \
 	typecheck lint test check build-api build-worker build-dashboard build-all \
 	health-api health-worker clean doctor seed-demo dev-up-staginglike dev-down-staginglike
 
@@ -149,6 +150,13 @@ dev-ps: ## Show Docker Compose services status
 	  docker compose --env-file $(ENV_FILE) -f $(COMPOSE_BASE_FILE) -f $(COMPOSE_LOCAL_FILE) ps; \
 	else \
 	  echo "Docker daemon not available; skipping dev-ps."; \
+	fi
+
+smoke-docker: ## Run Docker Compose smoke checks against api, worker, and dashboard
+	@if docker info >/dev/null 2>&1; then \
+	  ENV_FILE=$(ENV_FILE) COMPOSE_BASE_FILE=$(COMPOSE_BASE_FILE) COMPOSE_LOCAL_FILE=$(COMPOSE_LOCAL_FILE) bash scripts/smoke-docker-compose.sh; \
+	else \
+	  echo "Docker daemon not available; skipping smoke-docker."; \
 	fi
 
 dev-up-staginglike: ## Start staging-like local stack

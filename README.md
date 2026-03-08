@@ -62,6 +62,15 @@ Dashboard sign-in:
 - Worker ready: `http://localhost:3002/ready`
 - Dashboard: `http://localhost:3003/signin`
 
+## Implementation Stage
+- API: implemented and running
+- Worker: implemented and running, but still coupled to API internals
+- Dashboard: implemented and running
+- Shared Types: implemented and used across runtimes
+- Shared Config: implemented and used with `dist/` package output
+- Docker infra: implemented and running locally
+- Terraform infra: partially implemented, currently focused on storage/IAM
+
 ## Local Auth Seed
 - `ADMIN`: `admin@example.com` / `AdminPass123!`
 - `EDITOR`: `editor@example.com` / `EditorPass123!`
@@ -87,6 +96,7 @@ Dashboard sign-in:
   - builds the shared workspace packages
   - regenerates the Prisma client from `apps/api/src/prisma/schema.prisma`
 - Root and workspace tests run on Vitest 4 with shared config in `vitest.config.mts`.
+- `@aicp/shared-config` now builds runtime output into `dist/` and exports package entry points from there.
 - `apps/api/scripts/seed-demo.mjs` seeds the local user accounts and demo publish-ready topic.
 - Service-local env access is centralized in:
   - `apps/api/src/config/env.ts`
@@ -113,6 +123,7 @@ Dashboard sign-in:
 ## Validation Status
 - `npm audit` is currently clean: `0` vulnerabilities.
 - `npm run lint`, `npm run typecheck`, and `npm run test` pass on the current branch.
+- `make smoke-docker` verifies API, worker, and dashboard health against the local Compose stack.
 
 ## Where To Find Details
 - Detailed commands: [RUN.md](./RUN.md)

@@ -12,12 +12,9 @@ export type {
 import type {
   FailedJobView,
   FailedPublicationView,
-  OpsHealthPayload,
-  OpsReadinessPayload,
   OpsRuntimeStatusView,
   QueueMetricsView,
   SecurityEventView,
-  WorkerRuntimeView,
 } from './ops-types';
 
 export function getOpsRuntimeStatus() {

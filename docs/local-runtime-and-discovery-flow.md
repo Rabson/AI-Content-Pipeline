@@ -13,6 +13,7 @@
   - API on `3001`
   - Worker metrics on `3002`
   - Dashboard on `3003`
+- `make smoke-docker` now runs a retrying container-level smoke pass against API, worker, and dashboard.
 - `migrate` completed with exit code `0`.
 - Verified inside the running containers:
   - API `GET /api/health` -> `200`

@@ -6,6 +6,9 @@ import {
   PUBLISHING_QUEUE,
   SOCIAL_QUEUE,
 } from '@aicp/shared-types';
+import { AppLogger } from '../../api/src/common/logger/app-logger.service';
+import { SecurityEventRepository } from '../../api/src/common/security/security-event.repository';
+import { SecurityEventService } from '../../api/src/common/security/security-event.service';
 import { PrismaService } from '../../api/src/prisma/prisma.service';
 import { env } from './config/env';
 
@@ -97,7 +100,10 @@ import { UserPublisherTokenResolverService } from '../../api/src/modules/user/se
     ),
   ],
   providers: [
+    AppLogger,
     PrismaService,
+    SecurityEventRepository,
+    SecurityEventService,
     WorkflowRepository,
     WorkflowTransitionService,
     WorkflowService,

@@ -143,6 +143,7 @@ make dev-up-base
 make dev-down
 make dev-ps
 make dev-logs
+make smoke-docker
 make prisma-migrate-deploy
 make clean
 npm audit
@@ -165,6 +166,7 @@ npm run test
 - Root `npm start` is not defined; use `start:api`, `start:worker`, and `start:dashboard`.
 - Root scripts build `@aicp/shared-config` and `@aicp/shared-types`, then inject the repo-level `.env` automatically.
 - `npm install` and `npm ci` run `postinstall`, which builds the shared packages and regenerates the Prisma client automatically.
+- `@aicp/shared-config` now builds to `dist/`; runtime consumers import package exports instead of generated files beside source.
 - Workspace tests use Vitest 4 and the shared ESM config file `vitest.config.mts`.
 - API and worker must share the same `USER_TOKEN_ENCRYPTION_KEY`, because publisher tokens are encrypted in API and decrypted in worker during publish jobs.
 - Dashboard theme preference is stored in browser local storage under `aicp-dashboard-theme`.

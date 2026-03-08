@@ -43,6 +43,15 @@ It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
 - [env-reference.md](./env-reference.md)
   - service-by-service environment variable reference
 
+## Implementation Stage Map
+- API: implemented and running
+- Worker: implemented and running, but still coupled to API internals
+- Dashboard: implemented and running
+- Shared Types: implemented and used across runtimes
+- Shared Config: implemented and used with `dist/` package output
+- Docker infra: implemented and running locally
+- Terraform infra: partially implemented and currently storage-focused
+
 ## Rule
 
 If content belongs in one of the root docs, link to it instead of duplicating it here.

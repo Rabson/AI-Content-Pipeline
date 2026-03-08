@@ -234,6 +234,7 @@ These wrap the same Docker commands:
 
 ```bash
 make dev-up
+make smoke-docker
 make dev-ps
 make dev-logs
 make dev-down
