@@ -22,7 +22,7 @@ RUN npm run build:api
 
 FROM source AS migrate
 ENV NODE_ENV=production
-CMD ["npx", "prisma", "migrate", "deploy", "--schema", "apps/api/src/prisma/schema.prisma"]
+CMD ["./node_modules/.bin/prisma", "migrate", "deploy", "--schema", "apps/api/src/prisma/schema.prisma"]
 
 FROM build AS prod
 WORKDIR /workspace
