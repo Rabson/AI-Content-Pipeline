@@ -22,13 +22,17 @@ NestJS HTTP API for the AI content pipeline.
   - [render.staging.yaml](./render.staging.yaml)
 
 ## Security Notes
-- Non-local API access requires `INTERNAL_API_TOKEN` plus forwarded actor headers.
+- Non-local API access requires signed internal bearer tokens using:
+  - `INTERNAL_SERVICE_JWT_SECRET`
+  - `INTERNAL_SERVICE_JWT_ISSUER`
+  - `INTERNAL_SERVICE_JWT_AUDIENCE`
 - Unknown roles are rejected.
 - Publisher credentials are encrypted with `USER_TOKEN_ENCRYPTION_KEY`.
 - Upload signing enforces mime and size limits.
 - Outbound discovery and publish clients use shared timeout handling.
 - Approved content is assigned to a `USER` owner.
 - The owner can publish to ready channels, and `ADMIN` can publish on the owner's behalf.
+- Security events persist login failures, account lockouts, credential changes, publish requests, and admin-on-behalf publishing.
 - Reference: [security-model.md](../../docs/security-model.md)
 
 ## Common Commands

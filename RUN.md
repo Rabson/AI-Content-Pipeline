@@ -173,4 +173,8 @@ npm run test
   - `LINKEDIN_API_BASE_URL`
   - `LINKEDIN_API_VERSION`
 - For Docker-only command detail, see [docker-local-commands.md](./docs/docker-local-commands.md).
-- Non-local dashboard -> API calls require `INTERNAL_API_TOKEN`; local mode can still use `AUTH_ALLOW_HEADER_BYPASS=true`.
+- Non-local dashboard -> API calls require:
+  - `INTERNAL_SERVICE_JWT_SECRET`
+  - `INTERNAL_SERVICE_JWT_ISSUER`
+  - `INTERNAL_SERVICE_JWT_AUDIENCE`
+- Local mode can still use `AUTH_ALLOW_HEADER_BYPASS=true` for direct local tooling, but dashboard requests already use signed bearer tokens.

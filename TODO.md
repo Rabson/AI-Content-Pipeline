@@ -14,26 +14,7 @@ Audit basis:
 
 ## Security
 
-- Replace shared internal header auth with stronger service-to-service auth.
-  - Current state: `apps/api/src/common/guards/auth.guard.ts` trusts `x-actor-*` headers when `x-internal-api-token` matches a shared secret.
-  - Target: signed JWT or service identity flow with short-lived credentials and issuer/audience checks.
-
-- Move dashboard sign-in rate limiting out of in-memory process state.
-  - Current state: `apps/dashboard/src/lib/auth-rate-limit.ts`
-  - Target: Redis-backed rate limiting so throttling survives restarts and multiple instances.
-
-- Add account lockout and login security audit events.
-  - Current state: login succeeds/fails through `apps/dashboard/src/lib/auth-options.ts` and `apps/api/src/modules/user/services/user-auth.service.ts`, but there is no persistent lockout or security event history for repeated credential abuse.
-
-- Add publisher credential rotation and revoke flow.
-  - Current state: tokens can be stored and overwritten, but there is no versioning, revoke history, or forced re-encryption flow.
-  - Relevant files:
-    - `apps/api/src/modules/user/services/token-crypto.service.ts`
-    - `apps/api/src/modules/user/services/user-publisher-credential.service.ts`
-
-- Review dashboard session cookie settings for non-local deployment.
-  - Current state: auth works, but production cookie policy should be verified explicitly for `secure`, `sameSite`, and proxy/HTTPS behavior.
-  - Relevant file: `apps/dashboard/src/lib/auth-options.ts`
+No open backlog items in this section after the service-token, lockout, credential-audit, and session-cookie hardening pass.
 
 ## Publishing and User Workflow
 
@@ -81,29 +62,8 @@ No open backlog items in this section after the dashboard theme and responsive p
 
 ## Operations and Observability
 
-- Add persistent security/audit history for:
-  - login failures
-  - credential changes
-  - publish requests
-  - admin-on-behalf publishing
-
-- Add queue/job dashboards for failed publish attempts and recovery actions.
-  - Current Ops page shows runtime health, but not enough publish-specific operational detail.
-
-- Replace Terraform starter placeholders with real provider modules.
-  - Current state: `infra/terraform/README.md` is still starter-level only.
+No open backlog items in this section after the security-event persistence, publish recovery Ops panels, and Terraform module pass.
 
 ## Documentation
 
-- Add owner-assignment and publish-permission flow to docs.
-  - Explain:
-    - when approved posts get assigned to `USER`
-    - what `USER` can publish
-    - what `ADMIN` can publish on behalf of user
-
-- Add security deployment notes for non-local environments.
-  - Include:
-    - `INTERNAL_API_TOKEN`
-    - secure cookie/session expectations
-    - disabling local bypass
-    - token/key rotation guidance
+No open backlog items in this section after the publish-ownership and security deployment docs refresh.

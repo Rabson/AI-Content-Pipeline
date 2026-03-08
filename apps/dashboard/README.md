@@ -22,7 +22,11 @@ Next.js internal dashboard for admins, editors, reviewers, and assigned users.
 
 ## Auth Notes
 - Dashboard sign-in uses API-backed email/password authentication.
-- Dashboard forwards trusted caller headers to the API and includes `INTERNAL_API_TOKEN` when configured.
+- Dashboard signs a short-lived internal bearer token for API calls using:
+  - `INTERNAL_SERVICE_JWT_SECRET`
+  - `INTERNAL_SERVICE_JWT_ISSUER`
+  - `INTERNAL_SERVICE_JWT_AUDIENCE`
+- Dashboard sign-in throttling uses Redis when `REDIS_URL` is available, with in-memory fallback only as a last resort.
 - Local seeded users are created by `apps/api/scripts/seed-demo.mjs`.
 - `USER` sees assigned approved content and chooses where to publish.
 - `ADMIN` can reassign owners and publish on behalf of the assigned `USER`.

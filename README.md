@@ -93,6 +93,7 @@ Dashboard sign-in:
   - `apps/worker/src/config/env.ts`
   - `apps/dashboard/src/config/env.ts`
 - API and worker share `USER_TOKEN_ENCRYPTION_KEY` so publisher credentials can be encrypted in API and decrypted in worker jobs.
+- Dashboard signs short-lived internal bearer tokens for API calls, and API verifies issuer/audience/expiry before trusting the embedded user identity.
 - Publisher channel support is:
   - `DEVTO`: implemented
   - `MEDIUM`: implemented

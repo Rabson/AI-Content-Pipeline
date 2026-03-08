@@ -113,7 +113,11 @@ Container build ownership:
 - `NEXTAUTH_SECRET`
 - `AUTH_RATE_LIMIT_MAX_ATTEMPTS`
 - `AUTH_RATE_LIMIT_WINDOW_MS`
-- `INTERNAL_API_TOKEN`
+- `REDIS_URL`
+- `INTERNAL_SERVICE_JWT_SECRET`
+- `INTERNAL_SERVICE_JWT_ISSUER`
+- `INTERNAL_SERVICE_JWT_AUDIENCE`
+- `INTERNAL_SERVICE_JWT_TTL_SECONDS`
 - `NEXT_PUBLIC_FEATURE_PHASE2_ENABLED`
 - `NEXT_PUBLIC_FEATURE_PHASE3_ENABLED`
 
@@ -169,6 +173,7 @@ Rationale:
 - NextAuth credentials sign-in for dashboard
 - RBAC roles: `EDITOR`, `REVIEWER`, `ADMIN`
 - API local bypass only when `APP_ENV=local` and `AUTH_ALLOW_HEADER_BYPASS=true`
+- Dashboard -> API identity uses short-lived signed internal bearer tokens with issuer/audience checks
 - Secrets only in `.env` for local and provider secret stores for deployed environments
 - Dev.to and OpenAI keys remain server-side only
-- Audit trail in `workflow_events` for approval and publish actions
+- Security events persist login failures, account lockouts, credential changes, and publish actions

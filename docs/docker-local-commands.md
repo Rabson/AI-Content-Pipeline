@@ -226,10 +226,7 @@ curl -fsS 'http://localhost:3001/api/v1/discovery/candidates?limit=10'
 
 ### Check admin ops payload
 ```bash
-curl -fsS http://localhost:3001/api/v1/ops/runtime-status \
-  -H 'x-user-email: admin@example.com' \
-  -H 'x-actor-role: ADMIN' \
-  -H 'x-actor-id: admin@example.com'
+curl -fsS http://localhost:3001/api/v1/ops/runtime-status
 ```
 
 ## Make Shortcuts

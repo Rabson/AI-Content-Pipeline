@@ -6,23 +6,28 @@ This document defines the current security contract for the local, staging, and 
 - Local:
   - `APP_ENV=local`
   - `AUTH_ALLOW_HEADER_BYPASS=true`
-  - API accepts missing actor headers and injects a local dev identity.
+  - API accepts missing bearer tokens and injects a local dev identity only as a fallback for direct local tooling.
 - Non-local:
   - API rejects header-only identity.
-  - Caller must send `x-internal-api-token` matching `INTERNAL_API_TOKEN`.
-  - Caller must also send:
-    - `x-actor-id`
-    - `x-actor-role`
-    - `x-user-email`
+  - Caller must send `Authorization: Bearer <signed-service-token>`.
+  - Token claims must pass:
+    - shared HMAC secret verification
+    - issuer check
+    - audience check
+    - expiry check with bounded clock skew
   - Invalid or unknown roles are rejected.
 
 ## Dashboard to API Contract
 - Dashboard is the intended internal caller for operator actions.
 - Dashboard authenticates users with API-backed email/password login and stores a server-side session.
-- Dashboard forwards authenticated user identity headers to the API.
-- In staging and production, dashboard must also send `x-internal-api-token`.
+- Dashboard signs a short-lived internal service token that carries the authenticated user identity.
+- Dashboard session cookies use secure cookies outside local mode and `sameSite=lax`.
+- In staging and production, dashboard and API must share:
+  - `INTERNAL_SERVICE_JWT_SECRET`
+  - `INTERNAL_SERVICE_JWT_ISSUER`
+  - `INTERNAL_SERVICE_JWT_AUDIENCE`
 - Seeded local email/password accounts are acceptable for local/internal use only.
-- For non-local deployments, replace local credentials with a real identity provider or equivalent verified per-user auth flow, and keep `INTERNAL_API_TOKEN` between dashboard and API.
+- For non-local deployments, replace local credentials with a real identity provider or equivalent verified per-user auth flow, and keep the internal service-token flow or move to platform identity.
 
 ## Role Model
 - `ADMIN`
@@ -41,7 +46,7 @@ This document defines the current security contract for the local, staging, and 
 - Unknown roles fail closed.
 
 ## Rate Limiting
-- Dashboard sign-in is rate-limited by IP and email.
+- Dashboard sign-in is rate-limited by IP and email with Redis-backed counters when Redis is available.
 - API mutation routes with higher risk are rate-limited:
   - publish
   - upload signing
@@ -82,4 +87,4 @@ This document defines the current security contract for the local, staging, and 
 - The current dashboard auth model is still an internal-tool model, not full enterprise SSO.
 - Recommended production path:
   - replace shared-code auth with OIDC/SSO
-  - keep `INTERNAL_API_TOKEN` or move to JWT/service mesh identity for service-to-service trust
+  - keep the signed service-token flow or move to platform/service-mesh identity for service-to-service trust

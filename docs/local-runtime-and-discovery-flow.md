@@ -43,6 +43,7 @@
 - Topic scoring/approval/rejection flow
 - Research handoff flow after approval
 - Admin-only Ops screen in dashboard
+- Security event history and failed publication recovery in the Ops screen
 - Docker local stack with migration bootstrap and health endpoints
 
 ## Not Ready / Caveats

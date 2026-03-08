@@ -10,7 +10,10 @@ This file is the service-by-service environment reference.
 - `REDIS_URL`: Redis connection string
 - `QUEUE_PREFIX`: BullMQ prefix
 - `AUTH_ALLOW_HEADER_BYPASS`: local-only auth bypass toggle
-- `INTERNAL_API_TOKEN`: trusted caller token required outside local
+- `INTERNAL_SERVICE_JWT_SECRET`: shared secret for dashboard -> API service token signing
+- `INTERNAL_SERVICE_JWT_ISSUER`: expected dashboard token issuer
+- `INTERNAL_SERVICE_JWT_AUDIENCE`: expected API token audience
+- `INTERNAL_SERVICE_JWT_CLOCK_SKEW_SECONDS`: allowed service-token clock skew
 - `API_CORS_ORIGINS`: allowed browser origins, comma-separated
 - `API_REQUEST_BODY_LIMIT`: request size limit, for example `1mb`
 - `DISCOVERY_HN_API_BASE_URL`: Hacker News provider base URL
@@ -26,7 +29,10 @@ This file is the service-by-service environment reference.
 - `WORKER_HEALTH_BASE_URL`: worker health endpoint base URL for ops aggregation
 - `SECURITY_ALERT_THRESHOLD`: repeated auth failure threshold
 - `SECURITY_ALERT_WINDOW_MS`: threshold window
+- `AUTH_LOCKOUT_THRESHOLD`: failed login attempts before temporary account lockout
+- `AUTH_LOCKOUT_WINDOW_MS`: lockout duration window
 - `USER_TOKEN_ENCRYPTION_KEY`: symmetric key seed used to encrypt publisher tokens
+- `USER_TOKEN_ENCRYPTION_KEY_VERSION`: active encryption key version for credential rotation and re-encryption
 - `STORAGE_PROVIDER`: `s3` or `r2`
 - `STORAGE_BUCKET`: object bucket
 - `STORAGE_ENDPOINT`: S3/R2 endpoint override
@@ -64,7 +70,12 @@ This file is the service-by-service environment reference.
 - `NEXTAUTH_SECRET`: NextAuth session secret
 - `AUTH_RATE_LIMIT_MAX_ATTEMPTS`: sign-in attempt threshold
 - `AUTH_RATE_LIMIT_WINDOW_MS`: sign-in rate-limit window
-- `INTERNAL_API_TOKEN`: forwarded trusted-caller token for API access
+- `REDIS_URL`: optional Redis connection for shared sign-in throttling
+- `INTERNAL_SERVICE_JWT_SECRET`: shared secret used to sign dashboard -> API bearer tokens
+- `INTERNAL_SERVICE_JWT_ISSUER`: dashboard token issuer
+- `INTERNAL_SERVICE_JWT_AUDIENCE`: API token audience
+- `INTERNAL_SERVICE_JWT_TTL_SECONDS`: signed token lifetime
+- `SESSION_MAX_AGE_SECONDS`: dashboard session lifetime
 - `NEXT_PUBLIC_FEATURE_PHASE2_ENABLED`: phase-2 UI toggle
 - `NEXT_PUBLIC_FEATURE_PHASE3_ENABLED`: phase-3 UI toggle
 - `NEXT_DIST_DIR`: Next build directory override
