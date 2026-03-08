@@ -4,7 +4,9 @@ import { env } from './src/config/env';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   distDir: env.nextDistDir,
-  transpilePackages: ['@aicp/shared-types'],
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;

@@ -18,10 +18,10 @@
     ]
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
+    "next-env.d.ts",
     ".next-docker/types/**/*.ts"
   ],
   "exclude": [

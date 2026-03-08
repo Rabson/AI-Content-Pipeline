@@ -16,7 +16,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const phase3Enabled = isPhaseEnabled(3);
 
   return (
-    <html lang="en">
+    <html lang="en" data-theme="light" suppressHydrationWarning>
       <body>
         <DashboardShell user={user} phase2Enabled={phase2Enabled} phase3Enabled={phase3Enabled}>
           {children}

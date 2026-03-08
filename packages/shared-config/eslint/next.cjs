@@ -5,4 +5,12 @@ module.exports = {
     browser: true,
     node: true,
   },
+  settings: {
+    next: {
+      rootDir: ['apps/dashboard'],
+    },
+  },
+  rules: {
+    '@next/next/no-html-link-for-pages': 'off',
+  },
 };

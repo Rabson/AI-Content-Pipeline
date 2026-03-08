@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import type { StorageObjectView, TopicDetail } from '@aicp/shared-types';
 import { formatDate } from '../../../../../lib/formatting';
 import {
@@ -11,7 +12,18 @@ export function BannerPanel({ topicId, topic, assets }: { topicId: string; topic
   return (
     <div className="panel stack">
       <h3>Banner image</h3>
-      {topic?.bannerImage?.publicUrl ? <img className="banner-preview" src={topic.bannerImage.publicUrl} alt={topic.bannerImageAlt ?? topic.title} /> : <p className="empty-state">No banner image selected.</p>}
+      {topic?.bannerImage?.publicUrl ? (
+        <Image
+          className="banner-preview"
+          src={topic.bannerImage.publicUrl}
+          alt={topic.bannerImageAlt ?? topic.title}
+          width={1200}
+          height={675}
+          unoptimized
+        />
+      ) : (
+        <p className="empty-state">No banner image selected.</p>
+      )}
       <p className="topic-meta">{topic?.bannerImageAlt ?? 'No alt text set.'}</p>
       <p className="topic-meta">{topic?.bannerImageCaption ?? 'No caption set.'}</p>
       <form className="create-form" action={uploadTopicBannerImageAction.bind(null, topicId)}>
@@ -36,7 +48,9 @@ export function BannerPanel({ topicId, topic, assets }: { topicId: string; topic
       <div className="asset-grid">
         {imageAssets.map((asset) => (
           <form className="asset-card" key={asset.id} action={setTopicBannerImageAction.bind(null, topicId)}>
-            {asset.publicUrl ? <img src={asset.publicUrl} alt={asset.objectKey} /> : null}
+            {asset.publicUrl ? (
+              <Image src={asset.publicUrl} alt={asset.objectKey} width={640} height={360} unoptimized />
+            ) : null}
             <input type="hidden" name="storageObjectId" value={asset.id} />
             <input type="hidden" name="alt" value={topic?.bannerImageAlt ?? ''} />
             <input type="hidden" name="caption" value={topic?.bannerImageCaption ?? ''} />
