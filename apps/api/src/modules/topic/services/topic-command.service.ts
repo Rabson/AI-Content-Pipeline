@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ApproveTopicDto } from '../dto/approve-topic.dto';
+import { UpdateTopicBannerImageDto } from '../dto/update-topic-banner-image.dto';
 import { CreateTopicDto } from '../dto/create-topic.dto';
 import { RejectTopicDto } from '../dto/reject-topic.dto';
 import { ScoreTopicDto } from '../dto/score-topic.dto';
 import { UpdateTopicDto } from '../dto/update-topic.dto';
 import { TopicIntakeCommandService } from './topic-intake-command.service';
+import { TopicPublishCommandService } from './topic-publish-command.service';
 import { TopicReviewCommandService } from './topic-review-command.service';
 
 @Injectable()
@@ -12,6 +14,7 @@ export class TopicCommandService {
   constructor(
     private readonly topicIntakeCommandService: TopicIntakeCommandService,
     private readonly topicReviewCommandService: TopicReviewCommandService,
+    private readonly topicPublishCommandService: TopicPublishCommandService,
   ) {}
 
   async createTopic(dto: CreateTopicDto, actorId: string) {
@@ -40,5 +43,13 @@ export class TopicCommandService {
 
   async handoffToResearch(topicId: string, actorId: string, traceId?: string) {
     return this.topicReviewCommandService.handoffToResearch(topicId, actorId, traceId);
+  }
+
+  async assignOwner(topicId: string, ownerUserId: string, actorId: string) {
+    return this.topicPublishCommandService.assignOwner(topicId, ownerUserId, actorId);
+  }
+
+  async updateBannerImage(topicId: string, dto: UpdateTopicBannerImageDto, actorId: string) {
+    return this.topicPublishCommandService.updateBannerImage(topicId, dto, actorId);
   }
 }

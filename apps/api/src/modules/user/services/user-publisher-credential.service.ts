@@ -5,6 +5,11 @@ import { CasbinAuthorizationService } from '../../../common/auth/casbin-authoriz
 import { UpsertUserPublisherCredentialDto } from '../dto/upsert-user-publisher-credential.dto';
 import { UserAccountRepository } from '../repositories/user-account.repository';
 import { UserPublisherCredentialRepository } from '../repositories/user-publisher-credential.repository';
+import {
+  buildCredentialSettings,
+  buildTokenHint,
+  sanitizeCredential,
+} from './helpers/user-publisher-credential.helper';
 import { TokenCryptoService } from './token-crypto.service';
 import { UserPublisherTokenResolverService } from './user-publisher-token-resolver.service';
 
@@ -31,6 +36,7 @@ export class UserPublisherCredentialService {
       channel,
       encryptedToken: this.tokenCryptoService.encrypt(dto.token.trim()),
       tokenHint: buildTokenHint(dto.token),
+      settingsJson: buildCredentialSettings(dto),
     }));
   }
 
@@ -57,21 +63,4 @@ export class UserPublisherCredentialService {
       throw new ForbiddenException('Cross-user credential access is not enabled');
     }
   }
-}
-
-function buildTokenHint(token: string) {
-  const trimmed = token.trim();
-  return trimmed.length < 4 ? '****' : `****${trimmed.slice(-4)}`;
-}
-
-function sanitizeCredential({
-  channel,
-  tokenHint,
-  updatedAt,
-}: {
-  channel: PublicationChannel;
-  tokenHint?: string | null;
-  updatedAt: Date;
-}) {
-  return { channel, tokenHint, configured: true, updatedAt };
 }

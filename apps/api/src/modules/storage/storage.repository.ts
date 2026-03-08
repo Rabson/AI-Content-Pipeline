@@ -8,7 +8,14 @@ export class StorageRepository {
   findTopicById(topicId: string) {
     return this.prisma.topic.findFirst({
       where: { id: topicId, deletedAt: null },
-      include: { contentItem: true },
+      include: { contentItem: true, owner: { select: { id: true, email: true, role: true } } },
+    });
+  }
+
+  listTopicAssets(topicId: string) {
+    return this.prisma.storageObject.findMany({
+      where: { topicId },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

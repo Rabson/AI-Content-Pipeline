@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, TopicStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { topicDetailInclude } from './repositories/topic-include.helper';
+import { buildTopicListWhere } from './repositories/topic-query.helper';
 import { transitionTopicStatus } from './repositories/topic-status-transition.helper';
 
 @Injectable()
@@ -10,14 +12,12 @@ export class TopicRepository {
   create(data: Prisma.TopicCreateInput) {
     return this.prisma.topic.create({ data });
   }
-
   findById(id: string) {
     return this.prisma.topic.findFirst({
       where: { id, deletedAt: null },
-      include: { tags: true, owner: { select: { id: true, email: true, name: true, role: true } } },
+      include: topicDetailInclude,
     });
   }
-
   findMany(params: {
     status?: TopicStatus;
     q?: string;
@@ -26,36 +26,34 @@ export class TopicRepository {
     skip: number;
     take: number;
   }) {
-    const { status, q, minScore, ownerUserId, skip, take } = params;
+    const { skip, take } = params;
 
     return this.prisma.topic.findMany({
-      where: {
-        deletedAt: null,
-        status,
-        ownerUserId,
-        scoreTotal: minScore === undefined ? undefined : { gte: minScore },
-        OR: q
-          ? [
-              { title: { contains: q, mode: 'insensitive' } },
-              { brief: { contains: q, mode: 'insensitive' } },
-            ]
-          : undefined,
-      },
+      where: buildTopicListWhere(params),
       orderBy: [{ scoreTotal: 'desc' }, { createdAt: 'desc' }],
       skip,
       take,
-      include: { tags: true, owner: { select: { id: true, email: true, name: true, role: true } } },
+      include: topicDetailInclude,
     });
   }
-
   assignOwner(id: string, ownerUserId: string) {
     return this.prisma.topic.update({
       where: { id },
       data: { ownerUserId },
-      include: { tags: true, owner: { select: { id: true, email: true, name: true, role: true } } },
+      include: topicDetailInclude,
     });
   }
-
+  updateBannerImage(id: string, params: { storageObjectId: string | null; alt?: string | null; caption?: string | null }) {
+    return this.prisma.topic.update({
+      where: { id },
+      data: {
+        bannerImageStorageObjectId: params.storageObjectId,
+        bannerImageAlt: params.alt,
+        bannerImageCaption: params.caption,
+      },
+      include: topicDetailInclude,
+    });
+  }
   findOwner(id: string) {
     return this.prisma.topic.findFirst({
       where: { id, deletedAt: null },
@@ -63,8 +61,21 @@ export class TopicRepository {
     });
   }
 
+  findStorageObjectForTopic(topicId: string, storageObjectId: string) {
+    return this.prisma.storageObject.findFirst({
+      where: {
+        id: storageObjectId,
+        topicId,
+      },
+    });
+  }
+
   update(id: string, data: Prisma.TopicUpdateInput) {
-    return this.prisma.topic.update({ where: { id }, data, include: { tags: true } });
+    return this.prisma.topic.update({
+      where: { id },
+      data,
+      include: topicDetailInclude,
+    });
   }
 
   async transitionStatus(params: {

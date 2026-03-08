@@ -26,8 +26,8 @@ describe('RBAC metadata', () => {
     expect(methodRoles(PublisherController.prototype, 'publish')).toEqual([AppRole.USER]);
   });
 
-  it('protects upload signing with EDITOR', () => {
-    expect(Reflect.getMetadata(ROLES_KEY, StorageController)).toEqual([AppRole.EDITOR]);
+  it('protects topic asset access with USER role', () => {
+    expect(Reflect.getMetadata(ROLES_KEY, StorageController)).toEqual([AppRole.USER]);
   });
 
   it('requires REVIEWER for topic scoring and approval actions', () => {

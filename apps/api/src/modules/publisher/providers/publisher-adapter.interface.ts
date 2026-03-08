@@ -5,10 +5,18 @@ export interface PublishRequest {
   markdown: string;
   canonicalUrl?: string;
   tags?: string[];
+  summary?: string;
+  coverImageUrl?: string;
+  coverImageAlt?: string;
 }
 
 export interface PublisherCredentialInput {
   accessToken?: string;
+  settings?: {
+    mediumAuthorId?: string | null;
+    mediumPublicationId?: string | null;
+    linkedinAuthorUrn?: string | null;
+  } | null;
 }
 
 export interface PublishResponse {

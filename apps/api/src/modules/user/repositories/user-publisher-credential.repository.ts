@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PublicationChannel } from '@prisma/client';
+import { Prisma, PublicationChannel } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
@@ -19,10 +19,20 @@ export class UserPublisherCredentialRepository {
     });
   }
 
-  upsert(params: { userId: string; channel: PublicationChannel; encryptedToken: string; tokenHint?: string }) {
+  upsert(params: {
+    userId: string;
+    channel: PublicationChannel;
+    encryptedToken: string;
+    tokenHint?: string;
+    settingsJson?: Prisma.InputJsonValue;
+  }) {
     return this.prisma.userPublisherCredential.upsert({
       where: { userId_channel: { userId: params.userId, channel: params.channel } },
-      update: { encryptedToken: params.encryptedToken, tokenHint: params.tokenHint },
+      update: {
+        encryptedToken: params.encryptedToken,
+        tokenHint: params.tokenHint,
+        settingsJson: params.settingsJson,
+      },
       create: params,
     });
   }

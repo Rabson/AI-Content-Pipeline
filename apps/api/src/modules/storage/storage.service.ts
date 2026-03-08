@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { StorageObjectPurpose, WorkflowEventType, WorkflowStage } from '@prisma/client';
+import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
 import { env } from '../../config/env';
+import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 import { WorkflowService } from '../workflow/workflow.service';
 import { CreateUploadUrlDto } from './dto/create-upload-url.dto';
 import { StorageRepository } from './storage.repository';
@@ -12,10 +14,18 @@ export class StorageService {
     private readonly repository: StorageRepository,
     private readonly workflowService: WorkflowService,
     private readonly storageSigningService: StorageSigningService,
+    private readonly ownershipService: UserTopicOwnershipService,
   ) {}
 
-  async createUploadUrl(topicId: string, dto: CreateUploadUrlDto, actorId: string) {
+  async listTopicAssets(topicId: string, actor: AuthenticatedUser) {
     const topic = await this.getTopicOrThrow(topicId);
+    await this.ownershipService.assertPublishAccess(actor, topic.ownerUserId ?? null);
+    return this.repository.listTopicAssets(topicId);
+  }
+
+  async createUploadUrl(topicId: string, dto: CreateUploadUrlDto, actor: AuthenticatedUser) {
+    const topic = await this.getTopicOrThrow(topicId);
+    await this.ownershipService.assertPublishAccess(actor, topic.ownerUserId ?? null);
     const bucket = this.storageSigningService.getBucketOrThrow();
     this.storageSigningService.validateUploadInput(dto.filename, dto.mimeType, dto.sizeBytes);
     const objectKey = this.storageSigningService.buildObjectKey(topicId, dto.filename);
@@ -31,10 +41,16 @@ export class StorageService {
       mimeType: dto.mimeType,
       sizeBytes: dto.sizeBytes,
       purpose: dto.purpose ?? StorageObjectPurpose.ATTACHMENT,
-      createdBy: actorId,
+      createdBy: actor.id,
     });
 
-    await this.recordStorageEvent(topicId, object.id, objectKey, dto.purpose ?? StorageObjectPurpose.ATTACHMENT, actorId);
+    await this.recordStorageEvent(
+      topicId,
+      object.id,
+      objectKey,
+      dto.purpose ?? StorageObjectPurpose.ATTACHMENT,
+      actor.id,
+    );
 
     return {
       storageObjectId: object.id,

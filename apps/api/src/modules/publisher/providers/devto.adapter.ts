@@ -29,6 +29,7 @@ export class DevtoAdapter implements PublisherAdapter {
             published: true,
             canonical_url: input.canonicalUrl,
             tags: input.tags,
+            main_image: input.coverImageUrl,
           },
         }),
       },

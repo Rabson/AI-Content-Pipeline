@@ -35,6 +35,9 @@ export class PublisherOrchestrator {
       markdown: draft.assembledMarkdown,
       canonicalUrl: params.canonicalUrl,
       tags: params.tags,
+      summary: publication.topic.brief ?? undefined,
+      coverImageUrl: publication.topic.bannerImage?.publicUrl ?? undefined,
+      coverImageAlt: publication.topic.bannerImageAlt ?? undefined,
     };
     const credential = await this.resolveCredential(publication.channel, publication.publisherUserId);
 
@@ -53,9 +56,9 @@ export class PublisherOrchestrator {
 
   private async resolveCredential(channel: PublicationChannel, publisherUserId?: string | null) {
     if (publisherUserId) {
-      const accessToken = await this.credentialResolver.resolveToken(publisherUserId, channel);
-      if (accessToken) {
-        return { accessToken };
+      const credential = await this.credentialResolver.resolveCredential(publisherUserId, channel);
+      if (credential) {
+        return credential;
       }
     }
 

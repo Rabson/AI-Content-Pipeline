@@ -21,6 +21,7 @@ describe('Topic command services', () => {
       {} as any,
       {} as any,
       workflowServiceMock() as any,
+      {} as any,
     );
 
     await service.createTopic(
@@ -68,6 +69,7 @@ describe('Topic command services', () => {
       statusMachine,
       {} as any,
       workflowServiceMock() as any,
+      {} as any,
     );
 
     await expect(service.scoreTopic('topic-1', {} as any, 'reviewer-1')).rejects.toThrow('invalid');
@@ -97,6 +99,7 @@ describe('Topic command services', () => {
       { assertTransition: vi.fn() } as any,
       queueService,
       workflowServiceMock() as any,
+      {} as any,
     );
 
     const result = await service.handoffToResearch('topic-1', 'editor-1');

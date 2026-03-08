@@ -201,6 +201,9 @@ model Topic {
   approvalNote       String?
   rejectionReason    String?
   ownerUserId        String?
+  bannerImageStorageObjectId String?
+  bannerImageAlt     String?
+  bannerImageCaption String?
   contentItemId      String?     @unique
   researchJobId      String?
   researchEnqueuedAt DateTime?
@@ -211,6 +214,7 @@ model Topic {
   deletedAt          DateTime?
 
   owner             User?                @relation("TopicOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  bannerImage       StorageObject?       @relation("TopicBannerImage", fields: [bannerImageStorageObjectId], references: [id], onDelete: SetNull)
   contentItem       ContentItem?         @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
   history           TopicStatusHistory[]
   tags              TopicTag[]
@@ -231,6 +235,7 @@ model Topic {
   @@index([status, createdAt(sort: Desc)])
   @@index([scoreTotal(sort: Desc)])
   @@index([ownerUserId, updatedAt(sort: Desc)])
+  @@index([bannerImageStorageObjectId])
 }
 
 model User {
@@ -257,6 +262,7 @@ model UserPublisherCredential {
   channel        PublicationChannel
   encryptedToken String
   tokenHint      String?
+  settingsJson   Json?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
@@ -817,8 +823,9 @@ model StorageObject {
   createdBy     String?
   createdAt     DateTime             @default(now())
 
-  topic       Topic?       @relation(fields: [topicId], references: [id], onDelete: SetNull)
-  contentItem ContentItem? @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  topic            Topic?       @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  contentItem      ContentItem? @relation(fields: [contentItemId], references: [id], onDelete: SetNull)
+  bannerForTopics  Topic[]      @relation("TopicBannerImage")
 
   @@unique([bucket, objectKey])
   @@index([contentItemId, createdAt(sort: Desc)])

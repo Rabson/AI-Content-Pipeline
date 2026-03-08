@@ -28,6 +28,7 @@ describe('Workflow integration', () => {
       { assertTransition: vi.fn() } as any,
       {} as any,
       {} as any,
+      {} as any,
     );
 
     await expect(service.approveTopic('topic-1', { note: 'ship it' }, 'reviewer-1')).rejects.toThrow(

@@ -1,11 +1,13 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
-import { ContentState, PublicationChannel, WorkflowEventType, WorkflowStage } from '@prisma/client';
+import { ContentState, PublicationChannel, PublicationStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { Queue } from 'bullmq';
+import { AppRole } from '../../common/auth/roles.enum';
 import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
 import { buildQueueJobId } from '../../common/queue/job-id.util';
 import { SecurityEventService } from '../../common/security/security-event.service';
 import { isPhaseEnabled } from '../../config/feature-flags';
+import { UserPublisherTokenResolverService } from '../user/services/user-publisher-token-resolver.service';
 import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 import { WorkflowService } from '../workflow/workflow.service';
 import { PUBLISH_ARTICLE_JOB, PUBLISHING_QUEUE } from './constants/publisher.constants';
@@ -21,6 +23,7 @@ export class PublisherService {
     private readonly workflowService: WorkflowService,
     private readonly ownershipService: UserTopicOwnershipService,
     private readonly securityEventService: SecurityEventService,
+    private readonly credentialResolver: UserPublisherTokenResolverService,
     @InjectQueue(PUBLISHING_QUEUE) private readonly queue: Queue,
   ) {}
 
@@ -29,16 +32,35 @@ export class PublisherService {
     return this.repository.listPublications(topicId);
   }
 
+  async getPublicationOptions(topicId: string, actor: AuthenticatedUser) {
+    const topic = await this.getTopicOrThrow(topicId);
+    await this.ownershipService.assertPublishAccess(actor, topic.ownerUserId ?? null);
+
+    const targetUserId = topic.ownerUserId ?? actor.id;
+    const channels = await Promise.all(
+      Object.values(PublicationChannel).map((channel) =>
+        this.buildChannelOption(channel, targetUserId),
+      ),
+    );
+
+    return {
+      topicId,
+      owner: topic.owner ?? null,
+      publishAsUserId: targetUserId,
+      canReassignOwner: actor.role === AppRole.ADMIN,
+      channels,
+    };
+  }
+
   async enqueuePublication(topicId: string, dto: RequestPublicationDto, actor: AuthenticatedUser) {
     this.securityEventService.publishRequested({ topicId, actorId: actor.id, channel: dto.channel });
     if (!isPhaseEnabled(2)) throw new ServiceUnavailableException('Phase 2 features are disabled');
-    if (dto.channel !== PublicationChannel.DEVTO) {
-      throw new ServiceUnavailableException(`${dto.channel} publishing is not implemented yet`);
-    }
     const topic = await this.getTopicOrThrow(topicId);
     await this.ownershipService.assertPublishAccess(actor, topic.ownerUserId ?? null);
     const draft = await this.getPublishableDraft(topicId, dto.draftVersionNumber);
-    const publisherUserId = topic.ownerUserId ?? actor.id;
+    const channelOption = await this.buildChannelOption(dto.channel, topic.ownerUserId ?? actor.id);
+    this.assertChannelReady(dto.channel, channelOption);
+    const publisherUserId = channelOption.publisherUserId;
     const pending = await this.repository.findPendingPublication(topicId, dto.channel, publisherUserId);
     if (pending) return { enqueued: true, topicId, publicationId: pending.id, idempotent: true };
     await this.preparePublish(topicId, draft.id, draft.versionNumber, actor.id);
@@ -55,6 +77,37 @@ export class PublisherService {
     const jobId = await this.enqueuePublishJob(topicId, publication.id, dto, actor.id);
     await this.workflowService.recordEvent({ topicId, stage: WorkflowStage.PUBLISH, eventType: WorkflowEventType.ENQUEUED, actorId: actor.id, metadata: { publicationId: publication.id, jobId, channel: dto.channel } });
     return { enqueued: true, topicId, publicationId: publication.id, jobId };
+  }
+
+  async retryPublication(topicId: string, publicationId: string, actor: AuthenticatedUser) {
+    const publication = await this.getPublicationForRetry(topicId, publicationId, actor);
+    const payload = this.readPayload(publication.payloadJson);
+    const draftVersion = publication.draftVersion;
+    if (!draftVersion) throw new BadRequestException('Retry requires a pinned draft version');
+
+    await this.preparePublish(topicId, draftVersion.id, draftVersion.versionNumber, actor.id);
+    await this.repository.markRetryRequested(publicationId);
+    const jobId = await this.enqueuePublishJob(
+      topicId,
+      publicationId,
+      {
+        channel: publication.channel,
+        canonicalUrl: payload.canonicalUrl,
+        tags: payload.tags,
+        draftVersionNumber: draftVersion.versionNumber,
+      },
+      actor.id,
+    );
+
+    await this.workflowService.recordEvent({
+      topicId,
+      stage: WorkflowStage.PUBLISH,
+      eventType: WorkflowEventType.ENQUEUED,
+      actorId: actor.id,
+      metadata: { publicationId, jobId, retry: true, channel: publication.channel },
+    });
+
+    return { requeued: true, publicationId, topicId, jobId };
   }
 
   private async getTopicOrThrow(topicId: string) {
@@ -81,5 +134,70 @@ export class PublisherService {
     const jobId = buildQueueJobId('publish', dto.channel.toLowerCase(), topicId, publicationId);
     const job = await this.queue.add(PUBLISH_ARTICLE_JOB, { publicationId, topicId, channel: dto.channel, canonicalUrl: dto.canonicalUrl, tags: dto.tags ?? [], requestedBy: actorId }, { jobId, attempts: 5, backoff: { type: 'exponential', delay: 60000 } });
     return job.id ?? jobId;
+  }
+
+  private async buildChannelOption(channel: PublicationChannel, publisherUserId: string) {
+    const credential = await this.credentialResolver.resolveCredential(publisherUserId, channel);
+    const missingRequirements = this.missingRequirements(channel, credential?.settings, credential?.accessToken);
+
+    return {
+      channel,
+      supported: true,
+      publisherUserId,
+      configured: Boolean(credential?.accessToken),
+      ready: missingRequirements.length === 0,
+      missingRequirements,
+    };
+  }
+
+  private missingRequirements(
+    channel: PublicationChannel,
+    settings: { linkedinAuthorUrn?: string | null } | undefined,
+    accessToken?: string,
+  ) {
+    const missing = accessToken ? [] : ['token'];
+    if (channel === PublicationChannel.LINKEDIN && !settings?.linkedinAuthorUrn) {
+      missing.push('linkedinAuthorUrn');
+    }
+    return missing;
+  }
+
+  private assertChannelReady(
+    channel: PublicationChannel,
+    option: { ready: boolean; missingRequirements: string[] },
+  ) {
+    if (option.ready) return;
+    const requirements = option.missingRequirements.join(', ');
+    throw new BadRequestException(`${channel} publishing is not ready: missing ${requirements}`);
+  }
+
+  private async getPublicationForRetry(
+    topicId: string,
+    publicationId: string,
+    actor: AuthenticatedUser,
+  ) {
+    const publication = await this.repository.findPublicationById(topicId, publicationId);
+    if (!publication) throw new NotFoundException('Publication not found');
+    await this.ownershipService.assertPublishAccess(actor, publication.topic.ownerUserId ?? null);
+    if (publication.status !== PublicationStatus.FAILED) {
+      throw new BadRequestException('Only failed publications can be retried');
+    }
+    return publication;
+  }
+
+  private readPayload(payloadJson: unknown) {
+    if (!payloadJson || typeof payloadJson !== 'object' || Array.isArray(payloadJson)) {
+      return { canonicalUrl: undefined, tags: [] as string[] };
+    }
+
+    const payload = payloadJson as Record<string, unknown>;
+    const tags = Array.isArray(payload.tags)
+      ? payload.tags.filter((tag): tag is string => typeof tag === 'string')
+      : [];
+
+    return {
+      canonicalUrl: typeof payload.canonicalUrl === 'string' ? payload.canonicalUrl : undefined,
+      tags,
+    };
   }
 }

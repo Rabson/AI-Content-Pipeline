@@ -11,6 +11,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { UserModule } from '../user/user.module';
 import { TopicCommandService } from './services/topic-command.service';
 import { TopicIntakeCommandService } from './services/topic-intake-command.service';
+import { TopicPublishCommandService } from './services/topic-publish-command.service';
 import { TopicQueryService } from './services/topic-query.service';
 import { TopicReviewCommandService } from './services/topic-review-command.service';
 
@@ -31,6 +32,7 @@ import { TopicReviewCommandService } from './services/topic-review-command.servi
     TopicQueueService,
     TopicQueryService,
     TopicIntakeCommandService,
+    TopicPublishCommandService,
     TopicReviewCommandService,
     TopicCommandService,
   ],

@@ -5,7 +5,9 @@ import { ListTopicsQueryDto } from './dto/list-topics-query.dto';
 import { ScoreTopicDto } from './dto/score-topic.dto';
 import { ApproveTopicDto } from './dto/approve-topic.dto';
 import { RejectTopicDto } from './dto/reject-topic.dto';
+import { AssignTopicOwnerDto } from './dto/assign-topic-owner.dto';
 import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
+import { UpdateTopicBannerImageDto } from './dto/update-topic-banner-image.dto';
 import { TopicCommandService } from './services/topic-command.service';
 import { TopicQueryService } from './services/topic-query.service';
 
@@ -54,5 +56,13 @@ export class TopicService {
 
   async handoffToResearch(topicId: string, actorId: string, traceId?: string) {
     return this.topicCommandService.handoffToResearch(topicId, actorId, traceId);
+  }
+
+  async assignOwner(topicId: string, dto: AssignTopicOwnerDto, actorId: string) {
+    return this.topicCommandService.assignOwner(topicId, dto.ownerUserId, actorId);
+  }
+
+  async updateBannerImage(topicId: string, dto: UpdateTopicBannerImageDto, actorId: string) {
+    return this.topicCommandService.updateBannerImage(topicId, dto, actorId);
   }
 }

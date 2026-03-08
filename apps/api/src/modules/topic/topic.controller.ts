@@ -19,6 +19,8 @@ import { ApproveTopicDto } from './dto/approve-topic.dto';
 import { RejectTopicDto } from './dto/reject-topic.dto';
 import { HandoffResearchDto } from './dto/handoff-research.dto';
 import { ListTopicsQueryDto } from './dto/list-topics-query.dto';
+import { AssignTopicOwnerDto } from './dto/assign-topic-owner.dto';
+import { UpdateTopicBannerImageDto } from './dto/update-topic-banner-image.dto';
 import { TopicService } from './topic.service';
 import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 
@@ -60,6 +62,28 @@ export class TopicController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateTopicDto) {
     return this.topicService.updateTopic(id, dto);
+  }
+
+  @Roles(AppRole.ADMIN)
+  @Patch(':id/owner')
+  assignOwner(
+    @Param('id') id: string,
+    @Body() dto: AssignTopicOwnerDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.topicService.assignOwner(id, dto, this.actorId(req));
+  }
+
+  @Roles(AppRole.USER)
+  @Patch(':id/banner-image')
+  async updateBannerImage(
+    @Param('id') id: string,
+    @Body() dto: UpdateTopicBannerImageDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const topic = await this.topicService.getTopic(id);
+    await this.ownershipService.assertPublishAccess(req.user!, topic.ownerUserId ?? null);
+    return this.topicService.updateBannerImage(id, dto, this.actorId(req));
   }
 
   @Roles(AppRole.EDITOR)

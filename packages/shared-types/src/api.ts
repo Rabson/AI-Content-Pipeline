@@ -20,6 +20,16 @@ export interface UserSummary {
   role: UserRole;
 }
 
+export interface StorageObjectView {
+  id: string;
+  objectKey: string;
+  publicUrl?: string | null;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+  purpose: string;
+  createdAt: string;
+}
+
 export interface TopicSummary {
   id: string;
   title: string;
@@ -39,6 +49,9 @@ export interface TopicSummary {
   contentItemId?: string | null;
   ownerUserId?: string | null;
   owner?: UserSummary | null;
+  bannerImage?: StorageObjectView | null;
+  bannerImageAlt?: string | null;
+  bannerImageCaption?: string | null;
   tags?: Array<{ tag: string }>;
 }
 
@@ -135,13 +148,41 @@ export interface PublicationView {
   verificationStatus?: string | null;
   publisherUser?: UserSummary | null;
   requestedByUser?: UserSummary | null;
+  attempts?: Array<{
+    id: string;
+    status: 'PENDING' | 'PUBLISHED' | 'FAILED';
+    error?: string | null;
+    createdAt: string;
+  }>;
 }
 
 export interface UserPublisherCredentialView {
   channel: 'DEVTO' | 'MEDIUM' | 'LINKEDIN';
   tokenHint?: string | null;
   configured: boolean;
+  settings?: {
+    mediumAuthorId?: string | null;
+    mediumPublicationId?: string | null;
+    linkedinAuthorUrn?: string | null;
+  } | null;
   updatedAt: string;
+}
+
+export interface PublicationOptionView {
+  channel: 'DEVTO' | 'MEDIUM' | 'LINKEDIN';
+  supported: boolean;
+  configured: boolean;
+  ready: boolean;
+  publisherUserId: string;
+  missingRequirements: string[];
+}
+
+export interface PublicationOptionsView {
+  topicId: string;
+  owner?: UserSummary | null;
+  publishAsUserId: string;
+  canReassignOwner: boolean;
+  channels: PublicationOptionView[];
 }
 
 export interface AnalyticsUsageView {

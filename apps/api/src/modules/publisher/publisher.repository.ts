@@ -11,6 +11,7 @@ export class PublisherRepository {
       where: { id: topicId, deletedAt: null },
       include: {
         contentItem: true,
+        bannerImage: true,
         owner: { select: { id: true, email: true, name: true, role: true } },
       },
     });
@@ -43,6 +44,7 @@ export class PublisherRepository {
       include: {
         attempts: { orderBy: { createdAt: 'desc' } },
         draftVersion: true,
+        topic: { include: { bannerImage: true } },
         publisherUser: { select: { id: true, email: true, name: true, role: true } },
         requestedByUser: { select: { id: true, email: true, name: true, role: true } },
       },
@@ -142,8 +144,15 @@ export class PublisherRepository {
       where: { id: publicationId },
       include: {
         draftVersion: true,
-        topic: { include: { contentItem: true, owner: { select: { id: true, email: true, role: true, name: true } } } },
+        topic: {
+          include: {
+            contentItem: true,
+            bannerImage: true,
+            owner: { select: { id: true, email: true, role: true, name: true } },
+          },
+        },
         publisherUser: true,
+        attempts: { orderBy: { createdAt: 'desc' } },
       },
     });
 
@@ -152,5 +161,35 @@ export class PublisherRepository {
     }
 
     return publication;
+  }
+
+  findPublicationById(topicId: string, publicationId: string) {
+    return this.prisma.publication.findFirst({
+      where: { id: publicationId, topicId },
+      include: {
+        draftVersion: true,
+        topic: {
+          include: {
+            contentItem: true,
+            bannerImage: true,
+            owner: { select: { id: true, email: true, role: true, name: true } },
+          },
+        },
+        publisherUser: true,
+        requestedByUser: true,
+        attempts: { orderBy: { createdAt: 'desc' } },
+      },
+    });
+  }
+
+  markRetryRequested(publicationId: string) {
+    return this.prisma.publication.update({
+      where: { id: publicationId },
+      data: {
+        status: PublicationStatus.PENDING,
+        error: null,
+        lockedForPublish: true,
+      },
+    });
   }
 }

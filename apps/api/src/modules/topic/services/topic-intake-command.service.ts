@@ -72,7 +72,6 @@ export class TopicIntakeCommandService {
 
     return updated;
   }
-
   private buildTags(tags?: string[]) {
     const normalizedTags = normalizeTopicTags(tags);
     if (!normalizedTags.length) {
