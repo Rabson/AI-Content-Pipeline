@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { DraftVersionStatus, Prisma, RevisionRunStatus } from '@prisma/client';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { RevisionUsageRepository } from './revision-usage.repository';
 
 const wordCount = (markdown: string) => markdown.split(/\s+/).filter(Boolean).length;

@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { ServiceUnavailableException } from '@nestjs/common';
-import { isPhaseEnabled } from '../../../config/feature-flags';
+import { isPhaseEnabled } from '@api/config/feature-flags';
 
 export function assertDiscoveryEnabled() {
   if (!isPhaseEnabled(3)) {

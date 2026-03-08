@@ -3,8 +3,8 @@ import {
   assertAllowedHost,
   fetchWithTimeout,
   throwUpstreamHttpError,
-} from '../../../common/http/external-fetch.util';
-import { env } from '../../../config/env';
+} from '@api/common/http/external-fetch.util';
+import { env } from '@api/config/env';
 import {
   DiscoveryCandidate,
   DiscoveryImportParams,

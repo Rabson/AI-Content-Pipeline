@@ -1,4 +1,4 @@
-import type { LinkedInDraftView, SeoMetadataView } from '@aicp/shared-types';
+import type { LinkedInDraftView, SeoMetadataView } from '@aicp/contracts';
 import { updateSocialStatusAction } from '../../actions';
 
 export function DistributionPanel({ topicId, seo, social }: { topicId: string; seo: SeoMetadataView | null; social: LinkedInDraftView | null }) {

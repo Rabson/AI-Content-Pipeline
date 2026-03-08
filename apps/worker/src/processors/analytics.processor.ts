@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB, type AnalyticsRollupDailyJobPayload } from '@aicp/shared-types';
+import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB, type AnalyticsRollupDailyJobPayload } from '@aicp/queue-contracts';
 import { AnalyticsOrchestrator } from '../../../api/src/modules/analytics/analytics.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';

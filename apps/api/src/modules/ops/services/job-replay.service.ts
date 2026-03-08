@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, WorkflowEventType, WorkflowStage } from '@prisma/client';
-import { SecurityEventService } from '../../../common/security/security-event.service';
-import { WorkflowService } from '../../workflow/workflow.service';
+import { SecurityEventService } from '@api/common/security/security-event.service';
+import { WorkflowService } from '@api/modules/workflow/workflow.service';
 import { JobExecutionRepository } from '../repositories/job-execution.repository';
 import { QueueRegistryService } from './queue-registry.service';
 

@@ -29,7 +29,7 @@
     "apps/dashboard/src/lib/formatting.ts",
     "apps/worker/src/processors/content-pipeline.processor.ts",
     "apps/worker/src/worker.module.ts",
-    "packages/shared-types/src/api.ts"
+    "packages/contracts/src/api.ts"
   ],
   "mixedResponsibilities": []
 }

@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { AuthenticatedUser } from '../../../common/interfaces/authenticated-request.interface';
-import { CasbinAuthorizationService } from '../../../common/auth/casbin-authorization.service';
+import { AuthenticatedUser } from '@api/common/interfaces/authenticated-request.interface';
+import { CasbinAuthorizationService } from '@api/common/auth/casbin-authorization.service';
 import { UserAccountRepository } from '../repositories/user-account.repository';
 
 @Injectable()

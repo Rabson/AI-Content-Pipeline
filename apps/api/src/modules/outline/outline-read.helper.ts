@@ -1,5 +1,5 @@
 import { ArtifactType } from '@prisma/client';
-import type { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 
 export function findTopicById(prisma: PrismaService, topicId: string) {
   return prisma.topic.findFirst({ where: { id: topicId, deletedAt: null } });

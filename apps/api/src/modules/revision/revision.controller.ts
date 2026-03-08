@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
-import { AppRole } from '../../common/auth/roles.enum';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { AppRole } from '@api/common/auth/roles.enum';
+import { Roles } from '@api/common/decorators/roles.decorator';
+import { AuthenticatedRequest } from '@api/common/interfaces/authenticated-request.interface';
 import { GetDiffQueryDto } from './dto/get-diff-query.dto';
 import { RunRevisionDto } from './dto/run-revision.dto';
 import { RevisionService } from './revision.service';

@@ -1,5 +1,5 @@
 import { Prisma, TopicStatus } from '@prisma/client';
-import type { PrismaService } from '../../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 
 export function persistFailedExecution(
   prisma: PrismaService,

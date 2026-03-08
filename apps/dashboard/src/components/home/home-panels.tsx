@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { DiscoverySuggestionView, TopicSummary } from '@aicp/shared-types';
+import type { DiscoverySuggestionView, TopicSummary } from '@aicp/contracts';
 import { DiscoverySuggestionCard } from '../shared/discovery-suggestion-card';
 import { TopicSummaryCard } from '../shared/topic-summary-card';
 

@@ -2,10 +2,10 @@ import 'reflect-metadata';
 import { describe, expect, it } from 'vitest';
 import { AppRole } from '../auth/roles.enum';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { OpsController } from '../../modules/ops/ops.controller';
-import { PublisherController } from '../../modules/publisher/publisher.controller';
-import { StorageController } from '../../modules/storage/storage.controller';
-import { TopicController } from '../../modules/topic/topic.controller';
+import { OpsController } from '@api/modules/ops/ops.controller';
+import { PublisherController } from '@api/modules/publisher/publisher.controller';
+import { StorageController } from '@api/modules/storage/storage.controller';
+import { TopicController } from '@api/modules/topic/topic.controller';
 
 function methodRoles(target: object, methodName: string) {
   const method = Reflect.get(target, methodName) as object | undefined;

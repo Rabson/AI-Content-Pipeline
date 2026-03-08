@@ -1,4 +1,4 @@
-import type { PrismaService } from '../../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 
 export function loadOverviewSourceData(prisma: PrismaService, start: Date) {
   return Promise.all([

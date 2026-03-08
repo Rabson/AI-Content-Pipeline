@@ -1,6 +1,6 @@
 import { ArtifactType, Prisma, TopicStatus } from '@prisma/client';
-import { estimateLlmCostUsd } from '../../common/llm/usage-cost.util';
-import type { PrismaService } from '../../prisma/prisma.service';
+import { estimateLlmCostUsd } from '@api/common/llm/usage-cost.util';
+import type { PrismaService } from '@api/prisma/prisma.service';
 import type { PersistGeneratedOutlineParams } from './outline-write.types';
 
 export async function persistGeneratedOutline(

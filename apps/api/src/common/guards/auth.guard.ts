@@ -4,13 +4,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { verifyServiceToken } from '@aicp/shared-config/auth/service-token';
+import { verifyServiceToken } from '@aicp/auth-core';
 import { Reflector } from '@nestjs/core';
-import { env } from '../../config/env';
-import { parseAppRole } from '../auth/role-parser';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
-import { SecurityEventService } from '../security/security-event.service';
+import { env } from '@api/config/env';
+import { parseAppRole } from '@api/common/auth/role-parser';
+import { IS_PUBLIC_KEY } from '@api/common/decorators/public.decorator';
+import { AuthenticatedRequest } from '@api/common/interfaces/authenticated-request.interface';
+import { SecurityEventService } from '@api/common/security/security-event.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

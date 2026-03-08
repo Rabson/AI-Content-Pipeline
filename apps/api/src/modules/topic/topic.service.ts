@@ -6,7 +6,7 @@ import { ScoreTopicDto } from './dto/score-topic.dto';
 import { ApproveTopicDto } from './dto/approve-topic.dto';
 import { RejectTopicDto } from './dto/reject-topic.dto';
 import { AssignTopicOwnerDto } from './dto/assign-topic-owner.dto';
-import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
+import { AuthenticatedUser } from '@api/common/interfaces/authenticated-request.interface';
 import { UpdateTopicBannerImageDto } from './dto/update-topic-banner-image.dto';
 import { TopicCommandService } from './services/topic-command.service';
 import { TopicQueryService } from './services/topic-query.service';

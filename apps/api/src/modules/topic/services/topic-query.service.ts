@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AppRole } from '../../../common/auth/roles.enum';
-import { AuthenticatedUser } from '../../../common/interfaces/authenticated-request.interface';
+import { AppRole } from '@api/common/auth/roles.enum';
+import { AuthenticatedUser } from '@api/common/interfaces/authenticated-request.interface';
 import { ListTopicsQueryDto } from '../dto/list-topics-query.dto';
 import { TopicRepository } from '../topic.repository';
 

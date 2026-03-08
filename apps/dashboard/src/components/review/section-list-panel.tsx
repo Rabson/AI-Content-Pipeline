@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { DraftVersionView } from '@aicp/shared-types';
+import type { DraftVersionView } from '@aicp/contracts';
 
 export function SectionListPanel({ topicId, draft }: { topicId: string; draft: DraftVersionView | null }) {
   return (

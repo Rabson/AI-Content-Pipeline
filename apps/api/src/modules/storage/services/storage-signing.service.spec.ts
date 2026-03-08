@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BadRequestException } from '@nestjs/common';
 import { StorageSigningService } from './storage-signing.service';
-import { env } from '../../../config/env';
+import { env } from '@api/config/env';
 
 describe('StorageSigningService', () => {
   const service = new StorageSigningService();

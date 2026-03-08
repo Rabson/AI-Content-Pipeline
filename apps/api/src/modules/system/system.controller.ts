@@ -1,6 +1,6 @@
 import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { Public } from '../../common/decorators/public.decorator';
+import { Public } from '@api/common/decorators/public.decorator';
 import { SystemService } from './system.service';
 
 @Controller()

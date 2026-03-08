@@ -8,7 +8,7 @@ import {
   type DraftGenerateFinalizeJobPayload,
   type DraftGenerateSectionJobPayload,
   type DraftGenerateStartJobPayload,
-} from '@aicp/shared-types';
+} from '@aicp/queue-contracts';
 import { DraftOrchestrator } from '../../../api/src/modules/draft/draft.orchestrator';
 import { DraftRepository } from '../../../api/src/modules/draft/draft.repository';
 import { JobExecutionService } from '../support/job-execution.service';

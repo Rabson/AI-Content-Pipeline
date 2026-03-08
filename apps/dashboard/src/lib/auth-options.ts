@@ -46,8 +46,21 @@ export const authOptions: DashboardAuthOptions = {
           });
           if (!response.ok) return null;
           await clearAuthRateLimit(rateLimitKey);
-          const user = (await response.json()) as { id: string; email: string; role: string; name?: string | null };
-          return { id: user.id, email: user.email, role: user.role, name: user.name } as any;
+          const user = (await response.json()) as {
+            id: string;
+            email: string;
+            role: string;
+            name?: string | null;
+            apiToken: string;
+          };
+          if (!user.apiToken) return null;
+          return {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            name: user.name,
+            apiToken: user.apiToken,
+          } as any;
         } catch {
           return null;
         }
@@ -59,6 +72,7 @@ export const authOptions: DashboardAuthOptions = {
       if (user) {
         token.role = (user as any).role ?? 'USER';
         token.name = user.name;
+        token.apiToken = (user as any).apiToken;
       }
       return token;
     },
@@ -67,6 +81,7 @@ export const authOptions: DashboardAuthOptions = {
         session.user.id = String(token.sub ?? session.user.email ?? 'dashboard-user');
         session.user.role = String(token.role ?? 'USER');
         session.user.name = typeof token.name === 'string' ? token.name : session.user.name;
+        session.user.apiToken = typeof token.apiToken === 'string' ? token.apiToken : '';
       }
       return session;
     },

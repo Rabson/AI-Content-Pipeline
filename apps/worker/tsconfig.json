@@ -5,7 +5,8 @@
     "outDir": "dist",
     "rootDir": "..",
     "paths": {
-      "@worker/*": ["src/*"]
+      "@worker/*": ["src/*"],
+      "@api/*": ["../api/src/*"]
     }
   },
   "include": ["src/**/*.ts", "../api/src/**/*.ts"],

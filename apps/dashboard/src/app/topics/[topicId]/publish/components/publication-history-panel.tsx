@@ -1,4 +1,4 @@
-import type { PublicationView } from '@aicp/shared-types';
+import type { PublicationView } from '@aicp/contracts';
 import { formatDate } from '../../../../../lib/formatting';
 import { retryPublicationAction } from '../../actions';
 

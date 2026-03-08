@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { DraftVersionStatus, RevisionRunStatus } from '@prisma/client';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 
 export async function createRevisionRun(
   prisma: PrismaService,

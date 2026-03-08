@@ -1,5 +1,5 @@
 import { getDiscoverySuggestions, getTopics } from '../../lib/api-client';
-import type { DiscoverySuggestionView } from '@aicp/shared-types';
+import type { DiscoverySuggestionView } from '@aicp/contracts';
 
 export async function loadHomePageData() {
   const [topics, discovery] = await Promise.all([getTopics(), getDiscoverySuggestions()]);

@@ -1,8 +1,8 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import type { ResearchRunJobPayload } from '@aicp/shared-types';
-import { buildQueueJobId } from '../../common/queue/job-id.util';
+import type { ResearchRunJobPayload } from '@aicp/queue-contracts';
+import { buildQueueJobId } from '@api/common/queue/job-id.util';
 import { CONTENT_PIPELINE_QUEUE, RESEARCH_RUN_JOB } from './constants/topic-queue.constants';
 
 @Injectable()

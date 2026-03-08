@@ -1,12 +1,11 @@
 import { getServerSession } from 'next-auth';
-import { signServiceToken } from '@aicp/shared-config/auth/service-token';
-import { env } from '../config/env';
 import { authOptions } from './auth-options';
 
 export interface DashboardUser {
   id: string;
   role: string;
   email: string;
+  apiToken: string;
   name?: string | null;
   authorized: boolean;
 }
@@ -18,6 +17,7 @@ export async function getDashboardUser(): Promise<DashboardUser> {
       id: '',
       role: '',
       email: '',
+      apiToken: '',
       name: '',
       authorized: false,
     };
@@ -27,6 +27,7 @@ export async function getDashboardUser(): Promise<DashboardUser> {
     id: session.user.id,
     role: session.user.role,
     email: session.user.email,
+    apiToken: session.user.apiToken,
     name: session.user.name,
     authorized: true,
   };
@@ -40,15 +41,6 @@ export async function getDashboardAuthHeaders() {
 
   return {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${signServiceToken({
-      secret: env.internalServiceJwtSecret,
-      issuer: env.internalServiceJwtIssuer,
-      audience: env.internalServiceJwtAudience,
-      subject: user.id,
-      email: user.email,
-      role: user.role,
-      name: user.name,
-      ttlSeconds: env.internalServiceJwtTtlSeconds,
-    })}`,
+    Authorization: `Bearer ${user.apiToken}`,
   };
 }

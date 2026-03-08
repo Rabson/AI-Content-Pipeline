@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SocialPlatform, SocialPostStatus } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { findTopicById, getLatestDraft, getSocialPostOrThrow, latestLinkedInDraft, nextVersion } from './social-read.helper';
 import { applyStatus, persistGeneratedLinkedInDraft } from './social-write.helper';
 import type { PersistGeneratedLinkedInDraftParams } from './social.repository.types';

@@ -1,8 +1,8 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
-import { CasbinAuthorizationService } from '../../../common/auth/casbin-authorization.service';
-import { AuthenticatedUser } from '../../../common/interfaces/authenticated-request.interface';
-import { TopicRepository } from '../../topic/topic.repository';
+import { CasbinAuthorizationService } from '@api/common/auth/casbin-authorization.service';
+import { AuthenticatedUser } from '@api/common/interfaces/authenticated-request.interface';
+import { TopicRepository } from '@api/modules/topic/topic.repository';
 import { UserAccountRepository } from '../repositories/user-account.repository';
 
 @Injectable()

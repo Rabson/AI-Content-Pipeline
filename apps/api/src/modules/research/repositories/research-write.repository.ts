@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { TopicStatus } from '@prisma/client';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { persistFailedExecution } from './research-failure-write.helper';
 import { markTopicStatus, persistResearchResult } from './research-result-write.helper';
 import { addManualSource } from './research-source-write.helper';

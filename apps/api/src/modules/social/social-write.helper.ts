@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Prisma, SocialPlatform, SocialPostStatus } from '@prisma/client';
-import { estimateLlmCostUsd } from '../../common/llm/usage-cost.util';
-import type { PrismaService } from '../../prisma/prisma.service';
+import { estimateLlmCostUsd } from '@api/common/llm/usage-cost.util';
+import type { PrismaService } from '@api/prisma/prisma.service';
 import { findTopicById, getSocialPostOrThrow } from './social-read.helper';
 import type { PersistGeneratedLinkedInDraftParams } from './social.repository.types';
 

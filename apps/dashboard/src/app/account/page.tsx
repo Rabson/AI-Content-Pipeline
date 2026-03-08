@@ -1,4 +1,4 @@
-import type { UserPublisherCredentialView, UserSummary } from '@aicp/shared-types';
+import type { UserPublisherCredentialView, UserSummary } from '@aicp/contracts';
 import { getCurrentUser, getMyPublisherCredentials } from '../../lib/api-client/user-api';
 import { CredentialCard } from './credential-card';
 

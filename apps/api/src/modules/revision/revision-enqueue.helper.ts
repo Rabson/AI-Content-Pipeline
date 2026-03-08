@@ -5,8 +5,8 @@ import type {
   RevisionApplyFinalizeJobPayload,
   RevisionApplySectionJobPayload,
   RevisionApplyStartJobPayload,
-} from '@aicp/shared-types';
-import { buildQueueJobId } from '../../common/queue/job-id.util';
+} from '@aicp/queue-contracts';
+import { buildQueueJobId } from '@api/common/queue/job-id.util';
 import { RevisionRepository } from './revision.repository';
 import { REVISION_APPLY_FINALIZE_JOB, REVISION_APPLY_SECTION_JOB, REVISION_APPLY_START_JOB } from './constants/revision.constants';
 import { RunRevisionDto } from './dto/run-revision.dto';

@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { TopicSummary } from '@aicp/shared-types';
+import type { TopicSummary } from '@aicp/contracts';
 import { getDashboardAuthHeaders } from '../auth';
 import { env } from '../../config/env';
 

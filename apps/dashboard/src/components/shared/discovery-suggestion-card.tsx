@@ -1,4 +1,4 @@
-import type { DiscoverySuggestionView } from '@aicp/shared-types';
+import type { DiscoverySuggestionView } from '@aicp/contracts';
 import { formatPercent, truncateText } from '../../lib/formatting';
 
 export function DiscoverySuggestionCard({ suggestion }: { suggestion: DiscoverySuggestionView }) {

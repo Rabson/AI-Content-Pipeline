@@ -1,4 +1,4 @@
-import type { TopicDetail } from '@aicp/shared-types';
+import type { TopicDetail } from '@aicp/contracts';
 import { TopicPageHeader } from '../shared/topic-page-header';
 import { formatDate, formatScore, formatStatus, formatTopicPreview, formatTopicSource } from '../../lib/formatting';
 

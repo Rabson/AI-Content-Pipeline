@@ -1,4 +1,4 @@
-import type { DraftVersionView, PublicationView, ResearchArtifactView, TopicDetail } from '@aicp/shared-types';
+import type { DraftVersionView, PublicationView, ResearchArtifactView, TopicDetail } from '@aicp/contracts';
 import {
   getDraft,
   getPublications,

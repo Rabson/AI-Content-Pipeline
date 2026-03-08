@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { env } from '../../config/env';
+import { env } from '@api/config/env';
 import { fetchWithTimeout, throwUpstreamHttpError } from '../http/external-fetch.util';
 
 export async function requestOpenAiChatCompletion(body: Record<string, unknown>, label: string) {

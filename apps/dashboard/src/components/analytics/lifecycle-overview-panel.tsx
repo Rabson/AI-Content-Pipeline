@@ -1,4 +1,4 @@
-import type { AnalyticsOverviewView, TopicSummary } from '@aicp/shared-types';
+import type { AnalyticsOverviewView, TopicSummary } from '@aicp/contracts';
 import { formatStatus } from '../../lib/formatting';
 
 function LifecycleOverviewRow({ item }: { item: AnalyticsOverviewView }) {

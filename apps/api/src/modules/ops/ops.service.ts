@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SecurityEventType } from '@prisma/client';
-import { SecurityEventService } from '../../common/security/security-event.service';
-import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
+import { SecurityEventService } from '@api/common/security/security-event.service';
+import { AuthenticatedUser } from '@api/common/interfaces/authenticated-request.interface';
 import { PublisherService } from '../publisher/publisher.service';
 import { SystemService } from '../system/system.service';
 import { WorkerRuntimeClient } from './clients/worker-runtime.client';

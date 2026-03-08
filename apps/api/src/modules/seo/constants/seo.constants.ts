@@ -1,1 +1,1 @@
-export { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB } from '@aicp/shared-types';
+export { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB } from '@aicp/queue-contracts';

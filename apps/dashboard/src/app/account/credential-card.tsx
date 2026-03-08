@@ -1,4 +1,4 @@
-import type { UserPublisherCredentialView } from '@aicp/shared-types';
+import type { UserPublisherCredentialView } from '@aicp/contracts';
 import { formatDate } from '../../lib/formatting';
 import { deletePublisherCredentialAction, upsertPublisherCredentialAction } from './actions';
 

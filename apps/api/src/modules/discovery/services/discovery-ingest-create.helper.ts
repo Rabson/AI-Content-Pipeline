@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { TopicStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
-import { normalizeTopicTags, slugifyTopicTitle } from '../../topic/utils/topic-normalization.util';
+import { normalizeTopicTags, slugifyTopicTitle } from '@api/modules/topic/utils/topic-normalization.util';
 import type { DiscoveryCandidate } from '../providers/discovery-provider.interface';
 import { discoveryJsonValue } from '../utils/discovery.util';
 import type { DiscoveryIngestDependencies } from './discovery-ingest.types';

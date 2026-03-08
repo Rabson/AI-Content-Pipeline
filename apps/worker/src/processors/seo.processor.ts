@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB, type SeoGenerateJobPayload } from '@aicp/shared-types';
+import { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB, type SeoGenerateJobPayload } from '@aicp/queue-contracts';
 import { SeoOrchestrator } from '../../../api/src/modules/seo/seo.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
-import { AppRole } from '../../common/auth/roles.enum';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { AppRole } from '@api/common/auth/roles.enum';
+import { Roles } from '@api/common/decorators/roles.decorator';
+import { AuthenticatedRequest } from '@api/common/interfaces/authenticated-request.interface';
 import { GenerateSeoDto } from './dto/generate-seo.dto';
 import { SeoService } from './seo.service';
 import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';

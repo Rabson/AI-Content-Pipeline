@@ -1,4 +1,4 @@
-import { createTelemetryRuntime } from '@aicp/shared-config/observability/telemetry-runtime';
+import { createTelemetryRuntime } from '@aicp/observability-core';
 import { env } from '../config/env';
 
 const runtime = createTelemetryRuntime('worker', env);

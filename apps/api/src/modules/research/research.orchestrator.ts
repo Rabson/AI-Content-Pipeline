@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID, createHash } from 'crypto';
 import { ContentState, TopicStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
-import { env } from '../../config/env';
+import { env } from '@api/config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { ResearchRepository } from './research.repository';
 import { SourceGathererService } from './providers/source-gatherer.service';

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, RevisionRunStatus } from '@prisma/client';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { createRevisionRun } from './revision-run-create.helper';
 import { createSectionDiff, createUsageLog, finalizeRevisionRun, markRevisionRunFailed, updateRevisedSection, updateRevisionItemStatus } from './revision-run-update.helper';
 import { RevisionUsageRepository } from './revision-usage.repository';

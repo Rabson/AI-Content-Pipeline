@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
-import { estimateLlmCostUsd } from '../../../common/llm/usage-cost.util';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { estimateLlmCostUsd } from '@api/common/llm/usage-cost.util';
+import { PrismaService } from '@api/prisma/prisma.service';
 
 export async function createUsageLog(prisma: PrismaService, data: Prisma.LlmUsageLogCreateInput) {
   const payload = data as unknown as Prisma.LlmUsageLogUncheckedCreateInput & { topic?: { connect?: { id?: string } } };

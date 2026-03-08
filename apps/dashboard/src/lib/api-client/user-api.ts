@@ -1,4 +1,4 @@
-import type { UserPublisherCredentialView, UserSummary } from '@aicp/shared-types';
+import type { UserPublisherCredentialView, UserSummary } from '@aicp/contracts';
 import { safeFetch } from './core';
 
 export function getCurrentUser() {

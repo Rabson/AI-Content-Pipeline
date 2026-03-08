@@ -3,4 +3,4 @@ export {
   DRAFT_GENERATE_FINALIZE_JOB,
   DRAFT_GENERATE_SECTION_JOB,
   DRAFT_GENERATE_START_JOB,
-} from '@aicp/shared-types';
+} from '@aicp/queue-contracts';

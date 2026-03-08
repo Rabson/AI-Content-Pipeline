@@ -1,4 +1,4 @@
-import type { TopicSummary } from '@aicp/shared-types';
+import type { TopicSummary } from '@aicp/contracts';
 import Link from 'next/link';
 import {
   formatDate,

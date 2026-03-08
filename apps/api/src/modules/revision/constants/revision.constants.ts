@@ -3,4 +3,4 @@ export {
   REVISION_APPLY_FINALIZE_JOB,
   REVISION_APPLY_SECTION_JOB,
   REVISION_APPLY_START_JOB,
-} from '@aicp/shared-types';
+} from '@aicp/queue-contracts';

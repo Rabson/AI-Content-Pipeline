@@ -1,4 +1,4 @@
-import type { ReviewCommentView } from '@aicp/shared-types';
+import type { ReviewCommentView } from '@aicp/contracts';
 import { createReviewCommentAction, updateReviewCommentAction } from '../../app/topics/[topicId]/actions';
 import { formatDate } from '../../lib/formatting';
 

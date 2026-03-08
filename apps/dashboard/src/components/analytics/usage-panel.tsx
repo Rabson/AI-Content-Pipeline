@@ -1,4 +1,4 @@
-import type { AnalyticsUsageView } from '@aicp/shared-types';
+import type { AnalyticsUsageView } from '@aicp/contracts';
 import { formatUsd } from '../../lib/formatting';
 
 function UsageRow({ item, maxTokens }: { item: AnalyticsUsageView; maxTokens: number }) {

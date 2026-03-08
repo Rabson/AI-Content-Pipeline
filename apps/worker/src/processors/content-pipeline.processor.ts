@@ -12,7 +12,7 @@ import {
   REVISION_APPLY_SECTION_JOB,
   REVISION_APPLY_START_JOB,
   SEO_GENERATE_JOB,
-} from '@aicp/shared-types';
+} from '@aicp/queue-contracts';
 import { ResearchOrchestrator } from '../../../api/src/modules/research/research.orchestrator';
 import { OutlineOrchestrator } from '../../../api/src/modules/outline/outline.orchestrator';
 import { OutlineRepository } from '../../../api/src/modules/outline/outline.repository';

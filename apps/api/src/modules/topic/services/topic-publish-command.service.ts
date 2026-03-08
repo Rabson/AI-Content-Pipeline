@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { WorkflowEventType, WorkflowStage } from '@prisma/client';
-import { UserAccountService } from '../../user/services/user-account.service';
-import { WorkflowService } from '../../workflow/workflow.service';
+import { UserAccountService } from '@api/modules/user/services/user-account.service';
+import { WorkflowService } from '@api/modules/workflow/workflow.service';
 import { UpdateTopicBannerImageDto } from '../dto/update-topic-banner-image.dto';
 import { TopicRepository } from '../topic.repository';
 import { TopicQueryService } from './topic-query.service';

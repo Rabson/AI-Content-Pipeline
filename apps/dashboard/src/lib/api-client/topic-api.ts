@@ -10,7 +10,7 @@ import type {
   StorageObjectView,
   TopicDetail,
   TopicSummary,
-} from '@aicp/shared-types';
+} from '@aicp/contracts';
 import { normalizeTopic, safeFetch } from './core';
 
 export function getTopics() {

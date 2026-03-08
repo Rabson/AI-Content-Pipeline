@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { TopicStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
-import { WorkflowService } from '../../workflow/workflow.service';
+import { WorkflowService } from '@api/modules/workflow/workflow.service';
 import { CreateTopicDto } from '../dto/create-topic.dto';
 import { UpdateTopicDto } from '../dto/update-topic.dto';
 import { TopicRepository } from '../topic.repository';

@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { CONTENT_PIPELINE_QUEUE, RESEARCH_RUN_JOB, type ResearchRunJobPayload } from '@aicp/shared-types';
+import { CONTENT_PIPELINE_QUEUE, RESEARCH_RUN_JOB, type ResearchRunJobPayload } from '@aicp/queue-contracts';
 import { ResearchOrchestrator } from '../../../api/src/modules/research/research.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';

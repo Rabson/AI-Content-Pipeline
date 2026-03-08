@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { AppRole } from '../../common/auth/roles.enum';
-import { Roles } from '../../common/decorators/roles.decorator';
+import { AppRole } from '@api/common/auth/roles.enum';
+import { Roles } from '@api/common/decorators/roles.decorator';
 import { WorkflowService } from './workflow.service';
 
 @Roles(AppRole.EDITOR)

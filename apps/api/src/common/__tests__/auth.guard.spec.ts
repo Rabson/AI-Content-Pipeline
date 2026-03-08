@@ -1,9 +1,9 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { Reflector } from '@nestjs/core';
 import { UnauthorizedException } from '@nestjs/common';
-import { signServiceToken } from '@aicp/shared-config/auth/service-token';
+import { signServiceToken } from '@aicp/auth-core';
 import { AuthGuard } from '../guards/auth.guard';
-import { env } from '../../config/env';
+import { env } from '@api/config/env';
 import { SecurityEventService } from '../security/security-event.service';
 
 function contextFor(headers: Record<string, string>) {

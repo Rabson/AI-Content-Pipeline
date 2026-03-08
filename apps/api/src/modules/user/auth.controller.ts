@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Req } from '@nestjs/common';
-import { Public } from '../../common/decorators/public.decorator';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
-import { RequestRateLimitService } from '../../common/security/request-rate-limit.service';
+import { Public } from '@api/common/decorators/public.decorator';
+import { AuthenticatedRequest } from '@api/common/interfaces/authenticated-request.interface';
+import { RequestRateLimitService } from '@api/common/security/request-rate-limit.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserAuthService } from './services/user-auth.service';
 

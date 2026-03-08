@@ -31,6 +31,7 @@ describe('dashboard auth options', () => {
           email: 'editor@example.com',
           role: 'EDITOR',
           name: 'Editor User',
+          apiToken: 'token-1',
         }),
     } as Response);
     Object.assign(env as Record<string, unknown>, {
@@ -61,7 +62,7 @@ describe('dashboard auth options', () => {
 
     const token = await jwt({
       token: { sub: 'user-1' } as any,
-      user: { id: 'user-1', email: 'editor@example.com', role: 'EDITOR', name: 'Editor User' } as any,
+      user: { id: 'user-1', email: 'editor@example.com', role: 'EDITOR', name: 'Editor User', apiToken: 'token-1' } as any,
       account: null,
       profile: undefined,
       trigger: 'signIn',
@@ -77,10 +78,11 @@ describe('dashboard auth options', () => {
       trigger: 'update',
     });
 
-    const user = mapped.user as { role: string; id: string; name?: string | null };
+    const user = mapped.user as { role: string; id: string; name?: string | null; apiToken: string };
     expect(user.role).toBe('EDITOR');
     expect(user.id).toBe('user-1');
     expect(user.name).toBe('Editor User');
+    expect(user.apiToken).toBe('token-1');
   });
 
   afterEach(() => {

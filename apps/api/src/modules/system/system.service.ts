@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { env } from '../../config/env';
-import { getTelemetryStatus } from '../../common/observability/opentelemetry';
+import { env } from '@api/config/env';
+import { getTelemetryStatus } from '@api/common/observability/opentelemetry';
 import { RedisHealthClient } from './clients/redis-health.client';
 import { DatabaseHealthRepository } from './repositories/database-health.repository';
 import { QueueHealthService } from './services/queue-health.service';

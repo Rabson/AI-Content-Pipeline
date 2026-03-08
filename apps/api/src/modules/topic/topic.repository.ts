@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, TopicStatus } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { topicDetailInclude } from './repositories/topic-include.helper';
 import { buildTopicListWhere } from './repositories/topic-query.helper';
 import { transitionTopicStatus } from './repositories/topic-status-transition.helper';

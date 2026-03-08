@@ -1,5 +1,5 @@
 import { getDraft, getDraftSection, getReviewSessions, getTopic } from '../../lib/api-client';
-import type { DraftVersionView, TopicDetail } from '@aicp/shared-types';
+import type { DraftVersionView, TopicDetail } from '@aicp/contracts';
 
 export type ReviewSessionView = Awaited<ReturnType<typeof getReviewSessions>>[number];
 export type DraftSectionPayload = NonNullable<Awaited<ReturnType<typeof getDraftSection>>>;

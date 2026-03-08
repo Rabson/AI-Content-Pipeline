@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { AppRole } from '../../common/auth/roles.enum';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { AppRole } from '@api/common/auth/roles.enum';
+import { Roles } from '@api/common/decorators/roles.decorator';
+import { AuthenticatedRequest } from '@api/common/interfaces/authenticated-request.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserAccountService } from './services/user-account.service';
 

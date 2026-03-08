@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { env } from '../../../config/env';
-import { requestOpenAiChatCompletion } from '../../../common/llm/openai-request.util';
+import { env } from '@api/config/env';
+import { requestOpenAiChatCompletion } from '@api/common/llm/openai-request.util';
 
 export interface SocialGenerationInput {
   topicTitle: string;

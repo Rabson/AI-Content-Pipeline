@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 import { Prisma, TopicStatus } from '@prisma/client';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 
 export async function transitionTopicStatus(
   prisma: PrismaService,

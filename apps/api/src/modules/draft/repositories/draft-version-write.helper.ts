@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { ArtifactType, DraftVersionStatus, Prisma } from '@prisma/client';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 
 const countWords = (content: string) => content.split(/\s+/).filter(Boolean).length;
 

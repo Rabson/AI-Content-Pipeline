@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ContentState, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
-import { env } from '../../config/env';
+import { env } from '@api/config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { DiffService } from './providers/diff.service';
 import { OpenAiRevisionClient } from './providers/openai-revision.client';

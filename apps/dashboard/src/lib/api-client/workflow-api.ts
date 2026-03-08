@@ -1,4 +1,4 @@
-import type { DiscoverySuggestionView, RevisionDiffView } from '@aicp/shared-types';
+import type { DiscoverySuggestionView, RevisionDiffView } from '@aicp/contracts';
 import { safeFetch } from './core';
 
 export function getReviewSessions(topicId: string) {

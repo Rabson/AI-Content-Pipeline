@@ -1,4 +1,4 @@
-import type { AnalyticsOverviewView, AnalyticsUsageView, ContentMetricsView } from '@aicp/shared-types';
+import type { AnalyticsOverviewView, AnalyticsUsageView, ContentMetricsView } from '@aicp/contracts';
 import { safeFetch } from './core';
 
 export function getAnalyticsUsage() {

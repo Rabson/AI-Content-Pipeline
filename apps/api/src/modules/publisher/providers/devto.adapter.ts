@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PublicationChannel } from '@prisma/client';
-import type { PublishRequest, PublishResponse, PublisherAdapter, PublisherCredentialInput } from '@aicp/shared-types';
-import { fetchWithTimeout, throwUpstreamHttpError } from '../../../common/http/external-fetch.util';
-import { env } from '../../../config/env';
+import type { PublishRequest, PublishResponse, PublisherAdapter, PublisherCredentialInput } from '@api/modules/publisher/contracts/publisher.contract';
+import { fetchWithTimeout, throwUpstreamHttpError } from '@api/common/http/external-fetch.util';
+import { env } from '@api/config/env';
 
 @Injectable()
 export class DevtoAdapter implements PublisherAdapter {

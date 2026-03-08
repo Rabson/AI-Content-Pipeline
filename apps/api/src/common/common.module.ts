@@ -6,14 +6,14 @@ import { RolesGuard } from './guards/roles.guard';
 import { AppLogger } from './logger/app-logger.service';
 import { RequestLoggingInterceptor } from './interceptors/request-logging.interceptor';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { RequestRateLimitService } from './security/request-rate-limit.service';
 import { SecurityEventRepository } from './security/security-event.repository';
 import {
   SECURITY_EVENT_RUNTIME_CONFIG,
   SecurityEventService,
 } from './security/security-event.service';
-import { env } from '../config/env';
+import { env } from '@api/config/env';
 
 @Global()
 @Module({

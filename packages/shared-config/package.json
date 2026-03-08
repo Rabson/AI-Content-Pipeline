@@ -8,22 +8,6 @@
     "./env/readers": {
       "types": "./dist/env/readers.d.ts",
       "default": "./dist/env/readers.js"
-    },
-    "./auth/base64url": {
-      "types": "./dist/auth/base64url.d.ts",
-      "default": "./dist/auth/base64url.js"
-    },
-    "./auth/service-token": {
-      "types": "./dist/auth/service-token.d.ts",
-      "default": "./dist/auth/service-token.js"
-    },
-    "./observability/telemetry-config": {
-      "types": "./dist/observability/telemetry-config.d.ts",
-      "default": "./dist/observability/telemetry-config.js"
-    },
-    "./observability/telemetry-runtime": {
-      "types": "./dist/observability/telemetry-runtime.d.ts",
-      "default": "./dist/observability/telemetry-runtime.js"
     }
   },
   "files": [
@@ -33,7 +17,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "lint": "eslint \"{env,auth,observability}/**/*.ts\"",
+    "lint": "eslint \"env/**/*.ts\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --config ../../vitest.config.mts --dir ."
   }

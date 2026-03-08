@@ -1,9 +1,9 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import type { AnalyticsRollupDailyJobPayload } from '@aicp/shared-types';
-import { buildQueueJobId } from '../../common/queue/job-id.util';
-import { isPhaseEnabled } from '../../config/feature-flags';
+import type { AnalyticsRollupDailyJobPayload } from '@aicp/queue-contracts';
+import { buildQueueJobId } from '@api/common/queue/job-id.util';
+import { isPhaseEnabled } from '@api/config/feature-flags';
 import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB } from './constants/analytics.constants';
 import { AnalyticsRepository } from './analytics.repository';
 import { AnalyticsQueryDto } from './dto/analytics-query.dto';

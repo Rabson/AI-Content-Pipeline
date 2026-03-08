@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { createHash } from 'crypto';
-import { env } from '../../config/env';
+import { env } from '@api/config/env';
 import { WorkflowService } from '../workflow/workflow.service';
 import { SocialGeneratorService } from './providers/social-generator.service';
 import { SocialRepository } from './social.repository';

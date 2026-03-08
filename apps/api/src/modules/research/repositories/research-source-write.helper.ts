@@ -1,4 +1,4 @@
-import type { PrismaService } from '../../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 import type { ManualSourceInput } from './research-write.types';
 
 export function addManualSource(

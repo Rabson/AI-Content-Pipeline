@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
-import { AppRole } from '../../common/auth/roles.enum';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
-import { RequestRateLimitService } from '../../common/security/request-rate-limit.service';
+import { AppRole } from '@api/common/auth/roles.enum';
+import { Roles } from '@api/common/decorators/roles.decorator';
+import { AuthenticatedRequest } from '@api/common/interfaces/authenticated-request.interface';
+import { RequestRateLimitService } from '@api/common/security/request-rate-limit.service';
 import { CreateUploadUrlDto } from './dto/create-upload-url.dto';
 import { StorageService } from './storage.service';
 

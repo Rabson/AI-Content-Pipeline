@@ -1,5 +1,5 @@
 import { Prisma, WorkflowRunStatus, WorkflowStage } from '@prisma/client';
-import type { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 
 export function createRun(prisma: PrismaService, data: Prisma.WorkflowRunUncheckedCreateInput) {
   return prisma.workflowRun.create({ data });

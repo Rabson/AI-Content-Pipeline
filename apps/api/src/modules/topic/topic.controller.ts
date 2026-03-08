@@ -8,9 +8,9 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { AppRole } from '../../common/auth/roles.enum';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { AppRole } from '@api/common/auth/roles.enum';
+import { Roles } from '@api/common/decorators/roles.decorator';
+import { AuthenticatedRequest } from '@api/common/interfaces/authenticated-request.interface';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
 import { SubmitTopicDto } from './dto/submit-topic.dto';

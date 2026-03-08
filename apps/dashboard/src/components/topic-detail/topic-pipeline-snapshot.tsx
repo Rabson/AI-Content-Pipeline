@@ -1,4 +1,4 @@
-import type { LinkedInDraftView, PublicationView, ResearchArtifactView } from '@aicp/shared-types';
+import type { LinkedInDraftView, PublicationView, ResearchArtifactView } from '@aicp/contracts';
 import { formatStatus, formatTopicPreview } from '../../lib/formatting';
 import { getDraft } from '../../lib/api-client';
 

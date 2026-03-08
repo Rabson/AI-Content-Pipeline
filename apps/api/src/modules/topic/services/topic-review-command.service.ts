@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { TopicStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { WorkflowService } from '../../workflow/workflow.service';
-import { UserTopicOwnershipService } from '../../user/services/user-topic-ownership.service';
+import { WorkflowService } from '@api/modules/workflow/workflow.service';
+import { UserTopicOwnershipService } from '@api/modules/user/services/user-topic-ownership.service';
 import { ApproveTopicDto } from '../dto/approve-topic.dto';
 import { RejectTopicDto } from '../dto/reject-topic.dto';
 import { ScoreTopicDto } from '../dto/score-topic.dto';

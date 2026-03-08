@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { PUBLISH_ARTICLE_JOB, PUBLISHING_QUEUE, type PublishArticleJobPayload } from '@aicp/shared-types';
+import { PUBLISH_ARTICLE_JOB, PUBLISHING_QUEUE, type PublishArticleJobPayload } from '@aicp/queue-contracts';
 import { PublisherOrchestrator } from '../../../api/src/modules/publisher/publisher.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';

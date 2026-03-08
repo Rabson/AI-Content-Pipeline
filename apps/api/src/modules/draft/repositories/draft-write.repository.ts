@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, ReviewCommentSeverity, ReviewCommentStatus } from '@prisma/client';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { createReviewComment, createReviewSession, submitReviewSession, updateReviewComment } from './draft-review-write.helper';
 import { createUsageLog } from './draft-usage-write.helper';
 import { createDraftShell, finalizeDraft, markDraftApproved, markDraftFailed, upsertDraftSection } from './draft-version-write.helper';

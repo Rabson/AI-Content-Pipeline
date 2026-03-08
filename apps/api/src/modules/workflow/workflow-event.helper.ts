@@ -1,5 +1,5 @@
 import { Prisma, WorkflowEventType } from '@prisma/client';
-import type { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 
 export function createEvent(prisma: PrismaService, data: Prisma.WorkflowEventUncheckedCreateInput) {
   return prisma.workflowEvent.create({ data });

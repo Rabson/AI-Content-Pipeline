@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
-import { env } from '../../../config/env';
+import { env } from '@api/config/env';
 
 @Injectable()
 export class TokenCryptoService {

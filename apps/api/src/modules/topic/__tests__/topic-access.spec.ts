@@ -1,9 +1,9 @@
 import { ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import { AppRole } from '../../../common/auth/roles.enum';
-import { CasbinAuthorizationService } from '../../../common/auth/casbin-authorization.service';
+import { AppRole } from '@api/common/auth/roles.enum';
+import { CasbinAuthorizationService } from '@api/common/auth/casbin-authorization.service';
 import { TopicQueryService } from '../services/topic-query.service';
-import { UserTopicOwnershipService } from '../../user/services/user-topic-ownership.service';
+import { UserTopicOwnershipService } from '@api/modules/user/services/user-topic-ownership.service';
 
 describe('topic access', () => {
   it('filters topic lists to the owner for USER role', async () => {

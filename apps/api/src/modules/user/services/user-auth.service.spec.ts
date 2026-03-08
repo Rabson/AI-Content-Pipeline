@@ -1,5 +1,5 @@
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
-import { AppRole } from '../../../common/auth/roles.enum';
+import { AppRole } from '@api/common/auth/roles.enum';
 import { describe, expect, it, vi } from 'vitest';
 import { UserAuthService } from './user-auth.service';
 

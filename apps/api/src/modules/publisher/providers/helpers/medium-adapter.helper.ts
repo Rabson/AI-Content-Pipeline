@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { fetchWithTimeout, throwUpstreamHttpError } from '../../../../common/http/external-fetch.util';
-import { env } from '../../../../config/env';
-import type { PublishRequest } from '@aicp/shared-types';
+import { fetchWithTimeout, throwUpstreamHttpError } from '@api/common/http/external-fetch.util';
+import { env } from '@api/config/env';
+import type { PublishRequest } from '@api/modules/publisher/contracts/publisher.contract';
 
 export async function resolveMediumPublishPath(params: {
   accessToken: string;

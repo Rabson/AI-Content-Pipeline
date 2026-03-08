@@ -1,6 +1,6 @@
 import { ArtifactType, Prisma, TopicStatus } from '@prisma/client';
-import { estimateLlmCostUsd } from '../../../common/llm/usage-cost.util';
-import type { PrismaService } from '../../../prisma/prisma.service';
+import { estimateLlmCostUsd } from '@api/common/llm/usage-cost.util';
+import type { PrismaService } from '@api/prisma/prisma.service';
 import type { PersistResearchResultParams } from './research-write.types';
 
 export function markTopicStatus(prisma: PrismaService, topicId: string, status: TopicStatus) {

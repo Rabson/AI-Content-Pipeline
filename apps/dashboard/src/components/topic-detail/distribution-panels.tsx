@@ -1,4 +1,4 @@
-import type { LinkedInDraftView, SeoMetadataView } from '@aicp/shared-types';
+import type { LinkedInDraftView, SeoMetadataView } from '@aicp/contracts';
 import { cleanText, formatStatus } from '../../lib/formatting';
 
 function SeoSnapshotPanel({ seo }: { seo: SeoMetadataView | null }) {

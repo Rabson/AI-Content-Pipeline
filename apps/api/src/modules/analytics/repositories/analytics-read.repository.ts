@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { buildOverviewBuckets } from './analytics-overview-bucket.helper';
 import { toOverviewRows } from './analytics-overview-row.helper';
 import { loadOverviewSourceData } from './analytics-overview-source.helper';

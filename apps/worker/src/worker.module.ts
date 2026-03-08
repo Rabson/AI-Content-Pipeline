@@ -5,7 +5,7 @@ import {
   CONTENT_PIPELINE_QUEUE,
   PUBLISHING_QUEUE,
   SOCIAL_QUEUE,
-} from '@aicp/shared-types';
+} from '@aicp/queue-contracts';
 import {
   AppLogger,
   PrismaService,

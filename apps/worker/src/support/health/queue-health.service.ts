@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import { ANALYTICS_QUEUE, CONTENT_PIPELINE_QUEUE, PUBLISHING_QUEUE, SOCIAL_QUEUE } from '@aicp/shared-types';
+import { ANALYTICS_QUEUE, CONTENT_PIPELINE_QUEUE, PUBLISHING_QUEUE, SOCIAL_QUEUE } from '@aicp/queue-contracts';
 
 @Injectable()
 export class QueueHealthService {

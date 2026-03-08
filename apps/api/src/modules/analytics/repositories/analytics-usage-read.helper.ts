@@ -1,4 +1,4 @@
-import type { PrismaService } from '../../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 import { startOfUtcDay } from '../utils/analytics-date.util';
 import type { UsageBucket } from './analytics-overview.types';
 

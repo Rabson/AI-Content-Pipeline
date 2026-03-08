@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { DiscoveryImportJobPayload } from '@aicp/shared-types';
+import type { DiscoveryImportJobPayload } from '@aicp/queue-contracts';
 import { CreateDiscoveryTopicDto } from './dto/create-discovery-topic.dto';
 import { DiscoveryQueryDto } from './dto/discovery-query.dto';
 import { ImportDiscoveryTopicsDto } from './dto/import-discovery-topics.dto';

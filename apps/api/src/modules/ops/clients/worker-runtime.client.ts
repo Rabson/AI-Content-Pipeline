@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { fetchWithTimeout } from '../../../common/http/external-fetch.util';
-import { env } from '../../../config/env';
+import { fetchWithTimeout } from '@api/common/http/external-fetch.util';
+import { env } from '@api/config/env';
 
 @Injectable()
 export class WorkerRuntimeClient {

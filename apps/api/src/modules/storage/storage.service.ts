@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { StorageObjectPurpose, WorkflowEventType, WorkflowStage } from '@prisma/client';
-import { AuthenticatedUser } from '../../common/interfaces/authenticated-request.interface';
-import { env } from '../../config/env';
+import { AuthenticatedUser } from '@api/common/interfaces/authenticated-request.interface';
+import { env } from '@api/config/env';
 import { UserTopicOwnershipService } from '../user/services/user-topic-ownership.service';
 import { WorkflowService } from '../workflow/workflow.service';
 import { CreateUploadUrlDto } from './dto/create-upload-url.dto';

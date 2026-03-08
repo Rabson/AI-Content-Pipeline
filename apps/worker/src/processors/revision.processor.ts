@@ -8,7 +8,7 @@ import {
   type RevisionApplyFinalizeJobPayload,
   type RevisionApplySectionJobPayload,
   type RevisionApplyStartJobPayload,
-} from '@aicp/shared-types';
+} from '@aicp/queue-contracts';
 import { RevisionOrchestrator } from '../../../api/src/modules/revision/revision.orchestrator';
 import { RevisionRepository } from '../../../api/src/modules/revision/revision.repository';
 import { JobExecutionService } from '../support/job-execution.service';

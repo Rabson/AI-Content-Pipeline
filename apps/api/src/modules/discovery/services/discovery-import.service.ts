@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Optional, ServiceUnavailableException } from '@nestjs/common';
-import type { DiscoveryImportJobPayload } from '@aicp/shared-types';
+import type { DiscoveryImportJobPayload } from '@aicp/queue-contracts';
 import { DISCOVERY_PROVIDER_HACKER_NEWS } from '../constants/discovery.constants';
 import { ImportDiscoveryTopicsDto } from '../dto/import-discovery-topics.dto';
 import { DiscoveryProvider } from '../providers/discovery-provider.interface';

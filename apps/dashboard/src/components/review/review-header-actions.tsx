@@ -1,4 +1,4 @@
-import type { DraftVersionView } from '@aicp/shared-types';
+import type { DraftVersionView } from '@aicp/contracts';
 import { createReviewSessionAction } from '../../app/topics/[topicId]/actions';
 import type { ReviewSessionView } from './review-page-data';
 

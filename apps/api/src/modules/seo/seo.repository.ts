@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ArtifactType, Prisma } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
-import { estimateLlmCostUsd } from '../../common/llm/usage-cost.util';
+import { PrismaService } from '@api/prisma/prisma.service';
+import { estimateLlmCostUsd } from '@api/common/llm/usage-cost.util';
 
 @Injectable()
 export class SeoRepository {

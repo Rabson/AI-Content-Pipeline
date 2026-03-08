@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PublicationChannel, PublisherCredentialAuditAction } from '@prisma/client';
-import { AuthenticatedUser } from '../../../common/interfaces/authenticated-request.interface';
+import { AuthenticatedUser } from '@api/common/interfaces/authenticated-request.interface';
 import { UpsertUserPublisherCredentialDto } from '../dto/upsert-user-publisher-credential.dto';
 import { UserPublisherCredentialRepository } from '../repositories/user-publisher-credential.repository';
 import {

@@ -1,4 +1,4 @@
-import type { TopicSummary } from '@aicp/shared-types';
+import type { TopicSummary } from '@aicp/contracts';
 import { formatScore } from '../../lib/formatting';
 import { calculateAverageScore } from './analytics-data';
 import { AnalyticsMetricCard } from './analytics-metric-card';

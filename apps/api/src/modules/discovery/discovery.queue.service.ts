@@ -2,8 +2,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { createHash } from 'crypto';
-import type { DiscoveryImportJobPayload } from '@aicp/shared-types';
-import { buildQueueJobId } from '../../common/queue/job-id.util';
+import type { DiscoveryImportJobPayload } from '@aicp/queue-contracts';
+import { buildQueueJobId } from '@api/common/queue/job-id.util';
 import { CONTENT_PIPELINE_QUEUE } from '../topic/constants/topic-queue.constants';
 import { DISCOVERY_IMPORT_JOB } from './constants/discovery.constants';
 

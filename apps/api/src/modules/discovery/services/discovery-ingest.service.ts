@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { TopicRepository } from '../../topic/topic.repository';
-import { TopicScoringService } from '../../topic/topic.scoring.service';
+import { TopicRepository } from '@api/modules/topic/topic.repository';
+import { TopicScoringService } from '@api/modules/topic/topic.scoring.service';
 import { DEFAULT_DISCOVERY_MIN_SCORE } from '../constants/discovery.constants';
 import { DiscoveryRepository } from '../discovery.repository';
 import { CreateDiscoveryTopicDto } from '../dto/create-discovery-topic.dto';
@@ -9,7 +9,7 @@ import { assertDiscoveryEnabled } from '../utils/discovery.util';
 import { prepareCandidateIngest } from './discovery-ingest-create.helper';
 import { rejectDiscoveryCandidate, scoreDiscoveryCandidate } from './discovery-ingest-score.helper';
 import type { DiscoveryIngestDependencies, DiscoveryIngestOptions } from './discovery-ingest.types';
-import { WorkflowService } from '../../workflow/workflow.service';
+import { WorkflowService } from '@api/modules/workflow/workflow.service';
 
 @Injectable()
 export class DiscoveryIngestService {

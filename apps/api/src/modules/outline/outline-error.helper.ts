@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Prisma, TopicStatus } from '@prisma/client';
-import type { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 import { findTopicById } from './outline-read.helper';
 
 export async function markOutlineFailed(prisma: PrismaService, topicId: string, error: string) {

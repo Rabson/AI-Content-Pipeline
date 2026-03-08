@@ -1,6 +1,6 @@
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { ContentState } from '@prisma/client';
-import type { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 
 export function findTopic(prisma: PrismaService, topicId: string) {
   return prisma.topic.findUnique({ where: { id: topicId }, include: { contentItem: true } });

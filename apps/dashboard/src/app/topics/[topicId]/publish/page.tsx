@@ -1,4 +1,4 @@
-import type { LinkedInDraftView, PublicationOptionsView, PublicationView, SeoMetadataView, StorageObjectView, TopicDetail, UserSummary } from '@aicp/shared-types';
+import type { LinkedInDraftView, PublicationOptionsView, PublicationView, SeoMetadataView, StorageObjectView, TopicDetail, UserSummary } from '@aicp/contracts';
 import {
   getLinkedInDraft,
   getPublicationOptions,

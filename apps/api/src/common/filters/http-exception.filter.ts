@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { env } from '../../config/env';
+import { env } from '@api/config/env';
 import { AppLogger } from '../logger/app-logger.service';
 import { redactSensitiveValues } from '../security/redact.util';
 

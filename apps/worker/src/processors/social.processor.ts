@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { SOCIAL_LINKEDIN_GENERATE_JOB, SOCIAL_QUEUE, type SocialLinkedInGenerateJobPayload } from '@aicp/shared-types';
+import { SOCIAL_LINKEDIN_GENERATE_JOB, SOCIAL_QUEUE, type SocialLinkedInGenerateJobPayload } from '@aicp/queue-contracts';
 import { SocialOrchestrator } from '../../../api/src/modules/social/social.orchestrator';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';

@@ -1,16 +1,11 @@
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { AppRole } from '../../../common/auth/roles.enum';
-import { SecurityEventService } from '../../../common/security/security-event.service';
-import { env } from '../../../config/env';
-import { UserAccountRepository } from '../repositories/user-account.repository';
+import { AppRole } from '@api/common/auth/roles.enum';
+import { SecurityEventService } from '@api/common/security/security-event.service';
+import { env } from '@api/config/env';
+import { UserAccountRepository } from '@api/modules/user/repositories/user-account.repository';
 import { PasswordService } from './password.service';
-
-export class AuthenticatedUserView {
-  id!: string;
-  email!: string;
-  role!: AppRole;
-  name?: string | null;
-}
+import { createUserApiToken } from './user-auth-token.helper';
+import { AuthenticatedUserView } from './user-auth.types';
 
 @Injectable()
 export class UserAuthService {
@@ -91,6 +86,12 @@ export class UserAuthService {
       email: authenticatedUser.email,
       role: authenticatedUser.role as AppRole,
       name: authenticatedUser.name,
+      ...createUserApiToken({
+        userId: authenticatedUser.id,
+        email: authenticatedUser.email,
+        role: authenticatedUser.role,
+        name: authenticatedUser.name,
+      }),
     };
   }
 }

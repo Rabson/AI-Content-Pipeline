@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@aicp/shared-config": "0.1.0",
-    "@aicp/shared-types": "0.1.0",
+    "@aicp/contracts": "0.1.0",
     "@aws-sdk/client-s3": "^3.1004.0",
     "@aws-sdk/s3-request-presigner": "^3.1004.0",
     "ioredis": "^5.8.1",

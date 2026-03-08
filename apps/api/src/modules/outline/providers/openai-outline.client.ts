@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { env } from '../../../config/env';
-import { requestOpenAiChatCompletion } from '../../../common/llm/openai-request.util';
+import { env } from '@api/config/env';
+import { requestOpenAiChatCompletion } from '@api/common/llm/openai-request.util';
 import { OUTLINE_SYSTEM_PROMPT } from '../prompts/outline-system.prompt';
 import { OUTLINE_OUTPUT_SCHEMA } from '../prompts/outline-json-schema';
 import { buildOutlinePrompt, OutlinePromptInput } from '../prompts/outline.prompt';

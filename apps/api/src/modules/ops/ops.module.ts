@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { PublisherModule } from '../publisher/publisher.module';
 import { SystemModule } from '../system/system.module';
 import { OpsController } from './ops.controller';

@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { env } from '../../../config/env';
-import { requestOpenAiChatCompletion } from '../../../common/llm/openai-request.util';
+import { env } from '@api/config/env';
+import { requestOpenAiChatCompletion } from '@api/common/llm/openai-request.util';
 import { REVISION_SECTION_SYSTEM_PROMPT } from '../prompts/revision-system.prompt';
 import { buildRevisionPrompt, RevisionPromptInput } from '../prompts/revision-section.prompt';
 

@@ -7,7 +7,7 @@ import { TopicScoringService } from './topic.scoring.service';
 import { TopicStatusMachine } from './topic.status-machine';
 import { TopicQueueService } from './topic.queue.service';
 import { CONTENT_PIPELINE_QUEUE } from './constants/topic-queue.constants';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { UserModule } from '../user/user.module';
 import { TopicCommandService } from './services/topic-command.service';
 import { TopicIntakeCommandService } from './services/topic-intake-command.service';

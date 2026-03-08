@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { CONTENT_PIPELINE_QUEUE, DISCOVERY_IMPORT_JOB, type DiscoveryImportJobPayload } from '@aicp/shared-types';
+import { CONTENT_PIPELINE_QUEUE, DISCOVERY_IMPORT_JOB, type DiscoveryImportJobPayload } from '@aicp/queue-contracts';
 import { DiscoveryService } from '../../../api/src/modules/discovery/discovery.service';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';

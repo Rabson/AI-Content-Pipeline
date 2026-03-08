@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import type { PrismaService } from '../../prisma/prisma.service';
+import type { PrismaService } from '@api/prisma/prisma.service';
 
 export function updateContentItem(prisma: PrismaService, contentItemId: string, data: Prisma.ContentItemUncheckedUpdateInput) {
   return prisma.contentItem.update({ where: { id: contentItemId }, data });

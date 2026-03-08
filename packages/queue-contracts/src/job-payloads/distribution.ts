@@ -1,4 +1,4 @@
-export type PublicationChannelKey = 'DEVTO' | 'MEDIUM' | 'LINKEDIN';
+export type PublicationChannel = 'DEVTO' | 'MEDIUM' | 'LINKEDIN';
 
 export interface SocialLinkedInGenerateJobPayload {
   topicId: string;
@@ -9,7 +9,7 @@ export interface SocialLinkedInGenerateJobPayload {
 export interface PublishArticleJobPayload {
   publicationId: string;
   topicId: string;
-  channel: PublicationChannelKey;
+  channel: PublicationChannel;
   canonicalUrl?: string;
   tags: string[];
   requestedBy?: string;

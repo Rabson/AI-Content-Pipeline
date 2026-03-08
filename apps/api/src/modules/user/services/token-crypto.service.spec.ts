@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
-import { env } from '../../../config/env';
+import { env } from '@api/config/env';
 import { TokenCryptoService } from './token-crypto.service';
 
 describe('TokenCryptoService', () => {

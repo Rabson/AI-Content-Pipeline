@@ -1,6 +1,6 @@
 import { Controller, Delete, Get, Param, ParseEnumPipe, Put, Req, Body } from '@nestjs/common';
 import { PublicationChannel } from '@prisma/client';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { AuthenticatedRequest } from '@api/common/interfaces/authenticated-request.interface';
 import { UpsertUserPublisherCredentialDto } from './dto/upsert-user-publisher-credential.dto';
 import { UserPublisherCredentialService } from './services/user-publisher-credential.service';
 

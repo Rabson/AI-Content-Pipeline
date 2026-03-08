@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { markOutlineFailed } from './outline-error.helper';
 import { findTopicById, getLatestResearch, getNextVersion, latestOutline, outlineByVersion } from './outline-read.helper';
 import { persistGeneratedOutline } from './outline-write.helper';

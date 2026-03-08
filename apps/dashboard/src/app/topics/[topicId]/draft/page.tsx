@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { DraftVersionView, TopicDetail } from '@aicp/shared-types';
+import type { DraftVersionView, TopicDetail } from '@aicp/contracts';
 import { approveDraftAction, createReviewSessionAction } from '../actions';
 import { getDraft, getReviewSessions, getTopic } from '../../../../lib/api-client';
 import { TopicPageHeader } from '../../../../components/shared/topic-page-header';

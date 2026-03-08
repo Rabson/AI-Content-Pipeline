@@ -1,10 +1,10 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import { ANALYTICS_QUEUE } from '../../analytics/constants/analytics.constants';
-import { PUBLISHING_QUEUE } from '../../publisher/constants/publisher.constants';
-import { SOCIAL_QUEUE } from '../../social/constants/social.constants';
-import { CONTENT_PIPELINE_QUEUE } from '../../topic/constants/topic-queue.constants';
+import { ANALYTICS_QUEUE } from '@api/modules/analytics/constants/analytics.constants';
+import { PUBLISHING_QUEUE } from '@api/modules/publisher/constants/publisher.constants';
+import { SOCIAL_QUEUE } from '@api/modules/social/constants/social.constants';
+import { CONTENT_PIPELINE_QUEUE } from '@api/modules/topic/constants/topic-queue.constants';
 
 @Injectable()
 export class QueueHealthService {

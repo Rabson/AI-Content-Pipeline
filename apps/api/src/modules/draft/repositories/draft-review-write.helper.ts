@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { ReviewCommentSeverity, ReviewCommentStatus, ReviewSessionStatus } from '@prisma/client';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 
 export const createReviewSession = (prisma: PrismaService, params: { topicId: string; draftVersionId: string; reviewerId: string }) =>
   prisma.reviewSession.create({ data: { topicId: params.topicId, draftVersionId: params.draftVersionId, reviewerId: params.reviewerId, status: ReviewSessionStatus.OPEN } });

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { UserModule } from '../user/user.module';
 import { CONTENT_PIPELINE_QUEUE } from './constants/outline.constants';
 import { OutlineController } from './outline.controller';

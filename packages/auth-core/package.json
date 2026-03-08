@@ -1,0 +1,27 @@
+{
+  "name": "@aicp/auth-core",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./service-token": {
+      "types": "./dist/service-token.d.ts",
+      "default": "./dist/service-token.js"
+    },
+    "./base64url": {
+      "types": "./dist/base64url.d.ts",
+      "default": "./dist/base64url.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config ../../vitest.config.mts --dir src"
+  }
+}

@@ -1,5 +1,5 @@
 import { getAnalyticsOverview, getAnalyticsUsage, getTopics } from '../../lib/api-client';
-import type { TopicSummary } from '@aicp/shared-types';
+import type { TopicSummary } from '@aicp/contracts';
 
 export async function loadAnalyticsData() {
   const [usage, overview, topics] = await Promise.all([getAnalyticsUsage(), getAnalyticsOverview(), getTopics()]);

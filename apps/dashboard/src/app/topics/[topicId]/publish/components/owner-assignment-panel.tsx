@@ -1,4 +1,4 @@
-import type { UserSummary } from '@aicp/shared-types';
+import type { UserSummary } from '@aicp/contracts';
 import { assignTopicOwnerAction } from '../../actions';
 
 export function OwnerAssignmentPanel({ topicId, owner, users }: { topicId: string; owner?: UserSummary | null; users: UserSummary[] }) {

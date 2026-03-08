@@ -1,8 +1,8 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import type { OutlineGenerateJobPayload } from '@aicp/shared-types';
-import { buildQueueJobId } from '../../common/queue/job-id.util';
+import type { OutlineGenerateJobPayload } from '@aicp/queue-contracts';
+import { buildQueueJobId } from '@api/common/queue/job-id.util';
 import { GenerateOutlineDto } from './dto/generate-outline.dto';
 import { GetOutlineQueryDto } from './dto/get-outline-query.dto';
 import { CONTENT_PIPELINE_QUEUE, OUTLINE_GENERATE_JOB } from './constants/outline.constants';

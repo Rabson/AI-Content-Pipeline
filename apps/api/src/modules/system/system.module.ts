@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { ANALYTICS_QUEUE } from '../analytics/constants/analytics.constants';
 import { PUBLISHING_QUEUE } from '../publisher/constants/publisher.constants';
 import { SOCIAL_QUEUE } from '../social/constants/social.constants';

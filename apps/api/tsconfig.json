@@ -5,7 +5,11 @@
     "outDir": "dist",
     "rootDir": "src",
     "paths": {
-      "@api/*": ["src/*"]
+      "@api/*": ["src/*"],
+      "@api/common/*": ["src/common/*"],
+      "@api/config/*": ["src/config/*"],
+      "@api/modules/*": ["src/modules/*"],
+      "@api/prisma/*": ["src/prisma/*"]
     }
   },
   "include": ["src/**/*.ts"],

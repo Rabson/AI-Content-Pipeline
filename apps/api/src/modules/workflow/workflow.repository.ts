@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, WorkflowStage } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { lockForPublish, markApprovedDraft, markCurrentDraft, updateContentItem } from './workflow-content-item.helper';
 import { createEvent, listTopicEvents, setStateAndEvent } from './workflow-event.helper';
 import { completeRun, createRun, failRun, latestRun, listTopicRuns, updateRun } from './workflow-run.helper';

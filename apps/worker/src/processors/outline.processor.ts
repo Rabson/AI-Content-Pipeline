@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { CONTENT_PIPELINE_QUEUE, OUTLINE_GENERATE_JOB, type OutlineGenerateJobPayload } from '@aicp/shared-types';
+import { CONTENT_PIPELINE_QUEUE, OUTLINE_GENERATE_JOB, type OutlineGenerateJobPayload } from '@aicp/queue-contracts';
 import { OutlineOrchestrator } from '../../../api/src/modules/outline/outline.orchestrator';
 import { OutlineRepository } from '../../../api/src/modules/outline/outline.repository';
 import { JobExecutionService } from '../support/job-execution.service';

@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import type { StorageObjectView, TopicDetail } from '@aicp/shared-types';
+import type { StorageObjectView, TopicDetail } from '@aicp/contracts';
 import { formatDate } from '../../../../../lib/formatting';
 import {
   clearTopicBannerImageAction,

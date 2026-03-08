@@ -1,4 +1,4 @@
-import type { RevisionDiffView, TopicDetail } from '@aicp/shared-types';
+import type { RevisionDiffView, TopicDetail } from '@aicp/contracts';
 import { getRevisionDiff, getRevisionRuns, getTopic } from '../../../../lib/api-client';
 import { formatDate } from '../../../../lib/formatting';
 import { TopicPageHeader } from '../../../../components/shared/topic-page-header';

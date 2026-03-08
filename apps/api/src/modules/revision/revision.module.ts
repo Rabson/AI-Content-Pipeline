@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '@api/prisma/prisma.service';
 import { CONTENT_PIPELINE_QUEUE } from './constants/revision.constants';
 import { RevisionController } from './revision.controller';
 import { RevisionService } from './revision.service';

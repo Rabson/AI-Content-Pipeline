@@ -1,5 +1,5 @@
 import { Prisma, PublicationChannel } from '@prisma/client';
-import { UpsertUserPublisherCredentialDto } from '../../dto/upsert-user-publisher-credential.dto';
+import { UpsertUserPublisherCredentialDto } from '@api/modules/user/dto/upsert-user-publisher-credential.dto';
 
 export function buildTokenHint(token: string) {
   const trimmed = token.trim();

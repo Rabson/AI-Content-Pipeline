@@ -1,4 +1,4 @@
-import type { PublicationOptionsView } from '@aicp/shared-types';
+import type { PublicationOptionsView } from '@aicp/contracts';
 import { requestPublicationAction } from '../../actions';
 
 export function PublishReadinessPanel({ topicId, options }: { topicId: string; options: PublicationOptionsView | null }) {

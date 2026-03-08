@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PublicationChannel, PublisherCredentialAuditAction } from '@prisma/client';
-import { SecurityEventService } from '../../../common/security/security-event.service';
+import { SecurityEventService } from '@api/common/security/security-event.service';
 import { UserPublisherCredentialRepository } from '../repositories/user-publisher-credential.repository';
 
 @Injectable()

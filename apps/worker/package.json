@@ -2,18 +2,24 @@
   "name": "@aicp/worker",
   "version": "0.1.0",
   "private": true,
+  "_moduleAliases": {
+    "@api": "dist/api/src",
+    "@worker": "dist/worker/src"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/worker/src/main.js",
-    "start:dev": "ts-node --transpile-only src/main.ts",
+    "start": "node -r module-alias/register dist/worker/src/main.js",
+    "start:dev": "ts-node --transpile-only -r tsconfig-paths/register src/main.ts",
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --config ../../vitest.config.mts --dir src"
   },
   "dependencies": {
+    "@aicp/auth-core": "0.1.0",
     "@aicp/backend-core": "0.1.0",
+    "@aicp/observability-core": "0.1.0",
     "@aicp/shared-config": "0.1.0",
-    "@aicp/shared-types": "0.1.0",
+    "@aicp/workflow-core": "0.1.0",
     "@nestjs/bullmq": "^11.0.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
@@ -22,15 +28,18 @@
     "@opentelemetry/exporter-trace-otlp-http": "^0.205.0",
     "@opentelemetry/resources": "^2.1.0",
     "@opentelemetry/sdk-node": "^0.205.0",
-    "@prisma/client": "^6.0.0",
+    "@prisma/client": "^7.1.1",
     "bullmq": "^5.0.0",
     "dotenv": "^16.6.1",
+    "module-alias": "^2.2.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "@aicp/queue-contracts": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.2"
   }
 }

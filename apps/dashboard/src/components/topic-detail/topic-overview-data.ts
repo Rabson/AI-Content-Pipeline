@@ -12,7 +12,7 @@ import type {
   ResearchArtifactView,
   SeoMetadataView,
   TopicDetail,
-} from '@aicp/shared-types';
+} from '@aicp/contracts';
 
 export type TopicPageData = {
   topic: TopicDetail | null;

@@ -3,8 +3,8 @@ import type {
   DraftGenerateFinalizeJobPayload,
   DraftGenerateSectionJobPayload,
   DraftGenerateStartJobPayload,
-} from '@aicp/shared-types';
-import { buildQueueJobId } from '../../../common/queue/job-id.util';
+} from '@aicp/queue-contracts';
+import { buildQueueJobId } from '@api/common/queue/job-id.util';
 import { DRAFT_GENERATE_FINALIZE_JOB, DRAFT_GENERATE_SECTION_JOB, DRAFT_GENERATE_START_JOB } from '../constants/draft.constants';
 import { DraftPayload, DraftSectionPlanItem } from './draft-generation.types';
 

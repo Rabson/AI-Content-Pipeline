@@ -1,4 +1,4 @@
-import type { ResearchArtifactView } from '@aicp/shared-types';
+import type { ResearchArtifactView } from '@aicp/contracts';
 import { getResearch, getTopic } from '../../../../lib/api-client';
 import { cleanText, formatPercent, formatTopicPreview } from '../../../../lib/formatting';
 import { TopicPageHeader } from '../../../../components/shared/topic-page-header';
