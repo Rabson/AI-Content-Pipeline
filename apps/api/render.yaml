@@ -28,6 +28,14 @@ services:
         value: ai-content-prod
       - key: AUTH_ALLOW_HEADER_BYPASS
         value: 'false'
+      - key: INTERNAL_SERVICE_JWT_SECRET
+        sync: false
+      - key: INTERNAL_SERVICE_JWT_ISSUER
+        value: aicp-dashboard
+      - key: INTERNAL_SERVICE_JWT_AUDIENCE
+        value: aicp-api
+      - key: INTERNAL_SERVICE_JWT_CLOCK_SKEW_SECONDS
+        value: '30'
       - key: FEATURE_PHASE2_ENABLED
         value: 'true'
       - key: FEATURE_PHASE3_ENABLED
@@ -52,3 +60,15 @@ services:
         sync: false
       - key: SENTRY_ENVIRONMENT
         value: production
+      - key: SECURITY_ALERT_THRESHOLD
+        value: '5'
+      - key: SECURITY_ALERT_WINDOW_MS
+        value: '900000'
+      - key: AUTH_LOCKOUT_THRESHOLD
+        value: '5'
+      - key: AUTH_LOCKOUT_WINDOW_MS
+        value: '900000'
+      - key: USER_TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: USER_TOKEN_ENCRYPTION_KEY_VERSION
+        value: '1'
