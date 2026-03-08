@@ -9,6 +9,7 @@ This repo contains the full modular-monolith implementation for the content pipe
 - `apps/api`: NestJS HTTP API
 - `apps/worker`: BullMQ worker runtime
 - `apps/dashboard`: Next.js internal dashboard
+- `packages/backend-core`: shared backend runtime infrastructure (Prisma, logging, security-event primitives)
 - `packages/shared-types`: built shared API/view/job contracts and blog document types
 - `packages/shared-config`: shared TS env readers, ESLint presets, and TS base config
 
@@ -66,6 +67,7 @@ Dashboard sign-in:
 - API: implemented and running
 - Worker: implemented and running, but still coupled to API internals
 - Dashboard: implemented and running
+- Backend Core: first shared backend package is implemented and in use
 - Shared Types: implemented and used across runtimes
 - Shared Config: implemented and used with `dist/` package output
 - Docker infra: implemented and running locally
@@ -81,6 +83,7 @@ Dashboard sign-in:
 - Runtime runbook: [RUN.md](./RUN.md)
 - System summary: [summary.md](./summary.md)
 - Docs index: [docs/README.md](./docs/README.md)
+- Codebase handover: [docs/codebase-handover.md](./docs/codebase-handover.md)
 - Security model: [docs/security-model.md](./docs/security-model.md)
 - Env reference: [docs/env-reference.md](./docs/env-reference.md)
 - API service notes: [apps/api/README.md](./apps/api/README.md)
@@ -102,6 +105,10 @@ Dashboard sign-in:
   - `apps/api/src/config/env.ts`
   - `apps/worker/src/config/env.ts`
   - `apps/dashboard/src/config/env.ts`
+- App-local aliases are defined in service TS configs:
+  - API: `@api/*`
+  - worker: `@worker/*`
+  - dashboard: `@dashboard/*`
 - API and worker share `USER_TOKEN_ENCRYPTION_KEY` so publisher credentials can be encrypted in API and decrypted in worker jobs.
 - Dashboard signs short-lived internal bearer tokens for API calls, and API verifies issuer/audience/expiry before trusting the embedded user identity.
 - Publisher channel support is:

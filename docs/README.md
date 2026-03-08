@@ -42,11 +42,14 @@ It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
   - auth, trusted-caller, upload, and outbound request model
 - [env-reference.md](./env-reference.md)
   - service-by-service environment variable reference
+- [codebase-handover.md](./codebase-handover.md)
+  - code-level mental model and handover guide
 
 ## Implementation Stage Map
 - API: implemented and running
 - Worker: implemented and running, but still coupled to API internals
 - Dashboard: implemented and running
+- Backend Core: first shared backend package is implemented and in use
 - Shared Types: implemented and used across runtimes
 - Shared Config: implemented and used with `dist/` package output
 - Docker infra: implemented and running locally

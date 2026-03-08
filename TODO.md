@@ -37,8 +37,9 @@ Implemented:
 - publish adapters for Dev.to, Medium, and LinkedIn
 
 Open work:
-- decouple worker runtime from `apps/api/src/...`
-- move worker-safe contracts/services into shared packages or worker-owned modules
+- continue decoupling worker runtime from `apps/api/src/...`
+- first shared extraction is in place via `@aicp/backend-core` for Prisma/logging/security-event infrastructure
+- move remaining worker-safe contracts/services into shared packages or worker-owned modules
 - add integration coverage for publish, discovery, and recovery flows
 
 ### Dashboard Server (`apps/dashboard`)
@@ -65,6 +66,17 @@ Implemented:
 
 Open work:
 - continue moving runtime contracts out of API-owned code as worker decoupling progresses
+
+### Backend Core (`packages/backend-core`)
+Stage: implemented and used as the first shared backend extraction.
+
+Implemented:
+- shared Prisma service
+- shared structured logger
+- shared security-event repository/service and runtime config token
+
+Open work:
+- continue moving worker-safe backend infrastructure and domain helpers here as worker decoupling progresses
 
 ### Shared Config (`packages/shared-config`)
 Stage: implemented and used with a real `dist/` package layout.
@@ -105,19 +117,21 @@ Open work:
 No open backlog items after the typed exception cleanup and auth/ownership/ops/dashboard test coverage pass.
 
 ### Do Next
-No open backlog items after the shared-config `dist/` package layout, runtime contract extraction pass, publish/credential test additions, and Docker smoke automation pass.
-
-### Do Later
-- Decouple worker runtime from API source internals.
-  - Current state: `apps/worker/src/worker.module.ts` imports many providers directly from `apps/api/src/...`
-  - Target: move worker-safe domain services, queue contracts, and provider interfaces into shared packages or worker-owned modules.
+- Continue worker decoupling from API source internals.
+  - Current state: the first shared extraction is done via `@aicp/backend-core`, but `apps/worker/src/worker.module.ts` and several processors still import many providers directly from `apps/api/src/...`
+  - Target: move the next worker-safe domain services, queue contracts, and provider interfaces into shared packages or worker-owned modules.
+  - Why first: this remains the highest-impact architecture boundary and it blocks cleaner worker evolution.
 
 - Continue moving remaining runtime contracts out of API-owned code as worker decoupling progresses.
+  - Why next: this is the lowest-risk way to reduce worker/API coupling before deeper structural changes.
 
 - Add integration coverage for publish, discovery, and recovery flows executed through BullMQ workers.
+  - Why next: once worker boundaries move, these flows need end-to-end protection.
 
 - Add integration coverage for auth, ownership, publish retry, and ops endpoints at the API transport layer.
+  - Why next: transport-level regression coverage should follow the worker decoupling pass.
 
+### Do Later
 - Tighten API-side failure responses so remaining generic service errors never leak as raw `500` payloads.
 
 - Extend Terraform beyond storage to cover the actual deployment surface where desired:
