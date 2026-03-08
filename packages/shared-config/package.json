@@ -8,6 +8,6 @@
     "build": "tsc -p tsconfig.json",
     "lint": "eslint \"env/**/*.ts\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --config ../../vitest.config.ts --dir ."
+    "test": "vitest run --config ../../vitest.config.mts --dir ."
   }
 }

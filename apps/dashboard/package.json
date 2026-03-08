@@ -8,7 +8,7 @@
     "start": "next start -p ${DASHBOARD_HOST_PORT:-3003}",
     "lint": "eslint \"src/**/*.{ts,tsx}\" next.config.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --config ../../vitest.config.ts --dir src"
+    "test": "vitest run --config ../../vitest.config.mts --dir src"
   },
   "dependencies": {
     "@aicp/shared-config": "0.1.0",

@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --config ../../vitest.config.ts --dir src"
+    "test": "vitest run --config ../../vitest.config.mts --dir src"
   },
   "dependencies": {
     "zod": "^4.3.6"

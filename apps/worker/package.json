@@ -8,7 +8,7 @@
     "start:dev": "ts-node --transpile-only src/main.ts",
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --config ../../vitest.config.ts --dir src"
+    "test": "vitest run --config ../../vitest.config.mts --dir src"
   },
   "dependencies": {
     "@aicp/shared-config": "0.1.0",
