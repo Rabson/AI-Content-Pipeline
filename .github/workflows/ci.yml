@@ -4,27 +4,66 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ai_content_pipeline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d ai_content_pipeline"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_content_pipeline
+      SHADOW_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_content_pipeline_shadow
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
-      - run: npm run lint:workspaces
-      - run: npm run lint:structure
-      - run: npm run typecheck
-      - run: npm run test
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Prepare shadow database
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS ai_content_pipeline_shadow;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE DATABASE ai_content_pipeline_shadow;"
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm run test
+      - name: Build API
+        run: npm run build:api
+      - name: Build worker
+        run: npm run build:worker
+      - name: Build dashboard
+        run: npm run build:dashboard
       - name: Prisma Validate
         run: npx prisma validate --schema apps/api/src/prisma/schema.prisma
+      - name: Prisma Migrate Deploy
+        run: npx prisma migrate deploy --schema apps/api/src/prisma/schema.prisma
       - name: Prisma Migration Drift Check
         run: |
           npx prisma migrate diff \
-            --from-empty \
+            --from-migrations apps/api/src/prisma/migrations \
             --to-schema-datamodel apps/api/src/prisma/schema.prisma \
-            --script > /tmp/generated-migration.sql
-          diff -u apps/api/src/prisma/migrations/202603070001_init/migration.sql /tmp/generated-migration.sql
+            --shadow-database-url "$SHADOW_DATABASE_URL" \
+            --exit-code
