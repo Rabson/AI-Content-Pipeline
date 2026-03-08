@@ -10,7 +10,11 @@ This repo contains the full modular-monolith implementation for the content pipe
 - `apps/worker`: BullMQ worker runtime
 - `apps/dashboard`: Next.js internal dashboard
 - `packages/backend-core`: shared backend runtime infrastructure (Prisma, logging, security-event primitives)
-- `packages/shared-types`: built shared API/view/job contracts and blog document types
+- `packages/contracts`: built API/dashboard view contracts and blog document types
+- `packages/queue-contracts`: shared BullMQ queue names and job payload contracts
+- `packages/auth-core`: shared JWT/service-token primitives
+- `packages/observability-core`: shared OpenTelemetry runtime/config helpers
+- `packages/workflow-core`: shared workflow transition maps/helpers
 - `packages/shared-config`: shared TS env readers, ESLint presets, and TS base config
 
 This file is the entry point. It stays high-level.
@@ -68,7 +72,11 @@ Dashboard sign-in:
 - Worker: implemented and running, but still coupled to API internals
 - Dashboard: implemented and running
 - Backend Core: first shared backend package is implemented and in use
-- Shared Types: implemented and used across runtimes
+- Contracts: implemented and used for view/document contracts
+- Queue Contracts: implemented and used across API and worker
+- Auth Core: implemented and used for service-token signing/verifying
+- Observability Core: implemented and used by API/worker telemetry runtime
+- Workflow Core: implemented and used by workflow transition logic
 - Shared Config: implemented and used with `dist/` package output
 - Docker infra: implemented and running locally
 - Terraform infra: partially implemented, currently focused on storage/IAM
@@ -92,12 +100,17 @@ Dashboard sign-in:
 
 ## Repo Conventions
 - Root `.env` is the local runtime source.
-- Root `npm run dev:*`, `start:*`, `build:*`, `typecheck`, and `test` build both shared workspace packages first:
+- Root `npm run dev:*`, `start:*`, `build:*`, `typecheck`, and `test` build the shared workspace packages first:
   - `@aicp/shared-config`
-  - `@aicp/shared-types`
+  - `@aicp/auth-core`
+  - `@aicp/observability-core`
+  - `@aicp/workflow-core`
+  - `@aicp/contracts`
+  - `@aicp/queue-contracts`
+  - `@aicp/backend-core`
 - Root install runs `postinstall`, which:
   - builds the shared workspace packages
-  - regenerates the Prisma client from `apps/api/src/prisma/schema.prisma`
+  - regenerates the Prisma client via root `prisma.config.ts`
 - Root and workspace tests run on Vitest 4 with shared config in `vitest.config.mts`.
 - `@aicp/shared-config` now builds runtime output into `dist/` and exports package entry points from there.
 - `apps/api/scripts/seed-demo.mjs` seeds the local user accounts and demo publish-ready topic.
@@ -110,7 +123,7 @@ Dashboard sign-in:
   - worker: `@worker/*`
   - dashboard: `@dashboard/*`
 - API and worker share `USER_TOKEN_ENCRYPTION_KEY` so publisher credentials can be encrypted in API and decrypted in worker jobs.
-- Dashboard signs short-lived internal bearer tokens for API calls, and API verifies issuer/audience/expiry before trusting the embedded user identity.
+- API signs short-lived internal bearer tokens on login, dashboard forwards them, and API verifies issuer/audience/expiry before trusting identity.
 - Publisher channel support is:
   - `DEVTO`: implemented
   - `MEDIUM`: implemented
@@ -128,8 +141,10 @@ Dashboard sign-in:
 - Compose files live under `infra/docker`.
 
 ## Validation Status
-- `npm audit` is currently clean: `0` vulnerabilities.
+- `npm run prisma:generate` passes with Prisma v7 config (`prisma.config.ts`).
 - `npm run lint`, `npm run typecheck`, and `npm run test` pass on the current branch.
+- `npm run build:api`, `npm run build:worker`, and `npm run build:dashboard` pass on the current branch.
+- `npm audit` currently reports `9` vulnerabilities (`5` moderate, `4` high).
 - `make smoke-docker` verifies API, worker, and dashboard health against the local Compose stack.
 
 ## Where To Find Details

@@ -9,7 +9,12 @@ AI-Content-Pipeline/
     worker/               # NestJS BullMQ worker + render manifests + Dockerfile
     dashboard/            # Next.js dashboard + Dockerfile + Vercel config
   packages/
-    shared-types/         # DTOs, enums, Zod schemas, blog document contract
+    contracts/            # API/dashboard view contracts + blog document contract
+    queue-contracts/      # BullMQ queue names + job payload contracts
+    auth-core/            # service-token/JWT helpers
+    observability-core/   # OpenTelemetry runtime/config helpers
+    workflow-core/        # workflow transitions and helpers
+    backend-core/         # Prisma/logging/security-event primitives
     shared-config/        # TS env readers, ESLint presets, shared TS base config
   infra/
     docker/               # compose.base.yml, compose.local.yml, staginglike override
@@ -22,7 +27,13 @@ AI-Content-Pipeline/
 - `apps/api` owns HTTP, auth, orchestration commands, and queue enqueueing.
 - `apps/worker` owns async execution only.
 - `apps/dashboard` owns operator UX and API-backed workflows only.
-- `packages/shared-types` owns shared contracts.
+- `packages/contracts` owns API/dashboard content contracts.
+- `packages/queue-contracts` owns queue names and job payload contracts.
+- API-local publisher contracts live in `apps/api/src/modules/publisher/contracts`.
+- `packages/auth-core` owns service-token signing and verification helpers.
+- `packages/observability-core` owns telemetry runtime/config helpers.
+- `packages/workflow-core` owns workflow transition maps/helpers.
+- `packages/backend-core` owns shared backend runtime primitives.
 - `packages/shared-config` owns toolchain-level shared config and env parsing helpers.
 - No direct dashboard-to-database access; dashboard only calls API.
 
@@ -76,7 +87,7 @@ Container build ownership:
 
 ## Shared runtime shape
 - Root [`.env`](../.env) is the local runtime source
-- Root scripts build `@aicp/shared-config` and `@aicp/shared-types` first, then inject `.env`
+- Root scripts build the shared workspace packages first, then inject `.env`
 - Service-local env modules:
   - `apps/api/src/config/env.ts`
   - `apps/worker/src/config/env.ts`
@@ -114,10 +125,6 @@ Container build ownership:
 - `AUTH_RATE_LIMIT_MAX_ATTEMPTS`
 - `AUTH_RATE_LIMIT_WINDOW_MS`
 - `REDIS_URL`
-- `INTERNAL_SERVICE_JWT_SECRET`
-- `INTERNAL_SERVICE_JWT_ISSUER`
-- `INTERNAL_SERVICE_JWT_AUDIENCE`
-- `INTERNAL_SERVICE_JWT_TTL_SECONDS`
 - `NEXT_PUBLIC_FEATURE_PHASE2_ENABLED`
 - `NEXT_PUBLIC_FEATURE_PHASE3_ENABLED`
 

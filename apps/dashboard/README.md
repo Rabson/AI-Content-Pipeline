@@ -13,7 +13,7 @@ Next.js internal dashboard for admins, editors, reviewers, and assigned users.
 
 ## Runtime and Config
 - Service-local env module: [env.ts](./src/config/env.ts)
-- Root `npm run dev:dashboard`, `start:dashboard`, and `build:dashboard` build `@aicp/shared-config` and `@aicp/shared-types` first, then inject the repo-level [`.env`](../../.env)
+- Root `npm run dev:dashboard`, `start:dashboard`, and `build:dashboard` build the shared workspace packages first, then inject the repo-level [`.env`](../../.env)
 - Tests run through the shared Vitest 4 config at `../../vitest.config.mts`.
 - Docker image spec: [Dockerfile](./Dockerfile)
 - Docker build ignore: [Dockerfile.dockerignore](./Dockerfile.dockerignore)
@@ -22,10 +22,7 @@ Next.js internal dashboard for admins, editors, reviewers, and assigned users.
 
 ## Auth Notes
 - Dashboard sign-in uses API-backed email/password authentication.
-- Dashboard signs a short-lived internal bearer token for API calls using:
-  - `INTERNAL_SERVICE_JWT_SECRET`
-  - `INTERNAL_SERVICE_JWT_ISSUER`
-  - `INTERNAL_SERVICE_JWT_AUDIENCE`
+- API issues a short-lived bearer token at login; dashboard stores it in the NextAuth session and forwards it on server-side API calls.
 - Dashboard sign-in throttling uses Redis when `REDIS_URL` is available, with in-memory fallback only as a last resort.
 - Local seeded users are created by `apps/api/scripts/seed-demo.mjs`.
 - `USER` sees assigned approved content and chooses where to publish.

@@ -50,7 +50,9 @@ It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
 - Worker: implemented and running, but still coupled to API internals
 - Dashboard: implemented and running
 - Backend Core: first shared backend package is implemented and in use
-- Shared Types: implemented and used across runtimes
+- Shared Types: implemented and used for API/dashboard view contracts and blog documents
+- Queue Contracts: implemented and used across API and worker
+- Publisher Core: implemented and used across API and worker
 - Shared Config: implemented and used with `dist/` package output
 - Docker infra: implemented and running locally
 - Terraform infra: partially implemented and currently storage-focused

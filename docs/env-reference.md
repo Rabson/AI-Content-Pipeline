@@ -10,9 +10,10 @@ This file is the service-by-service environment reference.
 - `REDIS_URL`: Redis connection string
 - `QUEUE_PREFIX`: BullMQ prefix
 - `AUTH_ALLOW_HEADER_BYPASS`: local-only auth bypass toggle
-- `INTERNAL_SERVICE_JWT_SECRET`: shared secret for dashboard -> API service token signing
-- `INTERNAL_SERVICE_JWT_ISSUER`: expected dashboard token issuer
-- `INTERNAL_SERVICE_JWT_AUDIENCE`: expected API token audience
+- `INTERNAL_SERVICE_JWT_SECRET`: shared secret used by API to sign and verify internal bearer tokens
+- `INTERNAL_SERVICE_JWT_ISSUER`: expected token issuer value
+- `INTERNAL_SERVICE_JWT_AUDIENCE`: expected token audience value
+- `INTERNAL_SERVICE_JWT_TTL_SECONDS`: API-issued bearer token lifetime
 - `INTERNAL_SERVICE_JWT_CLOCK_SKEW_SECONDS`: allowed service-token clock skew
 - `API_CORS_ORIGINS`: allowed browser origins, comma-separated
 - `API_REQUEST_BODY_LIMIT`: request size limit, for example `1mb`
@@ -71,10 +72,6 @@ This file is the service-by-service environment reference.
 - `AUTH_RATE_LIMIT_MAX_ATTEMPTS`: sign-in attempt threshold
 - `AUTH_RATE_LIMIT_WINDOW_MS`: sign-in rate-limit window
 - `REDIS_URL`: optional Redis connection for shared sign-in throttling
-- `INTERNAL_SERVICE_JWT_SECRET`: shared secret used to sign dashboard -> API bearer tokens
-- `INTERNAL_SERVICE_JWT_ISSUER`: dashboard token issuer
-- `INTERNAL_SERVICE_JWT_AUDIENCE`: API token audience
-- `INTERNAL_SERVICE_JWT_TTL_SECONDS`: signed token lifetime
 - `SESSION_MAX_AGE_SECONDS`: dashboard session lifetime
 - `NEXT_PUBLIC_FEATURE_PHASE2_ENABLED`: phase-2 UI toggle
 - `NEXT_PUBLIC_FEATURE_PHASE3_ENABLED`: phase-3 UI toggle
@@ -83,6 +80,7 @@ This file is the service-by-service environment reference.
 ## Local-only Notes
 - `.env` at repo root is the local runtime source.
 - `.env.example` is structure only.
+- Prisma CLI reads schema + migrate datasource settings from root `prisma.config.ts`.
 - Local seeded users:
   - `admin@example.com` / `AdminPass123!`
   - `editor@example.com` / `EditorPass123!`

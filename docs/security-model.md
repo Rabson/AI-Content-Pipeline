@@ -20,9 +20,9 @@ This document defines the current security contract for the local, staging, and 
 ## Dashboard to API Contract
 - Dashboard is the intended internal caller for operator actions.
 - Dashboard authenticates users with API-backed email/password login and stores a server-side session.
-- Dashboard signs a short-lived internal service token that carries the authenticated user identity.
+- API signs a short-lived internal service token at login; dashboard stores and forwards it on server-side API calls.
 - Dashboard session cookies use secure cookies outside local mode and `sameSite=lax`.
-- In staging and production, dashboard and API must share:
+- In staging and production, API runtime must define:
   - `INTERNAL_SERVICE_JWT_SECRET`
   - `INTERNAL_SERVICE_JWT_ISSUER`
   - `INTERNAL_SERVICE_JWT_AUDIENCE`

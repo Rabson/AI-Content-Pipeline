@@ -11,8 +11,10 @@ Scope:
 Implemented surfaces:
 1. Foundation
    - monorepo setup, lint/typecheck/test pipelines
-   - shared contracts in `packages/shared-types`
+   - shared contracts in `packages/contracts` and `packages/queue-contracts`
+   - API-local publisher contracts in `apps/api/src/modules/publisher/contracts`
    - shared env/tooling config in `packages/shared-config`
+   - shared backend runtime primitives in `packages/backend-core`
 2. Data layer
    - Prisma schema and committed migration
 3. API baseline
@@ -165,9 +167,9 @@ apps/dashboard/
     types/
 ```
 
-## `packages/shared-types`
+## `packages/contracts`
 ```text
-packages/shared-types/
+packages/contracts/
   src/
     api.ts
     blog-document.ts
@@ -176,8 +178,62 @@ packages/shared-types/
     blog-document.metadata.ts
     blog-document-export.ts
     blog-document.schema.json
-    jobs.ts
     index.ts
+```
+
+## `packages/queue-contracts`
+```text
+packages/queue-contracts/
+  src/
+    index.ts
+    job-constants.ts
+    job-payloads.ts
+    job-payloads/
+      content-pipeline.ts
+      distribution.ts
+    jobs.ts
+```
+
+## `apps/api/src/modules/publisher/contracts`
+```text
+apps/api/src/modules/publisher/contracts/
+  publisher.contract.ts
+```
+
+## `packages/auth-core`
+```text
+packages/auth-core/
+  src/
+    base64url.ts
+    service-token.ts
+    index.ts
+```
+
+## `packages/observability-core`
+```text
+packages/observability-core/
+  src/
+    telemetry-config.ts
+    telemetry-runtime.ts
+    index.ts
+```
+
+## `packages/workflow-core`
+```text
+packages/workflow-core/
+  src/
+    transitions.ts
+    index.ts
+```
+
+## `packages/backend-core`
+```text
+packages/backend-core/
+  src/
+    index.ts
+    logger/
+    prisma/
+    security/
 ```
 
 ## `packages/shared-config`

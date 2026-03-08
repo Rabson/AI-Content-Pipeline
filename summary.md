@@ -72,7 +72,7 @@ The system should support:
 - API owns workflow state transitions, auth, persistence, and queue enqueueing.
 - Worker owns job execution, retries, metrics, and telemetry.
 - Dashboard owns operator UX and API-backed workflows.
-- Shared contracts live in `packages/shared-types`.
+- Shared contracts live in `packages/contracts`.
 - Shared TS env/tooling helpers live in `packages/shared-config`.
 
 ## Document Ownership

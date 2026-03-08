@@ -2,7 +2,12 @@
 
 ## What Was Verified
 - Runtime reads [`.env`](../.env); [`.env.example`](../.env.example) is template-only.
-- Root `npm run dev:*`, `start:*`, and `build:*` scripts build `@aicp/shared-config` and `@aicp/shared-types` first.
+- Root `npm run dev:*`, `start:*`, and `build:*` scripts build the shared workspace packages first:
+  - `@aicp/shared-config`
+  - `@aicp/contracts`
+  - `@aicp/queue-contracts`
+  - `API-local publisher contracts`
+  - `@aicp/backend-core`
 - Service-local env modules are:
   - API: [`env.ts`](../apps/api/src/config/env.ts)
   - Worker: [`env.ts`](../apps/worker/src/config/env.ts)

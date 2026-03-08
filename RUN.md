@@ -164,8 +164,15 @@ npm run test
 
 ## Notes
 - Root `npm start` is not defined; use `start:api`, `start:worker`, and `start:dashboard`.
-- Root scripts build `@aicp/shared-config` and `@aicp/shared-types`, then inject the repo-level `.env` automatically.
-- `npm install` and `npm ci` run `postinstall`, which builds the shared packages and regenerates the Prisma client automatically.
+- Root scripts build the shared workspace packages first, then inject the repo-level `.env` automatically:
+  - `@aicp/shared-config`
+  - `@aicp/auth-core`
+  - `@aicp/observability-core`
+  - `@aicp/workflow-core`
+  - `@aicp/contracts`
+  - `@aicp/queue-contracts`
+  - `@aicp/backend-core`
+- `npm install` and `npm ci` run `postinstall`, which builds shared packages and regenerates the Prisma client when full workspace sources are present (partial build contexts skip this safely).
 - `@aicp/shared-config` now builds to `dist/`; runtime consumers import package exports instead of generated files beside source.
 - Workspace tests use Vitest 4 and the shared ESM config file `vitest.config.mts`.
 - API and worker must share the same `USER_TOKEN_ENCRYPTION_KEY`, because publisher tokens are encrypted in API and decrypted in worker during publish jobs.
@@ -175,7 +182,7 @@ npm run test
   - `LINKEDIN_API_BASE_URL`
   - `LINKEDIN_API_VERSION`
 - For Docker-only command detail, see [docker-local-commands.md](./docs/docker-local-commands.md).
-- Non-local dashboard -> API calls require:
+- Non-local API runtime still requires:
   - `INTERNAL_SERVICE_JWT_SECRET`
   - `INTERNAL_SERVICE_JWT_ISSUER`
   - `INTERNAL_SERVICE_JWT_AUDIENCE`

@@ -11,7 +11,7 @@ BullMQ background worker for the AI content pipeline.
 
 ## Runtime and Config
 - Service-local env module: [env.ts](./src/config/env.ts)
-- Root `npm run dev:worker`, `start:worker`, and `build:worker` build `@aicp/shared-config` first, then inject the repo-level [`.env`](../../.env)
+- Root `npm run dev:worker`, `start:worker`, and `build:worker` build the shared workspace packages first, then inject the repo-level [`.env`](../../.env)
 - Tests run through the shared Vitest 4 config at `../../vitest.config.mts`.
 - Worker must use the same `USER_TOKEN_ENCRYPTION_KEY` as API so publish jobs can decrypt stored publisher credentials.
 - Worker publish adapters use:

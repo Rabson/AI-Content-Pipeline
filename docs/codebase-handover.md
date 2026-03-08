@@ -16,10 +16,20 @@ Treat the repo as a modular monolith with three deployable apps and a small set 
 - `apps/dashboard`
   - internal operator UI
   - owns sign-in, topic/research/draft/publish screens, and ops visibility
-- `packages/shared-types`
-  - queue names, queue payload contracts, API/view types, blog document contract
+- `packages/contracts`
+  - API/dashboard view types and blog document contract
+- `packages/queue-contracts`
+  - queue names and BullMQ payload contracts
+- `packages/auth-core`
+  - JWT/service-token signing and verification helpers
+- `packages/observability-core`
+  - OpenTelemetry runtime/config helpers
+- `packages/workflow-core`
+  - topic/content workflow transition maps and helpers
+- `apps/api/src/modules/publisher/contracts`
+  - API-local publisher adapter interfaces and publish credential/request contracts
 - `packages/shared-config`
-  - env readers, service-token helpers, telemetry config/runtime helpers, shared lint/TS config
+  - env readers, shared lint/TS config
 - `packages/backend-core`
   - first shared backend runtime package
   - currently owns Prisma service, structured logger, security-event repository/service, and redaction utilities
@@ -70,8 +80,13 @@ Start here for operator behavior:
 - env: `apps/dashboard/src/config/env.ts`
 
 ### Shared packages
-- queue and API contracts: `packages/shared-types/src/*`
-- env/security/telemetry helpers: `packages/shared-config/*`
+- API/dashboard contracts: `packages/contracts/src/*`
+- queue contracts: `packages/queue-contracts/src/*`
+- auth helpers: `packages/auth-core/src/*`
+- observability helpers: `packages/observability-core/src/*`
+- workflow transitions: `packages/workflow-core/src/*`
+- publisher contracts: `apps/api/src/modules/publisher/contracts/*`
+- env/tooling helpers: `packages/shared-config/*`
 - backend runtime primitives: `packages/backend-core/src/*`
 
 ## 3. Primary Business Flow
@@ -176,7 +191,7 @@ Example:
 ### Async worker path
 Use this order:
 1. queue producer in API
-2. queue name / payload in `packages/shared-types`
+2. queue name / payload in `packages/queue-contracts`
 3. worker processor
 4. orchestrator
 5. repository / provider
@@ -207,7 +222,7 @@ Start here:
 
 ### Observability
 Start here:
-- telemetry runtime: `packages/shared-config/observability/*`
+- telemetry runtime: `packages/observability-core/src/*`
 - API wrapper: `apps/api/src/common/observability/opentelemetry.ts`
 - worker wrapper: `apps/worker/src/support/opentelemetry.ts`
 - ops API: `apps/api/src/modules/ops/*`
@@ -221,7 +236,8 @@ This is the next major refactor area:
 
 What has already been extracted:
 - shared config and telemetry helpers
-- shared queue/type contracts
+- shared queue contracts
+- shared publisher contracts
 - backend runtime primitives in `@aicp/backend-core`
 
 What should be extracted next:
@@ -250,10 +266,15 @@ When debugging:
 4. `apps/api/src/app.module.ts`
 5. `apps/worker/src/worker.module.ts`
 6. `apps/dashboard/src/app/layout.tsx`
-7. `packages/shared-types/src/index.ts`
-8. `packages/shared-config/package.json`
-9. `packages/backend-core/src/index.ts`
-10. one full feature vertically, in this order:
+7. `packages/contracts/src/index.ts`
+8. `packages/queue-contracts/src/index.ts`
+9. `packages/auth-core/src/index.ts`
+10. `packages/observability-core/src/index.ts`
+11. `packages/workflow-core/src/index.ts`
+12. `apps/api/src/modules/publisher/contracts/publisher.contract.ts`
+13. `packages/shared-config/package.json`
+14. `packages/backend-core/src/index.ts`
+15. one full feature vertically, in this order:
    - topic
    - research
    - draft
@@ -267,7 +288,7 @@ If you only have time to understand a few places, use these:
 - `apps/api/src/modules/publisher/*`
 - `apps/api/src/modules/topic/*`
 - `apps/dashboard/src/lib/api-client/*`
-- `packages/shared-types/src/job-payloads/*`
+- `packages/queue-contracts/src/job-payloads/*`
 - `packages/backend-core/src/*`
 
 ## 11. Current Rule of Thumb
