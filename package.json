@@ -11,9 +11,10 @@
     "url": "https://github.com/Rabson/AI-Content-Pipeline.git"
   },
   "scripts": {
+    "build:backend-core": "npm --workspace @aicp/backend-core run build",
     "build:shared-config": "npm --workspace @aicp/shared-config run build",
     "build:shared-types": "npm --workspace @aicp/shared-types run build",
-    "build:shared-packages": "npm run build:shared-config && npm run build:shared-types",
+    "build:shared-packages": "npm run build:shared-config && npm run build:shared-types && npm run build:backend-core",
     "prisma:generate": "npx prisma generate --schema apps/api/src/prisma/schema.prisma",
     "postinstall": "npm run build:shared-packages && npm run prisma:generate",
     "dev:api": "npm run build:shared-packages && node scripts/run-with-root-env.mjs npm --workspace @aicp/api run start:dev",

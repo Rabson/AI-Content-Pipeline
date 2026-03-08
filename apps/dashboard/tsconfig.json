@@ -1,6 +1,7 @@
 {
   "extends": "../../packages/shared-config/tsconfig/base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "lib": [
       "dom",
       "dom.iterable",
@@ -15,7 +16,10 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "paths": {
+      "@dashboard/*": ["src/*"]
+    }
   },
   "include": [
     "**/*.ts",

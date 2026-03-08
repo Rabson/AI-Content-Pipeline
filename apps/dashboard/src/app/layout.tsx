@@ -1,9 +1,9 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { DashboardShell } from '../components/shared/dashboard-shell';
-import { getDashboardUser } from '../lib/auth';
-import { isPhaseEnabled } from '../lib/feature-flags';
+import { DashboardShell } from '@dashboard/components/shared/dashboard-shell';
+import { getDashboardUser } from '@dashboard/lib/auth';
+import { isPhaseEnabled } from '@dashboard/lib/feature-flags';
 
 export const metadata: Metadata = {
   title: 'AI Content Pipeline Dashboard',

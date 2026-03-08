@@ -6,10 +6,13 @@ import {
   PUBLISHING_QUEUE,
   SOCIAL_QUEUE,
 } from '@aicp/shared-types';
-import { AppLogger } from '../../api/src/common/logger/app-logger.service';
-import { SecurityEventRepository } from '../../api/src/common/security/security-event.repository';
-import { SecurityEventService } from '../../api/src/common/security/security-event.service';
-import { PrismaService } from '../../api/src/prisma/prisma.service';
+import {
+  AppLogger,
+  PrismaService,
+  SECURITY_EVENT_RUNTIME_CONFIG,
+  SecurityEventRepository,
+  SecurityEventService,
+} from '@aicp/backend-core';
 import { env } from './config/env';
 
 import { WorkflowRepository } from '../../api/src/modules/workflow/workflow.repository';
@@ -103,6 +106,13 @@ import { UserPublisherTokenResolverService } from '../../api/src/modules/user/se
     AppLogger,
     PrismaService,
     SecurityEventRepository,
+    {
+      provide: SECURITY_EVENT_RUNTIME_CONFIG,
+      useValue: {
+        securityAlertThreshold: env.securityAlertThreshold,
+        securityAlertWindowMs: env.securityAlertWindowMs,
+      },
+    },
     SecurityEventService,
     WorkflowRepository,
     WorkflowTransitionService,

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../../api/src/prisma/prisma.service';
+import { PrismaService } from '@aicp/backend-core';
 
 @Injectable()
 export class DatabaseHealthRepository {

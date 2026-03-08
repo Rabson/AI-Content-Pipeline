@@ -10,8 +10,6 @@ coverage/
 apps/**/dist/
 apps/dashboard/.next/
 apps/dashboard/.next-docker/
-packages/shared-config/env/*.js
-packages/shared-config/env/*.d.ts
-packages/shared-config/dist/
+packages/*/dist/
 misc/
 .local-data/

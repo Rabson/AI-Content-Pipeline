@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, JobExecutionStatus } from '@prisma/client';
 import { Job } from 'bullmq';
-import { PrismaService } from '../../../api/src/prisma/prisma.service';
+import { PrismaService } from '@aicp/backend-core';
 
 @Injectable()
 export class JobExecutionService {

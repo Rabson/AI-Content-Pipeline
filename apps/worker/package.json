@@ -11,6 +11,7 @@
     "test": "vitest run --config ../../vitest.config.mts --dir src"
   },
   "dependencies": {
+    "@aicp/backend-core": "0.1.0",
     "@aicp/shared-config": "0.1.0",
     "@aicp/shared-types": "0.1.0",
     "@nestjs/bullmq": "^11.0.0",

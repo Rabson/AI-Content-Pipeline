@@ -1,8 +1,12 @@
 {
   "extends": "../../packages/shared-config/tsconfig/base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "outDir": "dist",
-    "rootDir": ".."
+    "rootDir": "..",
+    "paths": {
+      "@worker/*": ["src/*"]
+    }
   },
   "include": ["src/**/*.ts", "../api/src/**/*.ts"],
   "exclude": ["dist", "node_modules", "../api/src/**/__tests__/**", "../api/test/**"]

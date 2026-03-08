@@ -2,11 +2,11 @@
 
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { DashboardNav } from '../shell/dashboard-nav';
-import { PhaseWarnings } from '../shell/phase-warnings';
-import { UserBadge } from '../shell/user-badge';
-import { ThemeToggle } from '../theme/theme-toggle';
-import { useDashboardTheme } from '../theme/use-dashboard-theme';
+import { DashboardNav } from '@dashboard/components/shell/dashboard-nav';
+import { PhaseWarnings } from '@dashboard/components/shell/phase-warnings';
+import { UserBadge } from '@dashboard/components/shell/user-badge';
+import { ThemeToggle } from '@dashboard/components/theme/theme-toggle';
+import { useDashboardTheme } from '@dashboard/components/theme/use-dashboard-theme';
 
 interface DashboardShellUser {
   role: string;
