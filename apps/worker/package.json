@@ -4,6 +4,7 @@
   "private": true,
   "_moduleAliases": {
     "@api": "dist/api/src",
+    "@aicp/api": "dist/api/src",
     "@worker": "dist/worker/src"
   },
   "scripts": {
@@ -18,26 +19,26 @@
     "@aicp/auth-core": "0.1.0",
     "@aicp/backend-core": "0.1.0",
     "@aicp/observability-core": "0.1.0",
+    "@aicp/queue-contracts": "0.1.0",
     "@aicp/shared-config": "0.1.0",
     "@aicp/workflow-core": "0.1.0",
     "@nestjs/bullmq": "^11.0.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.62.2",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.205.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.71.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.213.0",
     "@opentelemetry/resources": "^2.1.0",
-    "@opentelemetry/sdk-node": "^0.205.0",
-    "@prisma/client": "^7.1.1",
+    "@opentelemetry/sdk-node": "^0.213.0",
+    "@prisma/client": "^7.4.2",
     "bullmq": "^5.0.0",
-    "dotenv": "^16.6.1",
+    "dotenv": "^17.3.1",
     "module-alias": "^2.2.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "@aicp/queue-contracts": "0.1.0"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "^25.3.5",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.2"

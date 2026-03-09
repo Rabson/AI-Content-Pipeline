@@ -1,7 +1,8 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB, type AnalyticsRollupDailyJobPayload } from '@aicp/queue-contracts';
-import { AnalyticsOrchestrator } from '../../../api/src/modules/analytics/analytics.orchestrator';
+import { ANALYTICS_JOB_RUNNER, type AnalyticsJobRunner } from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
@@ -10,7 +11,7 @@ import { RetryPolicyService } from '../support/retry-policy.service';
 @Processor(ANALYTICS_QUEUE)
 export class WorkerAnalyticsProcessor extends WorkerHost {
   constructor(
-    private readonly orchestrator: AnalyticsOrchestrator,
+    @Inject(ANALYTICS_JOB_RUNNER) private readonly orchestrator: AnalyticsJobRunner,
     private readonly jobExecutionService: JobExecutionService,
     private readonly metrics: WorkerMetricsService,
     private readonly retryPolicyService: RetryPolicyService,

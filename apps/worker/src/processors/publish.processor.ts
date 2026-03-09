@@ -1,7 +1,8 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { PUBLISH_ARTICLE_JOB, PUBLISHING_QUEUE, type PublishArticleJobPayload } from '@aicp/queue-contracts';
-import { PublisherOrchestrator } from '../../../api/src/modules/publisher/publisher.orchestrator';
+import { PUBLISH_JOB_RUNNER, type PublishJobRunner } from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
@@ -10,7 +11,7 @@ import { RetryPolicyService } from '../support/retry-policy.service';
 @Processor(PUBLISHING_QUEUE)
 export class WorkerPublishProcessor extends WorkerHost {
   constructor(
-    private readonly orchestrator: PublisherOrchestrator,
+    @Inject(PUBLISH_JOB_RUNNER) private readonly orchestrator: PublishJobRunner,
     private readonly jobExecutionService: JobExecutionService,
     private readonly metrics: WorkerMetricsService,
     private readonly retryPolicyService: RetryPolicyService,

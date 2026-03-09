@@ -1,7 +1,8 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { SOCIAL_LINKEDIN_GENERATE_JOB, SOCIAL_QUEUE, type SocialLinkedInGenerateJobPayload } from '@aicp/queue-contracts';
-import { SocialOrchestrator } from '../../../api/src/modules/social/social.orchestrator';
+import { SOCIAL_JOB_RUNNER, type SocialJobRunner } from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
@@ -10,7 +11,7 @@ import { RetryPolicyService } from '../support/retry-policy.service';
 @Processor(SOCIAL_QUEUE)
 export class WorkerSocialProcessor extends WorkerHost {
   constructor(
-    private readonly orchestrator: SocialOrchestrator,
+    @Inject(SOCIAL_JOB_RUNNER) private readonly orchestrator: SocialJobRunner,
     private readonly jobExecutionService: JobExecutionService,
     private readonly metrics: WorkerMetricsService,
     private readonly retryPolicyService: RetryPolicyService,

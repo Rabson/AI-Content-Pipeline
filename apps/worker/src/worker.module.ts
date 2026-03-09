@@ -14,40 +14,23 @@ import {
   SecurityEventService,
 } from '@aicp/backend-core';
 import { env } from './config/env';
-
-import { WorkflowRepository } from '../../api/src/modules/workflow/workflow.repository';
-import { WorkflowService } from '../../api/src/modules/workflow/workflow.service';
-import { WorkflowTransitionService } from '../../api/src/modules/workflow/workflow-transition.service';
-import { TopicRepository } from '../../api/src/modules/topic/topic.repository';
-import { TopicScoringService } from '../../api/src/modules/topic/topic.scoring.service';
-
-import { ResearchRepository } from '../../api/src/modules/research/research.repository';
-import { ResearchReadRepository } from '../../api/src/modules/research/repositories/research-read.repository';
-import { ResearchWriteRepository } from '../../api/src/modules/research/repositories/research-write.repository';
-import { ResearchOrchestrator } from '../../api/src/modules/research/research.orchestrator';
-import { SourceGathererService } from '../../api/src/modules/research/providers/source-gatherer.service';
-import { SourceNormalizerService } from '../../api/src/modules/research/providers/source-normalizer.service';
-import { OpenAiResearchClient } from '../../api/src/modules/research/providers/openai-research.client';
-import { ResearchValidatorService } from '../../api/src/modules/research/providers/research-validator.service';
-
-import { DraftRepository } from '../../api/src/modules/draft/draft.repository';
-import { DraftReadRepository } from '../../api/src/modules/draft/repositories/draft-read.repository';
-import { DraftWriteRepository } from '../../api/src/modules/draft/repositories/draft-write.repository';
-import { DraftOrchestrator } from '../../api/src/modules/draft/draft.orchestrator';
-import { OpenAiDraftClient } from '../../api/src/modules/draft/providers/openai-draft.client';
-import { DraftValidatorService } from '../../api/src/modules/draft/providers/draft-validator.service';
-
-import { RevisionRepository } from '../../api/src/modules/revision/revision.repository';
-import { RevisionReadRepository } from '../../api/src/modules/revision/repositories/revision-read.repository';
-import { RevisionUsageRepository } from '../../api/src/modules/revision/repositories/revision-usage.repository';
-import { RevisionWriteRepository } from '../../api/src/modules/revision/repositories/revision-write.repository';
-import { RevisionOrchestrator } from '../../api/src/modules/revision/revision.orchestrator';
-import { OpenAiRevisionClient } from '../../api/src/modules/revision/providers/openai-revision.client';
-import { DiffService } from '../../api/src/modules/revision/providers/diff.service';
-import { OutlineRepository } from '../../api/src/modules/outline/outline.repository';
-import { OutlineOrchestrator } from '../../api/src/modules/outline/outline.orchestrator';
-import { OpenAiOutlineClient } from '../../api/src/modules/outline/providers/openai-outline.client';
-import { OutlineValidatorService } from '../../api/src/modules/outline/providers/outline-validator.service';
+import {
+  DRAFT_FAILURE_WRITER,
+  OUTLINE_FAILURE_WRITER,
+  REVISION_FAILURE_WRITER,
+} from './contracts/failure-writers.contracts';
+import {
+  ANALYTICS_JOB_RUNNER,
+  DISCOVERY_JOB_RUNNER,
+  DRAFT_JOB_RUNNER,
+  OUTLINE_JOB_RUNNER,
+  PUBLISH_JOB_RUNNER,
+  RESEARCH_JOB_RUNNER,
+  REVISION_JOB_RUNNER,
+  SEO_JOB_RUNNER,
+  SOCIAL_JOB_RUNNER,
+} from './contracts/job-runners.contracts';
+import { apiWorkerBindings, apiWorkerProviders } from '@aicp/api/worker/worker.providers';
 import { JobExecutionService } from './support/job-execution.service';
 import { DatabaseHealthRepository } from './support/health/database-health.repository';
 import { QueueHealthService } from './support/health/queue-health.service';
@@ -55,37 +38,10 @@ import { RedisHealthClient } from './support/health/redis-health.client';
 import { RetryPolicyService } from './support/retry-policy.service';
 import { WorkerMetricsService } from './support/worker-metrics.service';
 import { WorkerHealthService } from './support/worker-health.service';
-import { SeoRepository } from '../../api/src/modules/seo/seo.repository';
-import { SeoOrchestrator } from '../../api/src/modules/seo/seo.orchestrator';
-import { SeoGeneratorService } from '../../api/src/modules/seo/providers/seo-generator.service';
-import { SocialRepository } from '../../api/src/modules/social/social.repository';
-import { SocialOrchestrator } from '../../api/src/modules/social/social.orchestrator';
-import { SocialGeneratorService } from '../../api/src/modules/social/providers/social-generator.service';
 import { WorkerSocialProcessor } from './processors/social.processor';
-import { AnalyticsRepository } from '../../api/src/modules/analytics/analytics.repository';
-import { AnalyticsContentRepository } from '../../api/src/modules/analytics/repositories/analytics-content.repository';
-import { AnalyticsReadRepository } from '../../api/src/modules/analytics/repositories/analytics-read.repository';
-import { AnalyticsRollupRepository } from '../../api/src/modules/analytics/repositories/analytics-rollup.repository';
-import { AnalyticsOrchestrator } from '../../api/src/modules/analytics/analytics.orchestrator';
 import { WorkerAnalyticsProcessor } from './processors/analytics.processor';
-import { PublisherRepository } from '../../api/src/modules/publisher/publisher.repository';
-import { PublisherOrchestrator } from '../../api/src/modules/publisher/publisher.orchestrator';
-import { DevtoAdapter } from '../../api/src/modules/publisher/providers/devto.adapter';
-import { LinkedInAdapter } from '../../api/src/modules/publisher/providers/linkedin.adapter';
-import { MediumAdapter } from '../../api/src/modules/publisher/providers/medium.adapter';
-import { PublicationVerifierService } from '../../api/src/modules/publisher/providers/publication-verifier.service';
-import { PublisherRegistryService } from '../../api/src/modules/publisher/providers/publisher-registry.service';
 import { WorkerPublishProcessor } from './processors/publish.processor';
-import { DiscoveryService } from '../../api/src/modules/discovery/discovery.service';
-import { DiscoveryRepository } from '../../api/src/modules/discovery/discovery.repository';
-import { HackerNewsDiscoveryProvider } from '../../api/src/modules/discovery/providers/hacker-news-discovery.provider';
-import { DiscoveryImportService } from '../../api/src/modules/discovery/services/discovery-import.service';
-import { DiscoveryIngestService } from '../../api/src/modules/discovery/services/discovery-ingest.service';
-import { DiscoverySuggestionService } from '../../api/src/modules/discovery/services/discovery-suggestion.service';
 import { WorkerContentPipelineProcessor } from './processors/content-pipeline.processor';
-import { UserPublisherCredentialRepository } from '../../api/src/modules/user/repositories/user-publisher-credential.repository';
-import { TokenCryptoService } from '../../api/src/modules/user/services/token-crypto.service';
-import { UserPublisherTokenResolverService } from '../../api/src/modules/user/services/user-publisher-token-resolver.service';
 
 @Module({
   imports: [
@@ -114,11 +70,7 @@ import { UserPublisherTokenResolverService } from '../../api/src/modules/user/se
       },
     },
     SecurityEventService,
-    WorkflowRepository,
-    WorkflowTransitionService,
-    WorkflowService,
-    TopicRepository,
-    TopicScoringService,
+    ...apiWorkerProviders,
     JobExecutionService,
     RetryPolicyService,
     WorkerMetricsService,
@@ -126,71 +78,58 @@ import { UserPublisherTokenResolverService } from '../../api/src/modules/user/se
     RedisHealthClient,
     QueueHealthService,
     WorkerHealthService,
-
-    HackerNewsDiscoveryProvider,
-    DiscoveryRepository,
-    DiscoverySuggestionService,
-    DiscoveryIngestService,
-    DiscoveryImportService,
-    DiscoveryService,
     WorkerContentPipelineProcessor,
-
-    ResearchRepository,
-    ResearchReadRepository,
-    ResearchWriteRepository,
-    ResearchOrchestrator,
-    SourceGathererService,
-    SourceNormalizerService,
-    OpenAiResearchClient,
-    ResearchValidatorService,
-
-    OutlineRepository,
-    OutlineOrchestrator,
-    OpenAiOutlineClient,
-    OutlineValidatorService,
-
-    SeoRepository,
-    SeoOrchestrator,
-    SeoGeneratorService,
-
-    SocialRepository,
-    SocialOrchestrator,
-    SocialGeneratorService,
     WorkerSocialProcessor,
-
-    AnalyticsRepository,
-    AnalyticsContentRepository,
-    AnalyticsReadRepository,
-    AnalyticsRollupRepository,
-    AnalyticsOrchestrator,
     WorkerAnalyticsProcessor,
-
-    PublisherRepository,
-    UserPublisherCredentialRepository,
-    TokenCryptoService,
-    UserPublisherTokenResolverService,
-    PublisherOrchestrator,
-    DevtoAdapter,
-    MediumAdapter,
-    LinkedInAdapter,
-    PublisherRegistryService,
-    PublicationVerifierService,
     WorkerPublishProcessor,
-
-    DraftRepository,
-    DraftReadRepository,
-    DraftWriteRepository,
-    DraftOrchestrator,
-    OpenAiDraftClient,
-    DraftValidatorService,
-
-    RevisionRepository,
-    RevisionReadRepository,
-    RevisionUsageRepository,
-    RevisionWriteRepository,
-    RevisionOrchestrator,
-    OpenAiRevisionClient,
-    DiffService,
+    {
+      provide: DISCOVERY_JOB_RUNNER,
+      useExisting: apiWorkerBindings.DiscoveryService,
+    },
+    {
+      provide: RESEARCH_JOB_RUNNER,
+      useExisting: apiWorkerBindings.ResearchOrchestrator,
+    },
+    {
+      provide: OUTLINE_JOB_RUNNER,
+      useExisting: apiWorkerBindings.OutlineOrchestrator,
+    },
+    {
+      provide: DRAFT_JOB_RUNNER,
+      useExisting: apiWorkerBindings.DraftOrchestrator,
+    },
+    {
+      provide: REVISION_JOB_RUNNER,
+      useExisting: apiWorkerBindings.RevisionOrchestrator,
+    },
+    {
+      provide: SEO_JOB_RUNNER,
+      useExisting: apiWorkerBindings.SeoOrchestrator,
+    },
+    {
+      provide: SOCIAL_JOB_RUNNER,
+      useExisting: apiWorkerBindings.SocialOrchestrator,
+    },
+    {
+      provide: ANALYTICS_JOB_RUNNER,
+      useExisting: apiWorkerBindings.AnalyticsOrchestrator,
+    },
+    {
+      provide: PUBLISH_JOB_RUNNER,
+      useExisting: apiWorkerBindings.PublisherOrchestrator,
+    },
+    {
+      provide: DRAFT_FAILURE_WRITER,
+      useExisting: apiWorkerBindings.DraftRepository,
+    },
+    {
+      provide: OUTLINE_FAILURE_WRITER,
+      useExisting: apiWorkerBindings.OutlineRepository,
+    },
+    {
+      provide: REVISION_FAILURE_WRITER,
+      useExisting: apiWorkerBindings.RevisionRepository,
+    },
   ],
 })
 export class WorkerModule {}

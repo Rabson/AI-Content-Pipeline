@@ -1,7 +1,8 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB, type SeoGenerateJobPayload } from '@aicp/queue-contracts';
-import { SeoOrchestrator } from '../../../api/src/modules/seo/seo.orchestrator';
+import { SEO_JOB_RUNNER, type SeoJobRunner } from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
@@ -9,7 +10,7 @@ import { RetryPolicyService } from '../support/retry-policy.service';
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerSeoProcessor extends WorkerHost {
   constructor(
-    private readonly orchestrator: SeoOrchestrator,
+    @Inject(SEO_JOB_RUNNER) private readonly orchestrator: SeoJobRunner,
     private readonly jobExecutionService: JobExecutionService,
     private readonly metrics: WorkerMetricsService,
     private readonly retryPolicyService: RetryPolicyService,

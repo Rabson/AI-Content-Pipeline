@@ -1,4 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import {
   CONTENT_PIPELINE_QUEUE,
@@ -9,8 +10,8 @@ import {
   type DraftGenerateSectionJobPayload,
   type DraftGenerateStartJobPayload,
 } from '@aicp/queue-contracts';
-import { DraftOrchestrator } from '../../../api/src/modules/draft/draft.orchestrator';
-import { DraftRepository } from '../../../api/src/modules/draft/draft.repository';
+import { DRAFT_FAILURE_WRITER, type DraftFailureWriter } from '../contracts/failure-writers.contracts';
+import { DRAFT_JOB_RUNNER, type DraftJobRunner } from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
@@ -18,8 +19,8 @@ import { RetryPolicyService } from '../support/retry-policy.service';
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerDraftProcessor extends WorkerHost {
   constructor(
-    private readonly orchestrator: DraftOrchestrator,
-    private readonly repository: DraftRepository,
+    @Inject(DRAFT_JOB_RUNNER) private readonly orchestrator: DraftJobRunner,
+    @Inject(DRAFT_FAILURE_WRITER) private readonly repository: DraftFailureWriter,
     private readonly jobExecutionService: JobExecutionService,
     private readonly metrics: WorkerMetricsService,
     private readonly retryPolicyService: RetryPolicyService,

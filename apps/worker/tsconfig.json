@@ -6,7 +6,8 @@
     "rootDir": "..",
     "paths": {
       "@worker/*": ["src/*"],
-      "@api/*": ["../api/src/*"]
+      "@api/*": ["../api/src/*"],
+      "@aicp/api/*": ["../api/src/*"]
     }
   },
   "include": ["src/**/*.ts", "../api/src/**/*.ts"],

@@ -1,7 +1,8 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { CONTENT_PIPELINE_QUEUE, RESEARCH_RUN_JOB, type ResearchRunJobPayload } from '@aicp/queue-contracts';
-import { ResearchOrchestrator } from '../../../api/src/modules/research/research.orchestrator';
+import { RESEARCH_JOB_RUNNER, type ResearchJobRunner } from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
@@ -9,7 +10,7 @@ import { RetryPolicyService } from '../support/retry-policy.service';
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerResearchProcessor extends WorkerHost {
   constructor(
-    private readonly orchestrator: ResearchOrchestrator,
+    @Inject(RESEARCH_JOB_RUNNER) private readonly orchestrator: ResearchJobRunner,
     private readonly jobExecutionService: JobExecutionService,
     private readonly metrics: WorkerMetricsService,
     private readonly retryPolicyService: RetryPolicyService,

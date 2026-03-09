@@ -1,4 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import {
   CONTENT_PIPELINE_QUEUE,
@@ -13,15 +14,28 @@ import {
   REVISION_APPLY_START_JOB,
   SEO_GENERATE_JOB,
 } from '@aicp/queue-contracts';
-import { ResearchOrchestrator } from '../../../api/src/modules/research/research.orchestrator';
-import { OutlineOrchestrator } from '../../../api/src/modules/outline/outline.orchestrator';
-import { OutlineRepository } from '../../../api/src/modules/outline/outline.repository';
-import { DraftOrchestrator } from '../../../api/src/modules/draft/draft.orchestrator';
-import { DraftRepository } from '../../../api/src/modules/draft/draft.repository';
-import { RevisionOrchestrator } from '../../../api/src/modules/revision/revision.orchestrator';
-import { RevisionRepository } from '../../../api/src/modules/revision/revision.repository';
-import { SeoOrchestrator } from '../../../api/src/modules/seo/seo.orchestrator';
-import { DiscoveryService } from '../../../api/src/modules/discovery/discovery.service';
+import {
+  DRAFT_FAILURE_WRITER,
+  OUTLINE_FAILURE_WRITER,
+  REVISION_FAILURE_WRITER,
+  type DraftFailureWriter,
+  type OutlineFailureWriter,
+  type RevisionFailureWriter,
+} from '../contracts/failure-writers.contracts';
+import {
+  DISCOVERY_JOB_RUNNER,
+  DRAFT_JOB_RUNNER,
+  OUTLINE_JOB_RUNNER,
+  RESEARCH_JOB_RUNNER,
+  REVISION_JOB_RUNNER,
+  SEO_JOB_RUNNER,
+  type DiscoveryJobRunner,
+  type DraftJobRunner,
+  type OutlineJobRunner,
+  type ResearchJobRunner,
+  type RevisionJobRunner,
+  type SeoJobRunner,
+} from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { getTraceContext, withTelemetrySpan } from '../support/opentelemetry';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
@@ -30,15 +44,15 @@ import { RetryPolicyService } from '../support/retry-policy.service';
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerContentPipelineProcessor extends WorkerHost {
   constructor(
-    private readonly discoveryService: DiscoveryService,
-    private readonly researchOrchestrator: ResearchOrchestrator,
-    private readonly outlineOrchestrator: OutlineOrchestrator,
-    private readonly outlineRepository: OutlineRepository,
-    private readonly draftOrchestrator: DraftOrchestrator,
-    private readonly draftRepository: DraftRepository,
-    private readonly revisionOrchestrator: RevisionOrchestrator,
-    private readonly revisionRepository: RevisionRepository,
-    private readonly seoOrchestrator: SeoOrchestrator,
+    @Inject(DISCOVERY_JOB_RUNNER) private readonly discoveryService: DiscoveryJobRunner,
+    @Inject(RESEARCH_JOB_RUNNER) private readonly researchOrchestrator: ResearchJobRunner,
+    @Inject(OUTLINE_JOB_RUNNER) private readonly outlineOrchestrator: OutlineJobRunner,
+    @Inject(OUTLINE_FAILURE_WRITER) private readonly outlineRepository: OutlineFailureWriter,
+    @Inject(DRAFT_JOB_RUNNER) private readonly draftOrchestrator: DraftJobRunner,
+    @Inject(DRAFT_FAILURE_WRITER) private readonly draftRepository: DraftFailureWriter,
+    @Inject(REVISION_JOB_RUNNER) private readonly revisionOrchestrator: RevisionJobRunner,
+    @Inject(REVISION_FAILURE_WRITER) private readonly revisionRepository: RevisionFailureWriter,
+    @Inject(SEO_JOB_RUNNER) private readonly seoOrchestrator: SeoJobRunner,
     private readonly jobExecutionService: JobExecutionService,
     private readonly metrics: WorkerMetricsService,
     private readonly retryPolicyService: RetryPolicyService,

@@ -1,8 +1,12 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { CONTENT_PIPELINE_QUEUE, OUTLINE_GENERATE_JOB, type OutlineGenerateJobPayload } from '@aicp/queue-contracts';
-import { OutlineOrchestrator } from '../../../api/src/modules/outline/outline.orchestrator';
-import { OutlineRepository } from '../../../api/src/modules/outline/outline.repository';
+import {
+  OUTLINE_FAILURE_WRITER,
+  type OutlineFailureWriter,
+} from '../contracts/failure-writers.contracts';
+import { OUTLINE_JOB_RUNNER, type OutlineJobRunner } from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { WorkerMetricsService } from '../support/worker-metrics.service';
 import { RetryPolicyService } from '../support/retry-policy.service';
@@ -10,8 +14,8 @@ import { RetryPolicyService } from '../support/retry-policy.service';
 @Processor(CONTENT_PIPELINE_QUEUE)
 export class WorkerOutlineProcessor extends WorkerHost {
   constructor(
-    private readonly orchestrator: OutlineOrchestrator,
-    private readonly repository: OutlineRepository,
+    @Inject(OUTLINE_JOB_RUNNER) private readonly orchestrator: OutlineJobRunner,
+    @Inject(OUTLINE_FAILURE_WRITER) private readonly repository: OutlineFailureWriter,
     private readonly jobExecutionService: JobExecutionService,
     private readonly metrics: WorkerMetricsService,
     private readonly retryPolicyService: RetryPolicyService,
