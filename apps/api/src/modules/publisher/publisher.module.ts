@@ -4,6 +4,7 @@ import { PrismaService } from '@api/prisma/prisma.service';
 import { UserModule } from '../user/user.module';
 import { PUBLISHING_QUEUE } from './constants/publisher.constants';
 import { PublisherController } from './publisher.controller';
+import { PublisherWorkerController } from './publisher.worker.controller';
 import { PublisherOrchestrator } from './publisher.orchestrator';
 import { PublisherRepository } from './publisher.repository';
 import { PublisherService } from './publisher.service';
@@ -20,7 +21,7 @@ import { PublisherRegistryService } from './providers/publisher-registry.service
       name: PUBLISHING_QUEUE,
     }),
   ],
-  controllers: [PublisherController],
+  controllers: [PublisherController, PublisherWorkerController],
   providers: [
     PrismaService,
     PublisherRepository,

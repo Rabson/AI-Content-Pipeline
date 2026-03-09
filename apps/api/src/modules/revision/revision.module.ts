@@ -3,6 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { PrismaService } from '@api/prisma/prisma.service';
 import { CONTENT_PIPELINE_QUEUE } from './constants/revision.constants';
 import { RevisionController } from './revision.controller';
+import { RevisionWorkerController } from './revision.worker.controller';
 import { RevisionService } from './revision.service';
 import { RevisionRepository } from './revision.repository';
 import { RevisionOrchestrator } from './revision.orchestrator';
@@ -14,7 +15,7 @@ import { RevisionWriteRepository } from './repositories/revision-write.repositor
 
 @Module({
   imports: [BullModule.registerQueue({ name: CONTENT_PIPELINE_QUEUE })],
-  controllers: [RevisionController],
+  controllers: [RevisionController, RevisionWorkerController],
   providers: [
     PrismaService,
     RevisionService,

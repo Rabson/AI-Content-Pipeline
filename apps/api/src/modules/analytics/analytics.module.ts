@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaService } from '@api/prisma/prisma.service';
 import { AnalyticsController } from './analytics.controller';
+import { AnalyticsWorkerController } from './analytics.worker.controller';
 import { ANALYTICS_QUEUE } from './constants/analytics.constants';
 import { AnalyticsOrchestrator } from './analytics.orchestrator';
 import { AnalyticsContentRepository } from './repositories/analytics-content.repository';
@@ -16,7 +17,7 @@ import { AnalyticsService } from './analytics.service';
       name: ANALYTICS_QUEUE,
     }),
   ],
-  controllers: [AnalyticsController],
+  controllers: [AnalyticsController, AnalyticsWorkerController],
   providers: [
     PrismaService,
     AnalyticsRepository,

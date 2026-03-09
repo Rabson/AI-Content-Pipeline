@@ -4,6 +4,7 @@ import { PrismaService } from '@api/prisma/prisma.service';
 import { UserModule } from '../user/user.module';
 import { CONTENT_PIPELINE_QUEUE } from './constants/draft.constants';
 import { DraftController } from './draft.controller';
+import { DraftWorkerController } from './draft.worker.controller';
 import { DraftService } from './draft.service';
 import { DraftRepository } from './draft.repository';
 import { DraftOrchestrator } from './draft.orchestrator';
@@ -17,7 +18,7 @@ import { DraftReviewService } from './services/draft-review.service';
 
 @Module({
   imports: [UserModule, BullModule.registerQueue({ name: CONTENT_PIPELINE_QUEUE })],
-  controllers: [DraftController],
+  controllers: [DraftController, DraftWorkerController],
   providers: [
     PrismaService,
     DraftService,

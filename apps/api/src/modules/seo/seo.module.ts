@@ -4,6 +4,7 @@ import { PrismaService } from '@api/prisma/prisma.service';
 import { UserModule } from '../user/user.module';
 import { CONTENT_PIPELINE_QUEUE } from './constants/seo.constants';
 import { SeoController } from './seo.controller';
+import { SeoWorkerController } from './seo.worker.controller';
 import { SeoOrchestrator } from './seo.orchestrator';
 import { SeoRepository } from './seo.repository';
 import { SeoService } from './seo.service';
@@ -16,7 +17,7 @@ import { SeoGeneratorService } from './providers/seo-generator.service';
       name: CONTENT_PIPELINE_QUEUE,
     }),
   ],
-  controllers: [SeoController],
+  controllers: [SeoController, SeoWorkerController],
   providers: [
     PrismaService,
     SeoRepository,

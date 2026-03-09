@@ -30,8 +30,18 @@ import {
   SEO_JOB_RUNNER,
   SOCIAL_JOB_RUNNER,
 } from './contracts/job-runners.contracts';
-import { apiWorkerBindings, apiWorkerProviders } from '@aicp/api/worker/worker.providers';
 import { JobExecutionService } from './support/job-execution.service';
+import { ApiWorkerHttpClient } from './support/api-worker-http.client';
+import { AnalyticsJobRunnerService } from './support/runners/analytics-job-runner.service';
+import { DiscoveryJobRunnerService } from './support/runners/discovery-job-runner.service';
+import { DraftJobRunnerService } from './support/runners/draft-job-runner.service';
+import { FailureWriterService } from './support/runners/failure-writer.service';
+import { OutlineJobRunnerService } from './support/runners/outline-job-runner.service';
+import { PublishJobRunnerService } from './support/runners/publish-job-runner.service';
+import { ResearchJobRunnerService } from './support/runners/research-job-runner.service';
+import { RevisionJobRunnerService } from './support/runners/revision-job-runner.service';
+import { SeoJobRunnerService } from './support/runners/seo-job-runner.service';
+import { SocialJobRunnerService } from './support/runners/social-job-runner.service';
 import { DatabaseHealthRepository } from './support/health/database-health.repository';
 import { QueueHealthService } from './support/health/queue-health.service';
 import { RedisHealthClient } from './support/health/redis-health.client';
@@ -70,7 +80,17 @@ import { WorkerContentPipelineProcessor } from './processors/content-pipeline.pr
       },
     },
     SecurityEventService,
-    ...apiWorkerProviders,
+    ApiWorkerHttpClient,
+    DiscoveryJobRunnerService,
+    ResearchJobRunnerService,
+    OutlineJobRunnerService,
+    DraftJobRunnerService,
+    RevisionJobRunnerService,
+    SeoJobRunnerService,
+    SocialJobRunnerService,
+    AnalyticsJobRunnerService,
+    PublishJobRunnerService,
+    FailureWriterService,
     JobExecutionService,
     RetryPolicyService,
     WorkerMetricsService,
@@ -84,51 +104,51 @@ import { WorkerContentPipelineProcessor } from './processors/content-pipeline.pr
     WorkerPublishProcessor,
     {
       provide: DISCOVERY_JOB_RUNNER,
-      useExisting: apiWorkerBindings.DiscoveryService,
+      useExisting: DiscoveryJobRunnerService,
     },
     {
       provide: RESEARCH_JOB_RUNNER,
-      useExisting: apiWorkerBindings.ResearchOrchestrator,
+      useExisting: ResearchJobRunnerService,
     },
     {
       provide: OUTLINE_JOB_RUNNER,
-      useExisting: apiWorkerBindings.OutlineOrchestrator,
+      useExisting: OutlineJobRunnerService,
     },
     {
       provide: DRAFT_JOB_RUNNER,
-      useExisting: apiWorkerBindings.DraftOrchestrator,
+      useExisting: DraftJobRunnerService,
     },
     {
       provide: REVISION_JOB_RUNNER,
-      useExisting: apiWorkerBindings.RevisionOrchestrator,
+      useExisting: RevisionJobRunnerService,
     },
     {
       provide: SEO_JOB_RUNNER,
-      useExisting: apiWorkerBindings.SeoOrchestrator,
+      useExisting: SeoJobRunnerService,
     },
     {
       provide: SOCIAL_JOB_RUNNER,
-      useExisting: apiWorkerBindings.SocialOrchestrator,
+      useExisting: SocialJobRunnerService,
     },
     {
       provide: ANALYTICS_JOB_RUNNER,
-      useExisting: apiWorkerBindings.AnalyticsOrchestrator,
+      useExisting: AnalyticsJobRunnerService,
     },
     {
       provide: PUBLISH_JOB_RUNNER,
-      useExisting: apiWorkerBindings.PublisherOrchestrator,
+      useExisting: PublishJobRunnerService,
     },
     {
       provide: DRAFT_FAILURE_WRITER,
-      useExisting: apiWorkerBindings.DraftRepository,
+      useExisting: FailureWriterService,
     },
     {
       provide: OUTLINE_FAILURE_WRITER,
-      useExisting: apiWorkerBindings.OutlineRepository,
+      useExisting: FailureWriterService,
     },
     {
       provide: REVISION_FAILURE_WRITER,
-      useExisting: apiWorkerBindings.RevisionRepository,
+      useExisting: FailureWriterService,
     },
   ],
 })

@@ -4,6 +4,7 @@ import { PrismaService } from '@api/prisma/prisma.service';
 import { UserModule } from '../user/user.module';
 import { CONTENT_PIPELINE_QUEUE } from './constants/research.constants';
 import { ResearchController } from './research.controller';
+import { ResearchWorkerController } from './research.worker.controller';
 import { ResearchService } from './research.service';
 import { ResearchRepository } from './research.repository';
 import { ResearchOrchestrator } from './research.orchestrator';
@@ -21,7 +22,7 @@ import { ResearchWriteRepository } from './repositories/research-write.repositor
       name: CONTENT_PIPELINE_QUEUE,
     }),
   ],
-  controllers: [ResearchController],
+  controllers: [ResearchController, ResearchWorkerController],
   providers: [
     PrismaService,
     ResearchService,

@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "_moduleAliases": {
-    "@api": "dist/api/src",
-    "@aicp/api": "dist/api/src",
     "@worker": "dist/worker/src"
   },
   "scripts": {

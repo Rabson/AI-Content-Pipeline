@@ -15,6 +15,16 @@ services:
         sync: false
       - key: REDIS_URL
         sync: false
+      - key: INTERNAL_API_BASE_URL
+        sync: false
+      - key: INTERNAL_SERVICE_JWT_SECRET
+        sync: false
+      - key: INTERNAL_SERVICE_JWT_ISSUER
+        value: aicp-api
+      - key: INTERNAL_SERVICE_JWT_AUDIENCE
+        value: aicp-api
+      - key: INTERNAL_SERVICE_JWT_TTL_SECONDS
+        value: '300'
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL_RESEARCH

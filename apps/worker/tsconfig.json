@@ -5,11 +5,9 @@
     "outDir": "dist",
     "rootDir": "..",
     "paths": {
-      "@worker/*": ["src/*"],
-      "@api/*": ["../api/src/*"],
-      "@aicp/api/*": ["../api/src/*"]
+      "@worker/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts", "../api/src/**/*.ts"],
-  "exclude": ["dist", "node_modules", "../api/src/**/__tests__/**", "../api/test/**"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist", "node_modules"]
 }

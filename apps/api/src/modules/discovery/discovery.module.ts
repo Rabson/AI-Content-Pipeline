@@ -8,6 +8,7 @@ import { WorkflowRepository } from '../workflow/workflow.repository';
 import { WorkflowService } from '../workflow/workflow.service';
 import { DISCOVERY_PROVIDER_HACKER_NEWS } from './constants/discovery.constants';
 import { DiscoveryController } from './discovery.controller';
+import { DiscoveryWorkerController } from './discovery.worker.controller';
 import { DiscoveryRepository } from './discovery.repository';
 import { DiscoveryQueueService } from './discovery.queue.service';
 import { DiscoveryService } from './discovery.service';
@@ -22,7 +23,7 @@ import { DiscoverySuggestionService } from './services/discovery-suggestion.serv
       name: CONTENT_PIPELINE_QUEUE,
     }),
   ],
-  controllers: [DiscoveryController],
+  controllers: [DiscoveryController, DiscoveryWorkerController],
   providers: [
     PrismaService,
     DiscoveryRepository,

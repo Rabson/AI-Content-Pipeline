@@ -1,4 +1,6 @@
-export interface ResearchRunJobPayload {
+import type { QueueContractEnvelope } from '../contract-version';
+
+export interface ResearchRunJobPayload extends QueueContractEnvelope {
   topicId: string;
   contentItemId?: string;
   requestedBy?: string;
@@ -10,20 +12,20 @@ export interface ResearchRunJobPayload {
   sourceUrls?: string[];
 }
 
-export interface OutlineGenerateJobPayload {
+export interface OutlineGenerateJobPayload extends QueueContractEnvelope {
   topicId: string;
   contentItemId?: string;
   requestedBy?: string;
   traceId?: string;
 }
 
-export interface DraftGenerateStartJobPayload {
+export interface DraftGenerateStartJobPayload extends QueueContractEnvelope {
   topicId: string;
   draftVersionId: string;
   styleProfile?: string;
 }
 
-export interface DraftGenerateSectionJobPayload {
+export interface DraftGenerateSectionJobPayload extends QueueContractEnvelope {
   topicId: string;
   draftVersionId: string;
   sectionKey: string;
@@ -38,19 +40,19 @@ export interface DraftGenerateSectionJobPayload {
   targetWords?: number;
 }
 
-export interface DraftGenerateFinalizeJobPayload {
+export interface DraftGenerateFinalizeJobPayload extends QueueContractEnvelope {
   topicId: string;
   draftVersionId: string;
 }
 
-export interface RevisionApplyStartJobPayload {
+export interface RevisionApplyStartJobPayload extends QueueContractEnvelope {
   topicId: string;
   revisionRunId: string;
   fromDraftVersionId: string;
   toDraftVersionId: string;
 }
 
-export interface RevisionApplySectionJobPayload {
+export interface RevisionApplySectionJobPayload extends QueueContractEnvelope {
   topicId: string;
   topicTitle: string;
   revisionRunId: string;
@@ -63,11 +65,11 @@ export interface RevisionApplySectionJobPayload {
   commentTexts: string[];
 }
 
-export interface RevisionApplyFinalizeJobPayload {
+export interface RevisionApplyFinalizeJobPayload extends QueueContractEnvelope {
   revisionRunId: string;
 }
 
-export interface SeoGenerateJobPayload {
+export interface SeoGenerateJobPayload extends QueueContractEnvelope {
   topicId: string;
   requestedBy?: string;
   traceId?: string;
