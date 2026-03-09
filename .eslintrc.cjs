@@ -20,5 +20,27 @@ module.exports = {
       files: ['apps/dashboard/**/*.{ts,tsx}', 'apps/dashboard/**/*.js'],
       extends: ['./packages/shared-config/eslint/next.cjs'],
     },
+    {
+      files: ['apps/worker/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['@api/*', '@aicp/api/*', '**/api/src/**'],
+          },
+        ],
+      },
+    },
+    {
+      files: ['apps/dashboard/**/*.{ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['@api/*', '@aicp/api/*', '**/api/src/**'],
+          },
+        ],
+      },
+    },
   ],
 };

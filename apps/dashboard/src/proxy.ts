@@ -4,6 +4,9 @@ export default withAuth({
   pages: {
     signIn: '/signin',
   },
+  callbacks: {
+    authorized: ({ token }) => Boolean(token),
+  },
 });
 
 export const config = {

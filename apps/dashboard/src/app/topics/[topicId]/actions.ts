@@ -2,6 +2,17 @@
 
 import { revalidatePath } from 'next/cache';
 import { backendMutation } from '../../../lib/backend-client';
+import { getDashboardUser } from '../../../lib/auth';
+
+const OWNER_REASSIGN_ROLES = new Set(['ADMIN']);
+const PUBLISH_ROLES = new Set(['ADMIN', 'USER']);
+
+async function assertActionRole(action: string, allowedRoles: Set<string>) {
+  const user = await getDashboardUser();
+  if (!user.authorized || !allowedRoles.has(user.role)) {
+    throw new Error(`${action} requires one of: ${Array.from(allowedRoles).join(', ')}`);
+  }
+}
 
 function refreshTopicPaths(topicId: string) {
   revalidatePath('/topics');
@@ -95,6 +106,7 @@ export async function generateLinkedInAction(topicId: string) {
 }
 
 export async function requestPublicationAction(topicId: string, channel: string) {
+  await assertActionRole('Publish request', PUBLISH_ROLES);
   await backendMutation(`/v1/topics/${topicId}/publications`, {
     method: 'POST',
     body: JSON.stringify({ channel, tags: ['ai', 'contentops'] }),
@@ -103,6 +115,7 @@ export async function requestPublicationAction(topicId: string, channel: string)
 }
 
 export async function retryPublicationAction(topicId: string, publicationId: string) {
+  await assertActionRole('Publication retry', PUBLISH_ROLES);
   await backendMutation(`/v1/topics/${topicId}/publications/${publicationId}/retry`, {
     method: 'POST',
   });
@@ -110,6 +123,7 @@ export async function retryPublicationAction(topicId: string, publicationId: str
 }
 
 export async function assignTopicOwnerAction(topicId: string, formData: FormData) {
+  await assertActionRole('Owner reassignment', OWNER_REASSIGN_ROLES);
   await backendMutation(`/v1/topics/${topicId}/owner`, {
     method: 'PATCH',
     body: JSON.stringify({
