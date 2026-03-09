@@ -78,5 +78,6 @@ The system should support:
 ## Document Ownership
 - [README.md](./README.md): repo overview and navigation
 - [RUN.md](./RUN.md): runtime commands only
+- [docs/business-logic.md](./docs/business-logic.md): canonical business-flow and gating rules
 - [docs/README.md](./docs/README.md): detailed architecture and implementation docs
 - service READMEs under `apps/*`: service-specific runtime and deployment notes

@@ -91,6 +91,7 @@ Dashboard sign-in:
 - Runtime runbook: [RUN.md](./RUN.md)
 - System summary: [summary.md](./summary.md)
 - Docs index: [docs/README.md](./docs/README.md)
+- Business logic source of truth: [docs/business-logic.md](./docs/business-logic.md)
 - Codebase handover: [docs/codebase-handover.md](./docs/codebase-handover.md)
 - Security model: [docs/security-model.md](./docs/security-model.md)
 - Architecture decision: [docs/adr/0001-contract-first-database-first.md](./docs/adr/0001-contract-first-database-first.md)

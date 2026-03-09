@@ -20,6 +20,8 @@ It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
 
 ## Docs In This Folder
 
+- [business-logic.md](./business-logic.md)
+  - canonical business-flow rules and workflow invariants (source of truth)
 - [docker-local-commands.md](./docker-local-commands.md)
   - Docker-specific local commands and smoke checks
 - [local-runtime-and-discovery-flow.md](./local-runtime-and-discovery-flow.md)
@@ -68,3 +70,4 @@ It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
 ## Rule
 
 If content belongs in one of the root docs, link to it instead of duplicating it here.
+Business workflow and gate changes must be authored first in `business-logic.md`.

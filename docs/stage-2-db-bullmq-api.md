@@ -1,5 +1,7 @@
 # Stage 2: DB Schema, BullMQ Jobs, API Endpoints
 
+Source-of-truth note: business workflow and gating semantics referenced here are canonicalized in `docs/business-logic.md`.
+
 ## 1) PostgreSQL Schema (Prisma-oriented)
 
 ## `topics`

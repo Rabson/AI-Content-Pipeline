@@ -1,5 +1,7 @@
 # Stage 1: System Overview, Architecture, Core Modules
 
+Source-of-truth note: business workflow rules in this document are now canonicalized in `docs/business-logic.md`. Update that file first when changing business behavior.
+
 ## 1) System Overview
 
 ### Goal
