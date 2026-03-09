@@ -80,7 +80,7 @@ This file is the service-by-service environment reference.
 ## Local-only Notes
 - `.env` at repo root is the local runtime source.
 - `.env.example` is structure only.
-- Prisma CLI reads schema + migrate datasource settings from root `prisma.config.ts`.
+- Prisma CLI commands use `apps/api/src/prisma/schema.prisma` and load datasource config from root `prisma.config.ts`.
 - Local seeded users:
   - `admin@example.com` / `AdminPass123!`
   - `editor@example.com` / `EditorPass123!`

@@ -1,82 +1,56 @@
 # TODO - AI Content Pipeline
 
-Status: updated on 2026-03-09 after code + runtime validation.
+Status: pending items only.
 
-## Validation Snapshot
+## Pending Items
 
-Completed in this audit:
+### API
 
-- `npm run prisma:generate` ✅
-- `npm run lint` ✅
-- `npm run typecheck` ✅
-- `npm run test` ✅
-- `npm run build:api` ✅
-- `npm run build:worker` ✅
-- `npm run build:dashboard` ✅
-- `make smoke-docker` ✅ (`api`, `worker`, `dashboard`, `postgres`, `redis`, `minio` healthy)
+1. Add controller-level transport integration coverage for routes not explicitly covered with dedicated integration specs:
+   - `analytics`, `discovery`, `draft`, `outline`, `publisher`, `research`, `revision`, `seo`, `social`, `storage`, `system`, `user`, `user-publisher-credential`.
 
-## Missing by Service
+### Dashboard
 
-### API (`apps/api`)
-
-1. Expand transport-layer test coverage for controllers that currently have no dedicated controller/e2e spec:
-   - `analytics`, `discovery`, `draft`, `outline`, `publisher`, `research`, `revision`, `seo`, `social`, `storage`, `system`, `auth`, `user-publisher-credential`, `user`, `workflow`.
-2. Add end-to-end role/policy tests for publish ownership paths:
-   - `USER` publish own topic
-   - `ADMIN` publish on behalf
-   - unauthorized owner reassignment/publish attempts.
-3. Tighten error envelope consistency:
-   - ensure API returns normalized structured errors for all validation/service failures.
-
-### Worker (`apps/worker`)
-
-1. Decouple worker from API source internals:
-   - current state: `78` imports from `apps/api/src/...` across `worker.module.ts` and processors.
-   - target: move reusable orchestration/repository/provider contracts into shared packages (`@aicp/*`) or worker-owned modules.
-2. Add processor tests for all queue processors missing direct specs:
-   - `analytics`, `content-pipeline`, `discovery`, `draft`, `outline`, `publish`, `research`, `revision`, `seo`, `social`.
-3. Add BullMQ integration tests:
-   - retry/backoff behavior
-   - failed job recording
-   - replay/recovery flows.
-
-### Dashboard (`apps/dashboard`)
-
-1. Add route-level page specs for currently untested routes:
-   - `/`, `/topics`, `/topics/[topicId]`, `/topics/[topicId]/draft`, `/topics/[topicId]/history`, `/topics/[topicId]/outline`, `/topics/[topicId]/research`, `/topics/[topicId]/review`, `/topics/[topicId]/revisions`, `/analytics`, `/ops`.
+1. Add route-level page specs for currently untested topic sub-pages:
+   - `/topics/[topicId]/draft`
+   - `/topics/[topicId]/history`
+   - `/topics/[topicId]/outline`
+   - `/topics/[topicId]/research`
+   - `/topics/[topicId]/review`
+   - `/topics/[topicId]/revisions`
 2. Add auth/authorization integration tests:
-   - redirect when unauthenticated
-   - role-based access behavior on sensitive actions.
-3. Add API-failure UI tests for major pages (topics, ops, analytics) to lock error-boundary and fallback rendering.
+   - unauthenticated redirect behavior
+   - role-based access on sensitive actions
+3. Expand API-failure UI tests for topic sub-pages listed above.
 
-## Cross-Service / Platform Gaps
+### Security / Platform
 
-1. Security dependency backlog:
-   - `npm audit --omit=dev` reports `9` vulnerabilities (`5 moderate`, `4 high`) in transitive deps; triage and pin/override safely.
-2. Shared package test coverage:
-   - `@aicp/auth-core`, `@aicp/backend-core`, `@aicp/observability-core`, `@aicp/queue-contracts`, `@aicp/shared-config`, `@aicp/workflow-core` have minimal or no tests.
-3. CI hardening:
-   - keep current lint/typecheck/test/build gates
-   - add optional Docker smoke stage (`make smoke-docker`) for deploy pipelines where runtime parity is required.
-4. Terraform completeness:
-   - still storage-focused; decide whether to add managed DB/Redis + service infra modules or document non-Terraform ownership clearly.
+1. Add CI optional stage for Docker runtime parity (`make smoke-docker`).
+2. Decide Terraform ownership scope for managed DB/Redis/service infra vs external ownership.
+
+### Architecture / Workflow
+
+1. Adopt and document a `contract-first + database-first` implementation flow:
+   - define workflow contracts first (state machine + queue payload schemas)
+   - map contracts to Prisma models and DB constraints
+   - enforce API/worker implementation only after migration + contract update
+2. Add an ADR for service build order:
+   - `contracts -> prisma schema/migrations -> API services/controllers -> workers -> dashboard`
+3. Add a checklist gate in PR template (or CI policy doc) requiring contract/schema changes to land before workflow logic changes.
 
 ## Priority Order
 
-### Do First
+### P0
 
-0. Tighten error envelope consistency: ensure API returns normalized structured errors for all validation/service failures.
-1. Worker decoupling from `apps/api/src/...`.
-2. Worker processor and BullMQ integration tests.
-3. API transport/e2e coverage for publish/auth/ownership flows.
+1. Adopt and document `contract-first + database-first` workflow with ADR + checklist gate.
 
-### Do Next
+### P1
 
-1. Dashboard route + auth/failure integration tests.
-2. Shared package tests.
-3. Security dependency triage (`npm audit` findings).
+2. Add Dashboard coverage for remaining topic sub-page routes.
+3. Add Dashboard auth/authorization integration tests.
+4. Add dedicated API controller integration specs for uncovered controllers.
 
-### Do Later
+## P2
 
-1. CI Docker smoke stage expansion.
-2. Terraform scope decision and completion.
+1. Add optional CI stage for `make smoke-docker`.
+2. Finalize Terraform ownership scope.

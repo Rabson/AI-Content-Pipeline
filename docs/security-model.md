@@ -88,3 +88,17 @@ This document defines the current security contract for the local, staging, and 
 - Recommended production path:
   - replace shared-code auth with OIDC/SSO
   - keep the signed service-token flow or move to platform/service-mesh identity for service-to-service trust
+
+## Prisma 7 Audit Policy
+- Decision: keep Prisma at `7.4.2` for feature/runtime compatibility.
+- Current advisory surface (`npm audit --omit=dev`) is from Prisma transitive dev tooling (`@prisma/dev`), not the API runtime request path.
+- Accepted risk scope:
+  - local/dev and build-time Prisma CLI dependencies
+  - no direct exposure through API request handlers
+- Required mitigations:
+  - production images must run `npm prune --omit=dev`
+  - migrations run in controlled jobs only
+  - do not expose Prisma dev tooling endpoints in runtime containers
+- Ongoing controls:
+  - track Prisma advisory updates during dependency refreshes
+  - upgrade immediately if advisories move into runtime packages (`@prisma/client` or request-path deps)

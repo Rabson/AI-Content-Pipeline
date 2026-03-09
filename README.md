@@ -110,7 +110,7 @@ Dashboard sign-in:
   - `@aicp/backend-core`
 - Root install runs `postinstall`, which:
   - builds the shared workspace packages
-  - regenerates the Prisma client via root `prisma.config.ts`
+  - regenerates the Prisma client via `apps/api/src/prisma/schema.prisma`
 - Root and workspace tests run on Vitest 4 with shared config in `vitest.config.mts`.
 - `@aicp/shared-config` now builds runtime output into `dist/` and exports package entry points from there.
 - `apps/api/scripts/seed-demo.mjs` seeds the local user accounts and demo publish-ready topic.
@@ -141,10 +141,10 @@ Dashboard sign-in:
 - Compose files live under `infra/docker`.
 
 ## Validation Status
-- `npm run prisma:generate` passes with Prisma v7 config (`prisma.config.ts`).
+- `npm run prisma:generate` passes with Prisma `7.4.2` using `prisma.config.ts` + schema path (`apps/api/src/prisma/schema.prisma`).
 - `npm run lint`, `npm run typecheck`, and `npm run test` pass on the current branch.
 - `npm run build:api`, `npm run build:worker`, and `npm run build:dashboard` pass on the current branch.
-- `npm audit` currently reports `9` vulnerabilities (`5` moderate, `4` high).
+- `npm audit` currently reports Prisma transitive advisories (`9` total: `5` moderate, `4` high) from `@prisma/dev` in Prisma `7.4.2`.
 - `make smoke-docker` verifies API, worker, and dashboard health against the local Compose stack.
 
 ## Where To Find Details
