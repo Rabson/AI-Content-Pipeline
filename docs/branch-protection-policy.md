@@ -18,3 +18,4 @@ Recommended repository rules:
 Operational rule:
 
 - Database migrations run only through the protected `Migrate Database` workflow with environment approval.
+- PRs must use `.github/pull_request_template.md` and satisfy the Contract/Schema Workflow Gate for any workflow-affecting change.

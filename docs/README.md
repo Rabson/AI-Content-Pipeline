@@ -38,6 +38,8 @@ It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
   - structure and lint expectations
 - [branch-protection-policy.md](./branch-protection-policy.md)
   - repository protection policy
+- [adr/0001-contract-first-database-first.md](./adr/0001-contract-first-database-first.md)
+  - mandatory workflow change order: contracts -> schema -> workflow-core -> API/worker -> dashboard
 - [security-model.md](./security-model.md)
   - auth, trusted-caller, upload, and outbound request model
 - [env-reference.md](./env-reference.md)

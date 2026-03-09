@@ -93,6 +93,7 @@ Dashboard sign-in:
 - Docs index: [docs/README.md](./docs/README.md)
 - Codebase handover: [docs/codebase-handover.md](./docs/codebase-handover.md)
 - Security model: [docs/security-model.md](./docs/security-model.md)
+- Architecture decision: [docs/adr/0001-contract-first-database-first.md](./docs/adr/0001-contract-first-database-first.md)
 - Env reference: [docs/env-reference.md](./docs/env-reference.md)
 - API service notes: [apps/api/README.md](./apps/api/README.md)
 - Worker service notes: [apps/worker/README.md](./apps/worker/README.md)
@@ -122,6 +123,8 @@ Dashboard sign-in:
   - API: `@api/*`
   - worker: `@worker/*`
   - dashboard: `@dashboard/*`
+- Workflow-affecting implementation order is mandatory:
+  - `contracts -> prisma schema/migrations -> workflow-core -> API/worker -> dashboard`
 - API and worker share `USER_TOKEN_ENCRYPTION_KEY` so publisher credentials can be encrypted in API and decrypted in worker jobs.
 - API signs short-lived internal bearer tokens on login, dashboard forwards them, and API verifies issuer/audience/expiry before trusting identity.
 - Publisher channel support is:
