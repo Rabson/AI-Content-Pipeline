@@ -46,10 +46,16 @@ It should not repeat the role of `README.md`, `RUN.md`, or `summary.md`.
   - service-by-service environment variable reference
 - [codebase-handover.md](./codebase-handover.md)
   - code-level mental model and handover guide
+- [service-data-ownership-roadmap.md](./service-data-ownership-roadmap.md)
+  - service table ownership map and microservice migration sequence
+- [reliability-idempotency-dlq-replay.md](./reliability-idempotency-dlq-replay.md)
+  - idempotency policy, replay safety checks, and DLQ posture
+- [microservice-extraction-playbook.md](./microservice-extraction-playbook.md)
+  - first extraction candidate and rollback-safe carve-out sequence
 
 ## Implementation Stage Map
 - API: implemented and running
-- Worker: implemented and running, but still coupled to API internals
+- Worker: implemented and running with internal API transport contracts (no API source import coupling)
 - Dashboard: implemented and running
 - Backend Core: first shared backend package is implemented and in use
 - Shared Types: implemented and used for API/dashboard view contracts and blog documents

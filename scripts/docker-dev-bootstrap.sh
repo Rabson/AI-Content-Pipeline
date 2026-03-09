@@ -6,6 +6,13 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
+if [ "$1" = "dev:dashboard" ]; then
+  # Avoid stale Next.js build state when file-convention routing changes.
+  if [ -d apps/dashboard/.next ]; then
+    find apps/dashboard/.next -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+  fi
+fi
+
 LOCK_HASH="$(sha256sum package-lock.json | awk '{print $1}')"
 CURRENT_HASH="$(cat node_modules/.package-lock.hash 2>/dev/null || true)"
 PRISMA_READY=1

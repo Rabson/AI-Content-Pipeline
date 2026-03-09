@@ -69,7 +69,7 @@ Dashboard sign-in:
 
 ## Implementation Stage
 - API: implemented and running
-- Worker: implemented and running, but still coupled to API internals
+- Worker: implemented and running with internal API transport contracts (no API source import coupling)
 - Dashboard: implemented and running
 - Backend Core: first shared backend package is implemented and in use
 - Contracts: implemented and used for view/document contracts
@@ -147,6 +147,8 @@ Dashboard sign-in:
 - `npm run prisma:generate` passes with Prisma `7.4.2` using `prisma.config.ts` + schema path (`apps/api/src/prisma/schema.prisma`).
 - `npm run lint`, `npm run typecheck`, and `npm run test` pass on the current branch.
 - `npm run build:api`, `npm run build:worker`, and `npm run build:dashboard` pass on the current branch.
+- Queue payload contract versioning is enforced between API producers and worker consumers.
+- Trace correlation fields (`traceId`, `requestId`) propagate API -> queue -> worker and are surfaced in ops failed-job views.
 - `npm audit` currently reports Prisma transitive advisories (`9` total: `5` moderate, `4` high) from `@prisma/dev` in Prisma `7.4.2`.
 - `make smoke-docker` verifies API, worker, and dashboard health against the local Compose stack.
 

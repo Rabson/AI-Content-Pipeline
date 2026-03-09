@@ -37,7 +37,7 @@ Treat the repo as a modular monolith with three deployable apps and a small set 
 The important rule is:
 - apps are deployable runtimes
 - packages are shared code
-- worker should move toward packages, not toward importing `apps/api/src/...`
+- worker must never import API source directly; use shared packages/contracts or internal worker transport routes.
 
 ## 2. What Lives Where
 
@@ -68,8 +68,8 @@ Start here for async flows:
 - worker env: `apps/worker/src/config/env.ts`
 - worker support: `apps/worker/src/support/*`
 
-The worker is still the main architecture hotspot because many orchestrators/repositories are imported from API-owned code.
-The current refactor path is to extract worker-safe pieces into packages.
+The worker no longer imports API source code.
+Worker execution now goes through internal API worker transport routes, with compatibility checks on transport and queue contracts.
 
 ### Dashboard
 Start here for operator behavior:
@@ -230,19 +230,17 @@ Start here:
 
 ## 7. Current Architecture Debt
 
-This is the next major refactor area:
-- `apps/worker/src/worker.module.ts` still imports many API-owned repositories, orchestrators, and providers
-- worker TS config still includes `../api/src/**/*.ts`
+Main remaining debt areas:
+- some domains still share a single DB ownership model, so extraction requires explicit table-by-table ownership moves
+- contract/version governance exists, but domain-level compatibility policy needs to be formalized
+- reliability has retry/idempotency/replay protections, but failure-injection drills are not yet automated in CI
+- microservice extraction is planned but not yet executed (see `docs/microservice-extraction-playbook.md`)
 
-What has already been extracted:
-- shared config and telemetry helpers
-- shared queue contracts
-- shared publisher contracts
-- backend runtime primitives in `@aicp/backend-core`
-
-What should be extracted next:
-- worker-safe repositories/orchestrators/provider interfaces
-- queue-oriented domain services used by both API and worker
+What is already in place:
+- worker does not import API source modules
+- shared queue contracts and worker internal route constants are package-owned
+- architecture fitness and boundary checks run in `npm run lint:structure`
+- trace/request correlation propagates API -> queue -> worker and is surfaced in ops failed job views
 
 ## 8. Safe Change Strategy
 
@@ -278,6 +276,7 @@ When debugging:
    - topic
    - research
    - draft
+   - revision
    - publish
 
 ## 10. High-Value Hotspots

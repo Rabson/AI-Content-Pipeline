@@ -243,6 +243,11 @@ make health-worker
 make clean
 ```
 
+If your machine has slower cold starts, increase smoke retries:
+```bash
+SMOKE_MAX_ATTEMPTS=60 make smoke-docker
+```
+
 ## Cleanup Note
 - `make clean` removes local generated artifacts such as Next build output.
 - If the dashboard service is already running, recreate it after a clean:

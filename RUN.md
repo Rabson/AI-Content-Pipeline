@@ -150,6 +150,11 @@ npm audit
 npm run test
 ```
 
+Smoke retries can be increased for slower cold starts:
+```bash
+SMOKE_MAX_ATTEMPTS=60 make smoke-docker
+```
+
 ## Local Access
 - Dashboard sign-in: `http://localhost:3003/signin`
 - `ADMIN`: `admin@example.com` / `AdminPass123!`

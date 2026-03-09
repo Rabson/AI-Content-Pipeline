@@ -12,8 +12,9 @@ wait_for_status() {
   local url="$2"
   local expected="$3"
   local label="$4"
+  local max_attempts="${SMOKE_MAX_ATTEMPTS:-45}"
 
-  for attempt in {1..15}; do
+  for attempt in $(seq 1 "$max_attempts"); do
     if docker compose --env-file "$ENV_FILE" -f "$COMPOSE_BASE_FILE" -f "$COMPOSE_LOCAL_FILE" exec -T "$service" \
       node -e "fetch('$url').then(r=>{console.log(JSON.stringify({label:'$label',status:r.status,attempt:$attempt}));process.exit(r.status===$expected?0:1)}).catch(err=>{console.error(err.message);process.exit(1)})"
     then
