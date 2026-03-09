@@ -17,6 +17,6 @@
     "test": "vitest run --config ../../vitest.config.mts --dir src"
   },
   "dependencies": {
-    "@prisma/client": "^7.1.1"
+    "@prisma/client": "^7.4.2"
   }
 }

@@ -19,7 +19,7 @@
     "build:contracts": "npm --workspace @aicp/contracts run build",
     "build:queue-contracts": "npm --workspace @aicp/queue-contracts run build",
     "build:shared-packages": "npm run build:shared-config && npm run build:auth-core && npm run build:observability-core && npm run build:workflow-core && npm run build:queue-contracts && npm run build:contracts && npm run build:backend-core",
-    "prisma:generate": "npx prisma generate",
+    "prisma:generate": "npx prisma generate --schema apps/api/src/prisma/schema.prisma",
     "postinstall": "node scripts/postinstall.mjs",
     "dev:api": "npm run build:shared-packages && node scripts/run-with-root-env.mjs npm --workspace @aicp/api run start:dev",
     "dev:worker": "npm run build:shared-packages && node scripts/run-with-root-env.mjs npm --workspace @aicp/worker run start:dev",
@@ -42,6 +42,10 @@
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
     "eslint": "^8.57.1",
+    "prisma": "^7.4.2",
     "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.4.2"
   }
 }
