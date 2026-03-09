@@ -16,18 +16,19 @@ RUN npm ci --ignore-scripts
 FROM deps AS dev
 WORKDIR /workspace
 COPY . .
-RUN npx prisma generate
+RUN npx prisma generate --schema apps/api/src/prisma/schema.prisma
 EXPOSE 3002
 CMD ["npm", "run", "dev:worker"]
 
 FROM deps AS build
 WORKDIR /workspace
 COPY . .
-RUN npx prisma generate
+RUN npx prisma generate --schema apps/api/src/prisma/schema.prisma
 RUN npm run build:worker
 
 FROM build AS prod
 WORKDIR /workspace
 ENV NODE_ENV=production
+RUN npm prune --omit=dev
 EXPOSE 3002
 CMD ["node", "apps/worker/dist/worker/src/main.js"]

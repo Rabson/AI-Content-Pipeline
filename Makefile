@@ -24,7 +24,7 @@ prisma-generate: ## Generate Prisma client from schema
 	@set -a; \
 	if [ -f "$(ENV_FILE)" ]; then source "$(ENV_FILE)"; else echo "Missing $(ENV_FILE). Create it from .env.example."; exit 0; fi; \
 	set +a; \
-	npx prisma generate
+	npx prisma generate --schema apps/api/src/prisma/schema.prisma
 
 prisma-migrate-dev: ## Run Prisma dev migration (use: make prisma-migrate-dev NAME=your_migration)
 	@if [ -z "$(NAME)" ]; then echo "Usage: make prisma-migrate-dev NAME=your_migration"; exit 0; fi
@@ -38,7 +38,7 @@ prisma-migrate-dev: ## Run Prisma dev migration (use: make prisma-migrate-dev NA
 	  echo "Database $$DB_HOST:$$DB_PORT is not reachable; skipping prisma-migrate-dev."; \
 	  exit 0; \
 	fi; \
-	npx prisma migrate dev --name $(NAME)
+	npx prisma migrate dev --schema apps/api/src/prisma/schema.prisma --name $(NAME)
 
 prisma-migrate-deploy: ## Apply Prisma migrations in deploy mode
 	@set -a; \
@@ -51,7 +51,7 @@ prisma-migrate-deploy: ## Apply Prisma migrations in deploy mode
 	  echo "Database $$DB_HOST:$$DB_PORT is not reachable; skipping prisma-migrate-deploy."; \
 	  exit 0; \
 	fi; \
-	npx prisma migrate deploy
+	npx prisma migrate deploy --schema apps/api/src/prisma/schema.prisma
 
 prisma-studio: ## Open Prisma Studio
 	@set -a; \

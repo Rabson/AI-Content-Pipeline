@@ -28,5 +28,6 @@ RUN npm run build:dashboard
 FROM build AS prod
 WORKDIR /workspace
 ENV NODE_ENV=production
+RUN npm prune --omit=dev
 EXPOSE 3003
-CMD ["npm", "run", "start:dashboard"]
+CMD ["node", "scripts/run-with-root-env.mjs", "npm", "--workspace", "@aicp/dashboard", "run", "start"]

@@ -16,7 +16,7 @@ RUN npm ci --ignore-scripts
 FROM deps AS source
 WORKDIR /workspace
 COPY . .
-RUN npx prisma generate
+RUN npx prisma generate --schema apps/api/src/prisma/schema.prisma
 
 FROM source AS dev
 EXPOSE 3001
@@ -27,10 +27,11 @@ RUN npm run build:api
 
 FROM source AS migrate
 ENV NODE_ENV=production
-CMD ["./node_modules/.bin/prisma", "migrate", "deploy"]
+CMD ["./node_modules/.bin/prisma", "migrate", "deploy", "--schema", "apps/api/src/prisma/schema.prisma"]
 
 FROM build AS prod
 WORKDIR /workspace
 ENV NODE_ENV=production
+RUN npm prune --omit=dev
 EXPOSE 3001
 CMD ["node", "apps/api/dist/main.js"]

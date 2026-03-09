@@ -18,8 +18,8 @@ if (!hasWorkspaceSources) {
   process.exit(0);
 }
 
-run('npm', ['run', 'build:shared-packages']);
 run('npm', ['run', 'prisma:generate']);
+run('npm', ['run', 'build:shared-packages']);
 
 function run(command, args) {
   const result = spawnSync(command, args, {
