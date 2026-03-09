@@ -1,7 +1,12 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB, type AnalyticsRollupDailyJobPayload } from '@aicp/queue-contracts';
+import {
+  ANALYTICS_QUEUE,
+  ANALYTICS_ROLLUP_DAILY_JOB,
+  assertSupportedQueueContractVersion,
+  type AnalyticsRollupDailyJobPayload,
+} from '@aicp/queue-contracts';
 import { ANALYTICS_JOB_RUNNER, type AnalyticsJobRunner } from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';
@@ -29,6 +34,7 @@ export class WorkerAnalyticsProcessor extends WorkerHost {
         await this.jobExecutionService.succeed(execution.id);
         return null;
       }
+      assertSupportedQueueContractVersion(job.data);
 
       const result = await withTelemetrySpan(
         `worker.${job.queueName}.${job.name}`,
@@ -37,6 +43,9 @@ export class WorkerAnalyticsProcessor extends WorkerHost {
           'job.name': job.name,
           'queue.name': job.queueName,
           'usage.date': job.data?.usageDate,
+          'trace.id': job.data?.traceId ?? null,
+          'request.id': job.data?.requestId ?? null,
+          'queue.idempotency_key': job.data?.idempotencyKey ?? null,
         },
         async () => this.orchestrator.runDailyRollup(job.data.usageDate),
       );

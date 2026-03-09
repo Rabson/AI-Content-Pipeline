@@ -1,8 +1,9 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import type { SeoGenerateJobPayload } from '@aicp/queue-contracts';
+import { withQueueContractEnvelope, type SeoGenerateJobPayload } from '@aicp/queue-contracts';
 import { buildQueueJobId } from '@api/common/queue/job-id.util';
+import { resolveQueueTraceMetadata } from '@api/common/queue/trace-metadata.util';
 import { isPhaseEnabled } from '@api/config/feature-flags';
 import { GenerateSeoDto } from './dto/generate-seo.dto';
 import { CONTENT_PIPELINE_QUEUE, SEO_GENERATE_JOB } from './constants/seo.constants';
@@ -27,6 +28,7 @@ export class SeoService {
     }
 
     const jobId = buildQueueJobId('seo', 'topic', topicId, 'latest');
+    const trace = resolveQueueTraceMetadata({ traceId: dto.traceId });
     const existingJob = await this.queue.getJob(jobId);
     if (existingJob) {
       return { enqueued: true, topicId, jobId: existingJob.id ?? jobId, idempotent: true };
@@ -34,7 +36,10 @@ export class SeoService {
 
     const job = await this.queue.add(
       SEO_GENERATE_JOB,
-      { topicId, requestedBy: actorId, traceId: dto.traceId },
+      withQueueContractEnvelope(
+        { topicId, requestedBy: actorId, traceId: dto.traceId },
+        { idempotencyKey: jobId, ...trace },
+      ),
       {
         jobId,
         attempts: 3,

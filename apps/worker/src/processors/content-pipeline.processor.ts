@@ -13,6 +13,7 @@ import {
   REVISION_APPLY_SECTION_JOB,
   REVISION_APPLY_START_JOB,
   SEO_GENERATE_JOB,
+  assertSupportedQueueContractVersion,
 } from '@aicp/queue-contracts';
 import {
   DRAFT_FAILURE_WRITER,
@@ -72,8 +73,14 @@ export class WorkerContentPipelineProcessor extends WorkerHost {
           'job.name': job.name,
           'queue.name': job.queueName,
           'topic.id': job.data?.topicId,
+          'trace.id': job.data?.traceId ?? null,
+          'request.id': job.data?.requestId ?? null,
+          'queue.idempotency_key': job.data?.idempotencyKey ?? null,
         },
-        async () => this.route(job),
+        async () => {
+          assertSupportedQueueContractVersion(job.data);
+          return this.route(job);
+        },
       );
       this.metrics.recordSuccess(job.queueName);
       await this.jobExecutionService.succeed(execution.id);

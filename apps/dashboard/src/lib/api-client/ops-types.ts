@@ -42,6 +42,8 @@ export interface FailedJobView {
   queueName: string;
   jobName: string;
   status: string;
+  traceId?: string | null;
+  requestId?: string | null;
   errorMessage?: string | null;
   startedAt: string;
   finishedAt?: string | null;

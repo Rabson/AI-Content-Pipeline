@@ -55,6 +55,7 @@ export function FailedJobsPanel({ jobs }: { jobs: FailedJobView[] }) {
               <strong>{job.jobName}</strong>
               <p>{job.queueName}</p>
               <p>{job.errorMessage ?? 'No error message recorded.'}</p>
+              <p className="topic-meta">Trace {job.traceId ?? 'n/a'} · Request {job.requestId ?? 'n/a'}</p>
               <p className="topic-meta">Started {formatDate(job.startedAt)}</p>
             </div>
             <span className="pill">{job.status}</span>

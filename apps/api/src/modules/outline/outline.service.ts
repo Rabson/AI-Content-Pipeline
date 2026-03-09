@@ -1,8 +1,12 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import type { OutlineGenerateJobPayload } from '@aicp/queue-contracts';
+import {
+  withQueueContractEnvelope,
+  type OutlineGenerateJobPayload,
+} from '@aicp/queue-contracts';
 import { buildQueueJobId } from '@api/common/queue/job-id.util';
+import { resolveQueueTraceMetadata } from '@api/common/queue/trace-metadata.util';
 import { GenerateOutlineDto } from './dto/generate-outline.dto';
 import { GetOutlineQueryDto } from './dto/get-outline-query.dto';
 import { CONTENT_PIPELINE_QUEUE, OUTLINE_GENERATE_JOB } from './constants/outline.constants';
@@ -23,6 +27,7 @@ export class OutlineService {
     }
 
     const jobId = buildQueueJobId('outline', 'topic', topicId, 'latest');
+    const trace = resolveQueueTraceMetadata({ traceId: dto.traceId });
     const existingJob = await this.contentPipelineQueue.getJob(jobId);
     if (existingJob) {
       return {
@@ -35,11 +40,14 @@ export class OutlineService {
 
     const job = await this.contentPipelineQueue.add(
       OUTLINE_GENERATE_JOB,
-      {
-        topicId,
-        requestedBy: actorId,
-        traceId: dto.traceId,
-      },
+      withQueueContractEnvelope(
+        {
+          topicId,
+          requestedBy: actorId,
+          traceId: dto.traceId,
+        },
+        { idempotencyKey: jobId, ...trace },
+      ),
       {
         jobId,
         attempts: 3,

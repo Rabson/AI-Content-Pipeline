@@ -2,8 +2,9 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { TopicStatus } from '@prisma/client';
 import { Queue } from 'bullmq';
-import type { ResearchRunJobPayload } from '@aicp/queue-contracts';
+import { withQueueContractEnvelope, type ResearchRunJobPayload } from '@aicp/queue-contracts';
 import { buildQueueJobId } from '@api/common/queue/job-id.util';
+import { resolveQueueTraceMetadata } from '@api/common/queue/trace-metadata.util';
 import { AddSourceDto } from './dto/add-source.dto';
 import { ResearchQueryDto } from './dto/research-query.dto';
 import { RunResearchDto } from './dto/run-research.dto';
@@ -30,14 +31,10 @@ export class ResearchService {
     }
 
     const jobId = buildQueueJobId('research', 'topic', topicId, 'v1');
+    const trace = resolveQueueTraceMetadata({ traceId: dto.traceId });
     const existingJob = await this.contentPipelineQueue.getJob(jobId);
     if (existingJob || topic.status === TopicStatus.RESEARCH_QUEUED || topic.status === TopicStatus.RESEARCH_IN_PROGRESS) {
-      return {
-        enqueued: true,
-        topicId,
-        jobId: existingJob?.id ?? jobId,
-        idempotent: true,
-      };
+      return { enqueued: true, topicId, jobId: existingJob?.id ?? jobId, idempotent: true };
     }
 
     if (topic.status !== TopicStatus.APPROVED) {
@@ -49,12 +46,15 @@ export class ResearchService {
 
     const job = await this.contentPipelineQueue.add(
       RESEARCH_RUN_JOB,
-      {
-        topicId,
-        requestedBy: actorId,
-        traceId: dto.traceId,
-        sourceUrls: dto.sourceUrls ?? [],
-      },
+      withQueueContractEnvelope(
+        {
+          topicId,
+          requestedBy: actorId,
+          traceId: dto.traceId,
+          sourceUrls: dto.sourceUrls ?? [],
+        },
+        { idempotencyKey: jobId, ...trace },
+      ),
       {
         jobId,
         attempts: 3,

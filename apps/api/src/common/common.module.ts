@@ -14,12 +14,14 @@ import {
   SecurityEventService,
 } from './security/security-event.service';
 import { env } from '@api/config/env';
+import { RequestContextMiddleware } from './request-context/request-context.middleware';
 
 @Global()
 @Module({
   providers: [
     PrismaService,
     AppLogger,
+    RequestContextMiddleware,
     RequestRateLimitService,
     SecurityEventRepository,
     {

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { TopicModule } from './modules/topic/topic.module';
 import { ResearchModule } from './modules/research/research.module';
@@ -17,6 +17,7 @@ import { CommonModule } from './common/common.module';
 import { env } from './config/env';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { UserModule } from './modules/user/user.module';
+import { RequestContextMiddleware } from './common/request-context/request-context.middleware';
 
 @Module({
   imports: [
@@ -44,4 +45,8 @@ import { UserModule } from './modules/user/user.module';
     StorageModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestContextMiddleware).forRoutes('*');
+  }
+}

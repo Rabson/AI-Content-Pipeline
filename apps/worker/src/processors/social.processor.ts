@@ -1,7 +1,12 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { SOCIAL_LINKEDIN_GENERATE_JOB, SOCIAL_QUEUE, type SocialLinkedInGenerateJobPayload } from '@aicp/queue-contracts';
+import {
+  SOCIAL_LINKEDIN_GENERATE_JOB,
+  SOCIAL_QUEUE,
+  assertSupportedQueueContractVersion,
+  type SocialLinkedInGenerateJobPayload,
+} from '@aicp/queue-contracts';
 import { SOCIAL_JOB_RUNNER, type SocialJobRunner } from '../contracts/job-runners.contracts';
 import { JobExecutionService } from '../support/job-execution.service';
 import { withTelemetrySpan } from '../support/opentelemetry';
@@ -29,6 +34,7 @@ export class WorkerSocialProcessor extends WorkerHost {
         await this.jobExecutionService.succeed(execution.id);
         return null;
       }
+      assertSupportedQueueContractVersion(job.data);
 
       const result = await withTelemetrySpan(
         `worker.${job.queueName}.${job.name}`,
@@ -37,6 +43,9 @@ export class WorkerSocialProcessor extends WorkerHost {
           'job.name': job.name,
           'queue.name': job.queueName,
           'topic.id': job.data?.topicId,
+          'trace.id': job.data?.traceId ?? null,
+          'request.id': job.data?.requestId ?? null,
+          'queue.idempotency_key': job.data?.idempotencyKey ?? null,
         },
         async () => this.orchestrator.runLinkedIn(job.data.topicId),
       );

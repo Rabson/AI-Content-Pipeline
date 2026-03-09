@@ -1,8 +1,12 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import type { AnalyticsRollupDailyJobPayload } from '@aicp/queue-contracts';
+import {
+  withQueueContractEnvelope,
+  type AnalyticsRollupDailyJobPayload,
+} from '@aicp/queue-contracts';
 import { buildQueueJobId } from '@api/common/queue/job-id.util';
+import { resolveQueueTraceMetadata } from '@api/common/queue/trace-metadata.util';
 import { isPhaseEnabled } from '@api/config/feature-flags';
 import { ANALYTICS_QUEUE, ANALYTICS_ROLLUP_DAILY_JOB } from './constants/analytics.constants';
 import { AnalyticsRepository } from './analytics.repository';
@@ -27,6 +31,7 @@ export class AnalyticsService {
     const key = usageDate.toISOString().slice(0, 10);
     const jobId = buildQueueJobId('analytics', 'rollup', key);
     const existingJob = await this.queue.getJob(jobId);
+    const trace = resolveQueueTraceMetadata();
 
     if (existingJob) {
       return { enqueued: true, jobId: existingJob.id ?? jobId, usageDate: key, idempotent: true };
@@ -34,10 +39,13 @@ export class AnalyticsService {
 
     const job = await this.queue.add(
       ANALYTICS_ROLLUP_DAILY_JOB,
-      {
-        usageDate: usageDate.toISOString(),
-        requestedBy: actorId,
-      },
+      withQueueContractEnvelope(
+        {
+          usageDate: usageDate.toISOString(),
+          requestedBy: actorId,
+        },
+        { idempotencyKey: jobId, ...trace },
+      ),
       {
         jobId,
       },

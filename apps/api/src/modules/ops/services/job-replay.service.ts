@@ -1,6 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, WorkflowEventType, WorkflowStage } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { JobExecutionStatus, Prisma, WorkflowEventType, WorkflowStage } from '@prisma/client';
+import { withQueueContractEnvelope } from '@aicp/queue-contracts';
 import { SecurityEventService } from '@api/common/security/security-event.service';
+import { resolveQueueTraceMetadata } from '@api/common/queue/trace-metadata.util';
 import { WorkflowService } from '@api/modules/workflow/workflow.service';
 import { JobExecutionRepository } from '../repositories/job-execution.repository';
 import { QueueRegistryService } from './queue-registry.service';
@@ -25,15 +27,30 @@ export class JobReplayService {
     if (!execution) {
       throw new NotFoundException('Job execution not found');
     }
+    if (execution.status !== JobExecutionStatus.FAILED) {
+      throw new BadRequestException('Only failed job executions can be replayed');
+    }
 
     const payload =
       execution.payloadJson && typeof execution.payloadJson === 'object'
         ? (execution.payloadJson as Prisma.JsonObject)
         : {};
 
-    const replayJobId = `replay:${execution.jobName}:${execution.id}:${Date.now()}`;
+    const replayJobId = `replay:${execution.queueName}:${execution.jobName}:${execution.id}`;
     const queue = this.queueRegistry.resolve(execution.queueName);
-    const job = await queue.add(execution.jobName, payload, {
+    const existingJob = await queue.getJob(replayJobId);
+    if (existingJob) {
+      return {
+        replayed: true,
+        executionId,
+        jobId: existingJob.id ?? replayJobId,
+        actorId,
+        idempotent: true,
+      };
+    }
+
+    const trace = resolveQueueTraceMetadata(payload);
+    const job = await queue.add(execution.jobName, withQueueContractEnvelope(payload, { idempotencyKey: replayJobId, ...trace }), {
       jobId: replayJobId,
       attempts: 3,
       backoff: {

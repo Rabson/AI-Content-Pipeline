@@ -2,8 +2,12 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { createHash } from 'crypto';
-import type { DiscoveryImportJobPayload } from '@aicp/queue-contracts';
+import {
+  withQueueContractEnvelope,
+  type DiscoveryImportJobPayload,
+} from '@aicp/queue-contracts';
 import { buildQueueJobId } from '@api/common/queue/job-id.util';
+import { resolveQueueTraceMetadata } from '@api/common/queue/trace-metadata.util';
 import { CONTENT_PIPELINE_QUEUE } from '../topic/constants/topic-queue.constants';
 import { DISCOVERY_IMPORT_JOB } from './constants/discovery.constants';
 
@@ -26,21 +30,26 @@ export class DiscoveryQueueService {
       .slice(0, 16);
 
     const jobId = buildQueueJobId('discovery', payload.provider, digest);
+    const trace = resolveQueueTraceMetadata(payload);
     const existingJob = await this.contentPipelineQueue.getJob(jobId);
     if (existingJob) {
       return existingJob.id ?? jobId;
     }
 
-    const job = await this.contentPipelineQueue.add(DISCOVERY_IMPORT_JOB, payload, {
-      jobId,
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 15000,
+    const job = await this.contentPipelineQueue.add(
+      DISCOVERY_IMPORT_JOB,
+      withQueueContractEnvelope(payload, { idempotencyKey: jobId, ...trace }),
+      {
+        jobId,
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 15000,
+        },
+        removeOnComplete: true,
+        removeOnFail: false,
       },
-      removeOnComplete: true,
-      removeOnFail: false,
-    });
+    );
 
     return job.id ?? jobId;
   }

@@ -2,10 +2,11 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { ContentState, PublicationChannel, PublicationStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
 import { Queue } from 'bullmq';
-import type { PublishArticleJobPayload } from '@aicp/queue-contracts';
+import { withQueueContractEnvelope, type PublishArticleJobPayload } from '@aicp/queue-contracts';
 import { AppRole } from '@api/common/auth/roles.enum';
 import { AuthenticatedUser } from '@api/common/interfaces/authenticated-request.interface';
 import { buildQueueJobId } from '@api/common/queue/job-id.util';
+import { resolveQueueTraceMetadata } from '@api/common/queue/trace-metadata.util';
 import { SecurityEventService } from '@api/common/security/security-event.service';
 import { isPhaseEnabled } from '@api/config/feature-flags';
 import { UserPublisherTokenResolverService } from '../user/services/user-publisher-token-resolver.service';
@@ -159,7 +160,22 @@ export class PublisherService {
 
   private async enqueuePublishJob(topicId: string, publicationId: string, dto: RequestPublicationDto, actorId: string) {
     const jobId = buildQueueJobId('publish', dto.channel.toLowerCase(), topicId, publicationId);
-    const job = await this.queue.add(PUBLISH_ARTICLE_JOB, { publicationId, topicId, channel: dto.channel, canonicalUrl: dto.canonicalUrl, tags: dto.tags ?? [], requestedBy: actorId }, { jobId, attempts: 5, backoff: { type: 'exponential', delay: 60000 } });
+    const trace = resolveQueueTraceMetadata();
+    const job = await this.queue.add(
+      PUBLISH_ARTICLE_JOB,
+      withQueueContractEnvelope(
+        {
+          publicationId,
+          topicId,
+          channel: dto.channel,
+          canonicalUrl: dto.canonicalUrl,
+          tags: dto.tags ?? [],
+          requestedBy: actorId,
+        },
+        { idempotencyKey: jobId, ...trace },
+      ),
+      { jobId, attempts: 5, backoff: { type: 'exponential', delay: 60000 } },
+    );
     return job.id ?? jobId;
   }
 

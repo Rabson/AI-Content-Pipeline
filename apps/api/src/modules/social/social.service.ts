@@ -2,8 +2,12 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { ContentState, SocialPostStatus, WorkflowEventType, WorkflowStage } from '@prisma/client';
-import type { SocialLinkedInGenerateJobPayload } from '@aicp/queue-contracts';
+import {
+  withQueueContractEnvelope,
+  type SocialLinkedInGenerateJobPayload,
+} from '@aicp/queue-contracts';
 import { buildQueueJobId } from '@api/common/queue/job-id.util';
+import { resolveQueueTraceMetadata } from '@api/common/queue/trace-metadata.util';
 import { isPhaseEnabled } from '@api/config/feature-flags';
 import { WorkflowService } from '../workflow/workflow.service';
 import { GenerateLinkedInDto } from './dto/generate-linkedin.dto';
@@ -31,6 +35,7 @@ export class SocialService {
     }
 
     const jobId = buildQueueJobId('social', 'linkedin', topicId, 'latest');
+    const trace = resolveQueueTraceMetadata({ traceId: dto.traceId });
     const existingJob = await this.queue.getJob(jobId);
     if (existingJob) {
       return { enqueued: true, topicId, jobId: existingJob.id ?? jobId, idempotent: true };
@@ -38,11 +43,14 @@ export class SocialService {
 
     const job = await this.queue.add(
       SOCIAL_LINKEDIN_GENERATE_JOB,
-      {
-        topicId,
-        requestedBy: actorId,
-        traceId: dto.traceId,
-      },
+      withQueueContractEnvelope(
+        {
+          topicId,
+          requestedBy: actorId,
+          traceId: dto.traceId,
+        },
+        { idempotencyKey: jobId, ...trace },
+      ),
       {
         jobId,
         attempts: 3,
